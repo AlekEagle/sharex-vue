@@ -5,8 +5,31 @@
             >© 2019-2020 AlekEagle</a
         >
     </div>
-    <div id="snackbar"></div>
+    <Toast ref="toast"></Toast>
 </template>
+
+<script>
+import Toast from "@/components/Toast.vue";
+export default {
+    name: "App",
+    methods:{
+        temporaryToast(text, duration) {
+            this.$refs.toast.showToast(text, duration);
+        },
+        permanentToast(text) {
+            this.$refs.toast.showToast(text, false);
+        },
+        hideToast() {
+            this.$refs.toast.hideToast();
+        }
+    },
+    mounted() {
+        
+    },components: {
+        Toast
+    }
+}
+</script>
 
 <style>
 body {
@@ -116,10 +139,6 @@ body {
     word-spacing: 2px;
 }
 
-.subtitle {
-    font-size: 20px;
-}
-
 option {
     color: #c5c5c5;
     background-color: black;
@@ -153,7 +172,7 @@ body {
     margin-left: 0;
     margin-right: 0;
     margin-top: 0;
-    overflow: overlay;
+    overflow: hidden overlay;
 }
 
 button.button {
@@ -182,41 +201,6 @@ button.button:hover {
     width: 95%;
     margin-left: auto;
     margin-right: auto;
-}
-
-.header {
-    box-shadow: 0px 5px 20px 15px rgb(58, 58, 58);
-    min-height: 56px;
-    transition: min-height 0.3s;
-    background-color: #3a3a3a;
-    text-decoration: none;
-}
-
-.header__inner {
-    min-width: 80px;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-    padding-bottom: 1px;
-}
-
-.header__logo {
-    border-radius: 50%;
-    height: 90px;
-    margin-right: 10px;
-    vertical-align: top;
-    margin-top: 10px;
-}
-
-.header__title {
-    font-weight: 300;
-    font-size: 4em !important;
-    margin: 0.35em 0.35em;
-    display: inline-block;
-    color: #b3b3b3;
-    margin-bottom: 2px;
-    margin-left: 2px;
-    margin-top: 12px;
 }
 
 #bgCanvas {
@@ -461,22 +445,6 @@ p#dotseperator {
     box-shadow: 5px 5px 5px #14141485;
 }
 
-.project {
-    font-size: 16px;
-    margin: 10px;
-    padding-right: 10px;
-    padding-bottom: 10px;
-    background: #1d1d1d;
-    border-radius: 10px;
-    border: 1px solid #1d1d1d;
-    float: left;
-    transition: 0.3s;
-    cursor: pointer;
-    outline: none;
-    align-self: stretch;
-    position: relative;
-}
-
 .footer_box .loadmore,
 .footer_box .cpyrit {
     margin: 0px;
@@ -484,59 +452,6 @@ p#dotseperator {
 
 .loadmore {
     overflow: hidden;
-}
-
-.project * {
-    transition: 0.3s;
-}
-
-.project:focus:not(.float):not(.sink):not(.disabled) {
-    background: #252525;
-    box-shadow: 13px 13px 5px #141414b0;
-    border: 1px solid #505050;
-    transform: translate(-7px, -7px);
-}
-
-.project:hover:not(.float):not(.sink):not(.disabled) {
-    background: #252525;
-    box-shadow: 13px 13px 5px #141414b0;
-    border: 1px solid #505050;
-    transform: translate(-7px, -7px);
-}
-
-.project_link {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-
-    z-index: 1;
-
-    /* fixes overlap error in IE7/8, 
-       make sure you have an empty gif */
-    background-image: url('/assets/images/empty.gif');
-}
-
-.project_icon {
-    height: 64px;
-    float: left;
-    margin: 15px;
-}
-
-.project_title {
-    font-size: 1.2em;
-    text-align: left;
-    margin-bottom: 10px;
-    margin-top: 15px;
-}
-
-.project_description {
-    font-size: 0.9em;
-    color: #9c9c9c;
-    text-align: left;
-    overflow-x: hidden;
-    word-wrap: break-word;
 }
 
 .projects {
@@ -549,13 +464,6 @@ p#dotseperator {
 
 .titanic {
     float: none;
-}
-
-.subtitle {
-    margin-top: 30px;
-    margin-bottom: 20px;
-    margin-left: 25px;
-    margin-right: 25px;
 }
 
 .footer_text {
@@ -583,101 +491,6 @@ p#dotseperator {
     z-index: 1;
     margin-top: 10px;
     margin-bottom: 10px;
-}
-
-.auth .project_title {
-    margin-left: 7px;
-}
-
-.auth .project_description {
-    text-align: center;
-}
-
-.auth .project_description select {
-    width: 100%;
-    margin: 5px 0px;
-}
-
-.auth .project_description .darktextbox {
-    width: 95%;
-    margin: 5px 0px;
-}
-
-.project.auth {
-    padding-right: 0;
-}
-
-.header_button {
-    margin-left: 5px;
-    margin-right: 5px;
-}
-
-.error_text {
-    color: #ec1a1a;
-}
-
-.uploadfile {
-    width: 0.1px;
-    height: 0.1px;
-    opacity: 0;
-    overflow: hidden;
-    position: absolute;
-    z-index: -1;
-}
-
-.uploadfile + label {
-    font-size: 25px;
-    font-weight: 700;
-    color: white;
-    background-color: #161616;
-    display: block;
-    border-radius: 10px;
-    padding: 50px;
-    margin: 10px;
-    cursor: pointer;
-    overflow-x: hidden;
-    overflow-wrap: break-word;
-    max-width: inherit;
-}
-
-.uploadfile + label:hover {
-    background-color: #1f1f1f;
-}
-
-@media screen and (max-width: 589px) {
-    .project {
-        width: calc((100% - (32px * 1)) / 1);
-    }
-}
-
-@media screen and (min-width: 590px) and (max-width: 1152px) {
-    .project {
-        width: calc((100% - (32px * 2)) / 2);
-    }
-}
-
-@media screen and (min-width: 1153px) and (max-width: 1366px) {
-    .project {
-        width: calc((100% - (32px * 3)) / 3);
-    }
-}
-
-@media screen and (min-width: 1367px) and (max-width: 1699px) {
-    .project {
-        width: calc((100% - (32px * 4)) / 4);
-    }
-}
-
-@media screen and (min-width: 1700px) and (max-width: 2099px) {
-    .project {
-        width: calc((100% - (32px * 5)) / 5);
-    }
-}
-
-@media screen and (min-width: 2100px) {
-    .project {
-        width: calc((100% - (32px * 6)) / 6);
-    }
 }
 
 @keyframes glow {
@@ -708,112 +521,8 @@ p#dotseperator {
     }
 }
 
-.project.float:hover:not(.disabled) {
-    background: #202020;
-    box-shadow: 13px 13px 5px #141414b0;
-    border: 1px solid #505050;
-    transform: translate(-7px, -7px);
-}
-
-.project.sink:hover:not(.disabled) {
-    box-shadow: inset 13px 13px 5px #141414b0;
-    border: 1px solid #505050;
-}
-
-.project.sink:hover:not(.disabled) * {
-    transform: translate(7px, 7px);
-}
-
-.project.float:focus:not(.disabled) {
-    background: #252525;
-    box-shadow: 13px 13px 5px #141414b0;
-    border: 1px solid #505050;
-}
-
-.project.project.sink:focus:not(.disabled) * {
-    transform: translate(7px, 7px);
-}
-
-.project.sink:focus:not(.disabled) {
-    box-shadow: inset 13px 13px 5px #141414b0;
-    border: 1px solid #505050;
-}
-
 #strangebutton {
     margin-top: 10px;
-}
-
-#snackbar {
-    max-width: 80%;
-    overflow: hidden;
-    word-wrap: break-word;
-    visibility: hidden;
-    min-width: 250px;
-    margin-left: -125px;
-    background-color: #333333;
-    color: #fff;
-    text-align: center;
-    border-radius: 10px;
-    padding: 16px;
-    position: fixed;
-    z-index: 1;
-    right: 40px;
-    bottom: 30px;
-    box-shadow: 13px 13px 5px #141414, inset 0px 0px 5px #2c2c2c;
-}
-
-#snackbar.show {
-    visibility: visible;
-    -webkit-animation: fadein 0.5s, fadeout 0.5s 6.5s;
-    animation: fadein 0.5s, fadeout 0.5s 6.5s;
-}
-
-@-webkit-keyframes fadein {
-    from {
-        bottom: 0;
-        opacity: 0;
-    }
-
-    to {
-        bottom: 30px;
-        opacity: 1;
-    }
-}
-
-@keyframes fadein {
-    from {
-        bottom: 0;
-        opacity: 0;
-    }
-
-    to {
-        bottom: 30px;
-        opacity: 1;
-    }
-}
-
-@-webkit-keyframes fadeout {
-    from {
-        bottom: 30px;
-        opacity: 1;
-    }
-
-    to {
-        bottom: 0;
-        opacity: 0;
-    }
-}
-
-@keyframes fadeout {
-    from {
-        bottom: 30px;
-        opacity: 1;
-    }
-
-    to {
-        bottom: 0;
-        opacity: 0;
-    }
 }
 
 .lds-ellipsis {
@@ -881,23 +590,5 @@ p#dotseperator {
     100% {
         transform: translate(19px, 0);
     }
-}
-
-.project_link.disabled {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    cursor: not-allowed;
-    background: #00000099;
-    border-radius: 10px;
-    border: 1px solid #1d1d1d;
-
-    z-index: 2;
-
-    /* fixes overlap error in IE7/8, 
-         make sure you have an empty gif */
-    background-image: url('/assets/images/empty.gif');
 }
 </style>

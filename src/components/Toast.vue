@@ -6,15 +6,12 @@
   </transition>
 </template>
 <script>
-import Vue from "vue";
-import VueCompositionApi from "@vue/composition-api";
-import { reactive } from "@vue/composition-api";
-Vue.use(VueCompositionApi);
+import { reactive } from "vue";
 const store = {
   debug: false,
 
   state: reactive({
-    message: "test",
+    message: "",
     show: false,
   }),
 
