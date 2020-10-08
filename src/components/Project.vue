@@ -1,71 +1,81 @@
 <template>
-  <div v-if="sharedState.to" :class="getClasses()">
-    <img v-if="sharedState.icon" class="project_icon" :src="sharedState.icon"/>
-    <div class="project_title" v-text="sharedState.title" />
-    <slot />
-    <router-link v-if="sharedState.to" :to="sharedState.to">
-        <span v-if="!sharedState.disabled" class="project_link" />
-        <span v-else class="project_link disabled" />
+    <div v-if="sharedState.to" :class="getClasses()">
+        <img
+            v-if="sharedState.icon"
+            class="project_icon"
+            :src="sharedState.icon"
+        />
+        <div class="project_title" v-text="sharedState.title" />
+        <slot />
+        <router-link v-if="sharedState.to" :to="sharedState.to">
+            <span v-if="!sharedState.disabled" class="project_link" />
+            <span v-else class="project_link disabled" />
         </router-link>
-  </div>
-  <div v-else-if="sharedState.action" :class="getClasses()" @click="handleClick">
-    <img v-if="sharedState.icon" class="project_icon" :src="icon"/>
-    <div class="project_title" v-text="title" />
-    <slot />
-  </div>
-  <div v-else :class="getClasses()">
-    <img v-if="sharedState.icon" class="project_icon" :src="icon"/>
-    <div class="project_title" v-text="sharedState.title" />
-    <slot />
-  </div>
+    </div>
+    <div
+        v-else-if="sharedState.action"
+        :class="getClasses()"
+        @click="handleClick"
+    >
+        <img v-if="sharedState.icon" class="project_icon" :src="icon" />
+        <div class="project_title" v-text="title" />
+        <slot />
+    </div>
+    <div v-else :class="getClasses()">
+        <img v-if="sharedState.icon" class="project_icon" :src="icon" />
+        <div class="project_title" v-text="sharedState.title" />
+        <slot />
+    </div>
 </template>
 <script>
 import { reactive } from 'vue';
 const store = {
     debug: false,
-    
+
     state: reactive({
-        title: "",
-        icon: "",
+        title: '',
+        icon: '',
         classes: [],
         disabled: false,
-        to: "",
+        to: '',
         action: function() {}
     })
-}
+};
 export default {
-  name: "Project",
-  props: {
-    title: String,
-    icon: String,
-    classes: Array,
-    disabled: Boolean,
-    to: [String, Location],
-    action: Function
-  },
-  data() {
-      return {
-          privateState: {},
-          sharedState: store.state
-      }
-  },
-  methods: {
-    handleClick() {
-      this.action(this);
+    name: 'Project',
+    props: {
+        title: String,
+        icon: String,
+        classes: Array,
+        disabled: Boolean,
+        to: [String, Location],
+        action: Function
     },
-    getClasses() {
-      return `project${this.disabled ? ' disabled' : ''} ${this.classes.join(' ')}`;
+    data() {
+        return {
+            privateState: {},
+            sharedState: store.state
+        };
+    },
+    methods: {
+        handleClick() {
+            this.action(this);
+        },
+        getClasses() {
+            return `project${
+                this.disabled ? ' disabled' : ''
+            } ${this.classes.join(' ')}`;
+        }
+    },
+    mounted() {
+        store.state.title = this.title;
+        store.state.icon = this.icon;
+        store.state.classes = this.classes;
+        store.state.disabled = this.disabled;
+        store.state.to = this.to;
+        store.state.action = this.action;
     }
-  }, 
-  mounted() {
-    store.state.title = this.title;
-    store.state.icon = this.icon;
-    store.state.classes = this.classes;
-    store.state.disabled = this.disabled;
-    store.state.to = this.to;
-    store.state.action = this.action;
-  }
-}
+};
 </script>
 <style>
 .project {

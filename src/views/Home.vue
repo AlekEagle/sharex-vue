@@ -17,9 +17,15 @@
         ]"
     />
     <div class="projects">
-    <Project title="Test" :classes="['float']" icon="/images/mombot.png" :disabled="false" :action="classes.push('auth')">
-        <div class="project_description">hi</div>
-    </Project>
+        <Project
+            title="Test"
+            :classes="['float']"
+            icon="/images/mombot.png"
+            :disabled="false"
+            :action="classes.push('auth')"
+        >
+            <div class="project_description">hi</div>
+        </Project>
     </div>
 </template>
 
