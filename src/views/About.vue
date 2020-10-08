@@ -5,7 +5,7 @@
         :buttons="[
             {
                 title: 'Head back Home',
-                action: '/',
+                to: '/',
                 text: 'Back Home'
             }
         ]"
@@ -13,7 +13,6 @@
 </template>
 
 <script>
-// @ is an alias to /src
 import Header from '@/components/Header.vue';
 export default {
     name: 'Home',

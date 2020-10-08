@@ -6,25 +6,32 @@
         :buttons="[
             {
                 title: 'Manage Your Account',
-                action: '/me/',
+                to: '/me/',
                 text: 'My Dashboard'
             },
             {
                 title: 'What is this even for?',
-                action: '/about/',
+                to: '/about/',
                 text: 'About'
             }
         ]"
     />
+    <div class="projects">
+    <Project title="Test" :classes="['float']" icon="/images/mombot.png" :disabled="false" :action="classes.push('auth')">
+        <div class="project_description">hi</div>
+    </Project>
+    </div>
 </template>
 
 <script>
-// @ is an alias to /src
 import Header from '@/components/Header.vue';
+import Project from '@/components/Project.vue';
 export default {
+    title: 'AlekEagle ShareX Dashboard',
     name: 'Home',
     components: {
-        Header
+        Header,
+        Project
     }
 };
 </script>
