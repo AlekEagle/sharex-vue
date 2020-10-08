@@ -20,9 +20,9 @@
         <Project
             title="Test"
             :classes="['float']"
-            icon="/images/mombot.png"
+            icon="/img/mombot.png"
             :disabled="false"
-            :action="classes.push('auth')"
+            :action="doThing"
         >
             <div class="project_description">hi</div>
         </Project>
@@ -38,6 +38,11 @@ export default {
     components: {
         Header,
         Project
+    },
+    methods: {
+        doThing(that) {
+            that.sharedState.icon = '/img/warning.png';
+        }
     }
 };
 </script>

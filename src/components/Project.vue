@@ -17,12 +17,20 @@
         :class="getClasses()"
         @click="handleClick"
     >
-        <img v-if="sharedState.icon" class="project_icon" :src="icon" />
-        <div class="project_title" v-text="title" />
+        <img
+            v-if="sharedState.icon"
+            class="project_icon"
+            :src="sharedState.icon"
+        />
+        <div class="project_title" v-text="sharedState.title" />
         <slot />
     </div>
     <div v-else :class="getClasses()">
-        <img v-if="sharedState.icon" class="project_icon" :src="icon" />
+        <img
+            v-if="sharedState.icon"
+            class="project_icon"
+            :src="sharedState.icon"
+        />
         <div class="project_title" v-text="sharedState.title" />
         <slot />
     </div>
@@ -63,8 +71,8 @@ export default {
         },
         getClasses() {
             return `project${
-                this.disabled ? ' disabled' : ''
-            } ${this.classes.join(' ')}`;
+                this.sharedState.disabled ? ' disabled' : ''
+            } ${this.sharedState.classes.join(' ')}`;
         }
     },
     mounted() {
