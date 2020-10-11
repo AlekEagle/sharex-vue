@@ -18,6 +18,16 @@ const routes = [
     name: "Main Dashboard",
     component: () =>
       import("../views/MainDash.vue")
+  },
+  {
+    path: "/auth",
+    name: "Login or Register",
+    component: () => import("../views/Auth.vue")
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "Error",
+    component: () => import("../views/NotFound.vue")
   }
 ];
 

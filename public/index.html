@@ -12,14 +12,39 @@
             rel="stylesheet"
             type="text/css"
         />
+        <style>
+            body {
+                margin-left: 0;
+                margin-right: 0;
+                margin-top: 0;
+                background-color: #252525;
+                overflow: hidden;
+            }
+            #noscript {
+                display: block;
+                text-align: center;
+                font-size: 50px;
+                font-family: 'K2D', Arial, Helvetica, sans-serif;
+                color: white;
+            }
+            #noscript-flexbox {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 100vw;
+                height: 100vh;
+            }
+        </style>
     </head>
     <body>
         <noscript>
-            <strong
-                >We're sorry but AlekEagle ShareX Server doesn't work properly
-                without JavaScript enabled. Please enable it to
-                continue.</strong
-            >
+            <div id="noscript-flexbox">
+                <strong id="noscript"
+                    >We're sorry but AlekEagle ShareX Server doesn't work
+                    properly without JavaScript enabled. Please enable it to
+                    continue.</strong
+                >
+            </div>
         </noscript>
         <div id="app"></div>
     </body>

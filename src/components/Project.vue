@@ -6,24 +6,26 @@
             :src="sharedState.icon"
         />
         <div class="project_title" v-text="sharedState.title" />
-        <slot />
+        <div class="project_description"><slot /></div>
         <router-link v-if="sharedState.to" :to="sharedState.to">
             <span v-if="!sharedState.disabled" class="project_link" />
             <span v-else class="project_link disabled" />
         </router-link>
     </div>
-    <div
-        v-else-if="sharedState.action"
-        :class="getClasses()"
-        @click="handleClick"
-    >
+    <div v-else-if="sharedState.action" :class="getClasses()">
         <img
             v-if="sharedState.icon"
             class="project_icon"
             :src="sharedState.icon"
         />
         <div class="project_title" v-text="sharedState.title" />
-        <slot />
+        <div class="project_description"><slot /></div>
+        <span
+            v-if="!sharedState.disabled"
+            class="project_link"
+            @click="handleClick"
+        />
+        <span v-else class="project_link disabled" />
     </div>
     <div v-else :class="getClasses()">
         <img
@@ -32,7 +34,12 @@
             :src="sharedState.icon"
         />
         <div class="project_title" v-text="sharedState.title" />
-        <slot />
+        <div class="project_description"><slot /></div>
+        <span
+            v-if="!sharedState.disabled && !sharedState.noSpan"
+            class="project_link"
+        />
+        <span v-else-if="!sharedState.noSpan" class="project_link disabled" />
     </div>
 </template>
 <script>
@@ -46,7 +53,8 @@ const store = {
         classes: [],
         disabled: false,
         to: '',
-        action: function() {}
+        action: null,
+        noSpan: false
     })
 };
 export default {
@@ -57,7 +65,8 @@ export default {
         classes: Array,
         disabled: Boolean,
         to: [String, Location],
-        action: Function
+        action: Function,
+        noSpan: Boolean
     },
     data() {
         return {
@@ -82,6 +91,7 @@ export default {
         store.state.disabled = this.disabled;
         store.state.to = this.to;
         store.state.action = this.action;
+        store.state.noSpan = !!this.noSpan;
     }
 };
 </script>
@@ -131,7 +141,7 @@ export default {
 
     /* fixes overlap error in IE7/8, 
        make sure you have an empty gif */
-    background-image: url('/assets/images/empty.gif');
+    background-image: url('/img/empty.gif');
 }
 
 .project_icon {
@@ -291,6 +301,6 @@ export default {
 
     /* fixes overlap error in IE7/8, 
          make sure you have an empty gif */
-    background-image: url('/assets/images/empty.gif');
+    background-image: url('/img/empty.gif');
 }
 </style>

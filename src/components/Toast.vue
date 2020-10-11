@@ -88,7 +88,7 @@ export default {
     border-radius: 10px;
     padding: 16px;
     position: fixed;
-    z-index: 1000;
+    z-index: 10000;
     right: 40px;
     bottom: 30px;
     box-shadow: 13px 13px 5px #141414, inset 0px 0px 5px #2c2c2c;

@@ -1,6 +1,6 @@
 <template>
     <Header
-        headerTitle="Your Profile"
+        title="Your Profile"
         subtitle="Welcome back."
         :buttons="[
             {
@@ -15,15 +15,32 @@
 <script>
 import Header from '@/components/Header.vue';
 export default {
-    title: 'Test',
+    title: 'User Dashboard',
     name: 'Dashboard',
     components: {
         Header
     },
     methods: {
-        logout(that) {
-            that.$parent.$parent.$parent.temporaryToast("//TODO: Add logout function", 10 * 1000);
+        logout() {
+            fetch('/api/user/logout/', {
+                credentials: 'include'
+            }).then(() => {
+                this.$router.push(
+                    `/auth/?redirect=${window.location.pathname}`
+                );
+            });
         }
+    },
+    beforeMount() {
+        fetch('/api/authenticate/', {
+            credentials: 'include'
+        }).then(res => {
+            if (res.status === 401) {
+                this.$router.push(
+                    `/auth/?redirect=${window.location.pathname}`
+                );
+            }
+        });
     }
 };
 </script>

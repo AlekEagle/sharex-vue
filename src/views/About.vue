@@ -1,6 +1,6 @@
 <template>
     <Header
-        headerTitle="What is This?"
+        title="What is This?"
         subtitle="All about what this server is."
         :buttons="[
             {

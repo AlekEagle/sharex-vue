@@ -1,6 +1,6 @@
 <template>
     <Header
-        headerTitle="AlekEagle ShareX Server"
+        title="AlekEagle ShareX Server"
         subtitle="A Server that
         can host your ShareX uploads"
         :buttons="[
@@ -22,9 +22,10 @@
             :classes="['float']"
             icon="/img/mombot.png"
             :disabled="false"
-            :action="doThing"
         >
-            <div class="project_description">hi</div>
+            <div class="project_description">
+                hi
+            </div>
         </Project>
     </div>
 </template>
@@ -32,6 +33,7 @@
 <script>
 import Header from '@/components/Header.vue';
 import Project from '@/components/Project.vue';
+
 export default {
     title: 'AlekEagle ShareX Dashboard',
     name: 'Home',
@@ -39,10 +41,6 @@ export default {
         Header,
         Project
     },
-    methods: {
-        doThing(that) {
-            that.sharedState.icon = '/img/warning.png';
-        }
-    }
+    methods: {}
 };
 </script>

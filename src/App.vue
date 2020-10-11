@@ -1,6 +1,6 @@
 <template>
     <router-view />
-    <div class="footer_box">
+    <div ref="footerBox" class="footer_box">
         <a href="https://alekeagle.com" class="footer_text"
             >© 2019-2020 AlekEagle</a
         >
@@ -9,10 +9,10 @@
 </template>
 
 <script>
-import Toast from "@/components/Toast.vue";
+import Toast from '@/components/Toast.vue';
 export default {
-    name: "App",
-    methods:{
+    name: 'App',
+    methods: {
         temporaryToast(text, duration) {
             this.$refs.toast.showToast(text, duration);
         },
@@ -23,12 +23,11 @@ export default {
             this.$refs.toast.hideToast();
         }
     },
-    mounted() {
-        
-    },components: {
+    mounted() {},
+    components: {
         Toast
     }
-}
+};
 </script>
 
 <style>
