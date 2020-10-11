@@ -119,7 +119,7 @@ export default {
         },
         login(e) {
             let data = new FormData(e.target);
-            fetch('http://localhost:3000/api/user/login/', {
+            fetch('/api/user/login/', {
                 credentials: 'include',
                 method: 'POST',
                 body: data
@@ -151,7 +151,7 @@ export default {
                 body: data
             }).then(res => {
                 switch (res.status) {
-                    case 200:
+                    case 201:
                         this.$router.push(
                             window.location.href.split('?').length > 1
                                 ? parseQueryString(
