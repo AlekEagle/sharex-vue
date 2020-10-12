@@ -5,15 +5,19 @@
         subtitle="You found an error 404 page!"
     />
     <div></div>
+
+    <Footer />
 </template>
 
 <script>
 import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
 export default {
     title: 'Error!?!?!11?!/',
     name: 'Not Found',
     components: {
-        Header
+        Header,
+        Footer
     }
 };
 </script>

@@ -26,6 +26,7 @@
                     name="name"
                     maxlength="30"
                     placeholder="Username"
+                    required
                 />
                 <input
                     class="darktextbox"
@@ -34,6 +35,7 @@
                     name="password"
                     maxlength="30"
                     placeholder="Password"
+                    required
                 />
                 <button class="button">Login</button>
             </form>
@@ -52,6 +54,7 @@
                     name="name"
                     maxlength="30"
                     placeholder="Username"
+                    required
                 />
                 <input
                     class="darktextbox"
@@ -60,6 +63,7 @@
                     name="email"
                     maxlength="30"
                     placeholder="E-mail"
+                    required
                 />
                 <input
                     class="darktextbox"
@@ -68,6 +72,7 @@
                     name="password"
                     maxlength="30"
                     placeholder="Password"
+                    required
                 />
                 <input
                     class="darktextbox"
@@ -76,16 +81,19 @@
                     name="password-conf"
                     maxlength="30"
                     placeholder="Confirm Password"
+                    required
                 />
                 <button class="button">Register</button>
             </form>
         </Project>
     </div>
+    <Footer />
 </template>
 
 <script>
 import Project from '@/components/Project.vue';
 import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
 function parseQueryString(qs, sep, eq) {
     let parsed = {};
     qs.split(sep || '&').forEach(p => {
@@ -99,7 +107,8 @@ export default {
     name: 'Auth',
     components: {
         Header,
-        Project
+        Project,
+        Footer
     },
     methods: {
         switchBetweenLoginAndRegister() {
@@ -134,6 +143,40 @@ export default {
                                 : '/me/'
                         );
                         break;
+                    case 401:
+                        res.json().then(json => {
+                            this.$parent.$parent.temporaryToast(json.error);
+                        });
+                        break;
+                    case 404:
+                        res.json().then(
+                            json => {
+                                this.$parent.$parent.temporaryToast(json.error);
+                            },
+                            () => {
+                                this.$parent.$parent.temporaryToast(
+                                    'Development lol'
+                                );
+                            }
+                        );
+                        break;
+                    case 500:
+                        res.json().then(
+                            json => {
+                                this.$parent.$parent.temporaryToast(json.error);
+                            },
+                            () => {
+                                this.$parent.$parent.temporaryToast(
+                                    'Development lol'
+                                );
+                            }
+                        );
+                        break;
+                    case 400:
+                        this.$parent.$parent.temporaryToast(
+                            'Please fill out all fields.'
+                        );
+                        break;
                     default:
                         this.$parent.$parent.temporaryToast(
                             'An unknown error occurred, if this issue persists contact AlekEagle.',
@@ -144,6 +187,12 @@ export default {
         },
         register(e) {
             let data = new FormData(e.target);
+            if (data.get('password') !== data.get('password-conf')) {
+                this.$parent.$parent.temporaryToast(
+                    "These passwords don't match!"
+                );
+                return;
+            }
             data.delete('password-conf');
             fetch('/api/user/create/', {
                 credentials: 'include',
@@ -158,6 +207,11 @@ export default {
                                       window.location.href.split('?')[1]
                                   ).redirect
                                 : '/me/'
+                        );
+                        break;
+                    case 401:
+                        this.$parent.$parent.temporaryToast(
+                            'There is already an account with this username or email.'
                         );
                         break;
                     default:

@@ -43,20 +43,6 @@
     </div>
 </template>
 <script>
-import { reactive } from 'vue';
-const store = {
-    debug: false,
-
-    state: reactive({
-        title: '',
-        icon: '',
-        classes: [],
-        disabled: false,
-        to: '',
-        action: null,
-        noSpan: false
-    })
-};
 export default {
     name: 'Project',
     props: {
@@ -71,7 +57,15 @@ export default {
     data() {
         return {
             privateState: {},
-            sharedState: store.state
+            sharedState: {
+                title: '',
+                icon: '',
+                classes: [],
+                disabled: false,
+                to: '',
+                action: null,
+                noSpan: false
+            }
         };
     },
     methods: {
@@ -85,13 +79,13 @@ export default {
         }
     },
     mounted() {
-        store.state.title = this.title;
-        store.state.icon = this.icon;
-        store.state.classes = this.classes;
-        store.state.disabled = this.disabled;
-        store.state.to = this.to;
-        store.state.action = this.action;
-        store.state.noSpan = !!this.noSpan;
+        this.sharedState.title = this.title;
+        this.sharedState.icon = this.icon;
+        this.sharedState.classes = this.classes;
+        this.sharedState.disabled = this.disabled;
+        this.sharedState.to = this.to;
+        this.sharedState.action = this.action;
+        this.sharedState.noSpan = !!this.noSpan;
     }
 };
 </script>
@@ -106,7 +100,6 @@ export default {
     border: 1px solid #1d1d1d;
     float: left;
     transition: 0.3s;
-    cursor: pointer;
     outline: none;
     align-self: stretch;
     position: relative;
@@ -136,6 +129,8 @@ export default {
     height: 100%;
     top: 0;
     left: 0;
+
+    cursor: pointer;
 
     z-index: 1;
 

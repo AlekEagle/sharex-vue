@@ -1,0 +1,126 @@
+<template>
+    <Header
+        ref="header"
+        title="Your Files"
+        subtitle="Everything you've uploaded is right here."
+        :buttons="[
+            {
+                text: 'Back',
+                to: '/me/',
+                title: 'Head back to the main dashboard.'
+            }
+        ]"
+    />
+    <div ref="files" class="projects">
+        <Project
+            v-for="file in sharedState.uploads"
+            :key="file.filename"
+            :classes="['auth', 'float']"
+            :to="`/me/files/info?file=${file.filename}`"
+            :title="file.filename"
+        >
+            Click me to look at info about the file {{ file.filename }}
+        </Project>
+    </div>
+    <Footer>
+        <div
+            v-if="!privateState.loading && !privateState.hideLoadMore"
+            class="loadmore"
+        >
+            <p class="footer_text" @click="loadMore">
+                Load More
+            </p>
+        </div>
+        <div v-else-if="!privateState.hideLoadMore" class="lds-ellipsis">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </Footer>
+</template>
+
+<script>
+import Header from '@/components/Header.vue';
+import Project from '@/components/Project.vue';
+import Footer from '@/components/Footer.vue';
+import { reactive } from 'vue';
+const store = {
+    state: reactive({
+        uploads: []
+    })
+};
+export default {
+    name: 'Files',
+    title: 'Your Files',
+    components: {
+        Header,
+        Project,
+        Footer
+    },
+    data() {
+        return {
+            privateState: {
+                loading: true,
+                hideLoadMore: false,
+                offset: 0
+            },
+            sharedState: store.state
+        };
+    },
+    beforeMount() {
+        fetch('/api/authenticate/', {
+            credentials: 'include'
+        }).then(res => {
+            if (res.status !== 200) {
+                this.$router.push(
+                    `/auth/?redirect=${window.location.pathname}`
+                );
+            } else {
+                fetch('/api/user/uploads?offset=' + this.privateState.offset, {
+                    credentials: 'include'
+                }).then(uploads => {
+                    if (uploads.status === 200) {
+                        uploads.json().then(json => {
+                            this.$refs.header.sharedState.subtitle =
+                                this.$refs.header.sharedState.subtitle +
+                                `\nYou've uploaded ${json.count} files.`;
+                            this.privateState.offset += json.uploads.length;
+                            this.sharedState.uploads.push(...json.uploads);
+                            this.privateState.loading = false;
+                        });
+                    }
+                });
+            }
+        });
+    },
+    methods: {
+        loadMore() {
+            this.privateState.loading = true;
+            fetch('/api/user/uploads?offset=' + this.privateState.offset, {
+                credentials: 'include'
+            }).then(uploads => {
+                if (uploads.status === 200) {
+                    uploads.json().then(json => {
+                        this.privateState.offset += json.uploads.length;
+                        if (json.uploads.length < 1) {
+                            this.privateState.hideLoadMore = true;
+                        }
+                        this.sharedState.uploads.push(...json.uploads);
+                        this.privateState.loading = false;
+                    });
+                }
+            });
+        }
+    }
+};
+</script>
+
+<style>
+.loadmore {
+    padding-bottom: 23px;
+}
+.loadmore p {
+    cursor: pointer;
+}
+</style>

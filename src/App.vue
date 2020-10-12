@@ -1,10 +1,5 @@
 <template>
     <router-view />
-    <div ref="footerBox" class="footer_box">
-        <a href="https://alekeagle.com" class="footer_text"
-            >© 2019-2020 AlekEagle</a
-        >
-    </div>
     <Toast ref="toast"></Toast>
 </template>
 
@@ -14,10 +9,13 @@ export default {
     name: 'App',
     methods: {
         temporaryToast(text, duration) {
-            this.$refs.toast.showToast(text, duration);
+            this.$refs.toast.showToast(
+                text,
+                typeof duration === 'number' ? duration : true
+            );
         },
         permanentToast(text) {
-            this.$refs.toast.showToast(text, false);
+            this.$refs.toast.showToast(text);
         },
         hideToast() {
             this.$refs.toast.hideToast();
@@ -463,33 +461,6 @@ p#dotseperator {
 
 .titanic {
     float: none;
-}
-
-.footer_text {
-    color: #a8a8a8;
-    font-size: 20px;
-    margin-bottom: 0px;
-    margin-top: 20px;
-    margin-left: 5px;
-    margin-right: 5px;
-    text-decoration: none;
-    transition-property: color;
-    transition-duration: 0.3s;
-}
-
-.footer_text:hover {
-    transition-property: color;
-    transition-duration: 0.3s;
-    color: #1199ff;
-}
-
-.footer_box {
-    width: 100%;
-    position: relative;
-    float: left;
-    z-index: 1;
-    margin-top: 10px;
-    margin-bottom: 10px;
 }
 
 @keyframes glow {

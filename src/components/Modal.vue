@@ -11,7 +11,9 @@
                         X
                     </p>
                     <h2 class="modal-title" v-text="sharedState.title" />
-                    <slot />
+                    <div class="modal-content">
+                        <slot />
+                    </div>
                     <div class="modal-buttons">
                         <template
                             v-for="(button, index) in sharedState.buttons"
@@ -33,17 +35,6 @@
 </template>
 
 <script>
-import { reactive } from 'vue';
-const store = {
-    debug: false,
-
-    state: reactive({
-        title: '',
-        show: false,
-        buttons: [],
-        cancelable: false
-    })
-};
 export default {
     name: 'Modal',
     props: {
@@ -53,25 +44,35 @@ export default {
         cancelable: Boolean
     },
     mounted() {
-        store.state.title = this.title;
-        store.state.show = this.show;
-        store.state.buttons = this.buttons;
-        store.state.cancelable = this.cancelable;
+        this.sharedState.title = this.title;
+        this.sharedState.show = this.show;
+        this.sharedState.buttons = this.buttons;
+        this.sharedState.cancelable = this.cancelable;
+
+        if (this.sharedState.show === true) {
+            document.addEventListener('keydown', this.__hideModal);
+        }
     },
     methods: {
         __hideModal(e) {
             if (
-                store.state.cancelable &&
-                !!e.path
-                    .slice(0, 2)
-                    .map(
-                        ele =>
-                            ele.classList.contains('modal-mask') ||
-                            ele.classList.contains('modal-close-button')
-                    )
-                    .filter(val => val === true)[0]
+                (this.sharedState.cancelable &&
+                    !!e.path
+                        .slice(0, 2)
+                        .map(
+                            ele =>
+                                ele.classList.contains('modal-mask') ||
+                                ele.classList.contains('modal-close-button')
+                        )
+                        .filter(val => val === true)[0]) ||
+                (e.type === 'keydown' &&
+                    e.key === 'Escape' &&
+                    this.sharedState.cancelable)
             ) {
-                store.state.show = false;
+                if (e.type === 'keydown' && e.key === 'Escape') {
+                    document.removeEventListener('keydown', this.__hideModal);
+                }
+                this.sharedState.show = false;
             }
         },
         __handleButtonClick(index) {
@@ -79,15 +80,24 @@ export default {
         },
         showModal() {
             this.sharedState.show = true;
+            document.addEventListener('keydown', this.__hideModal);
         },
         set(values) {
             this.sharedState = { ...this.sharedState, ...values };
+        },
+        hideModal() {
+            this.sharedState.show = false;
         }
     },
     data() {
         return {
             privateState: {},
-            sharedState: store.state
+            sharedState: {
+                title: '',
+                show: false,
+                buttons: [],
+                cancelable: false
+            }
         };
     }
 };
@@ -113,6 +123,7 @@ export default {
     margin-top: 0px;
     z-index: 9999;
     cursor: pointer;
+    padding: 10px;
     transition-duration: 0.4s;
 }
 
@@ -134,12 +145,13 @@ export default {
 
 .modal-container {
     position: relative;
-    width: 80%;
+    width: fit-content;
     margin: 0 auto;
-    padding: 20px 30px;
+    padding: 20px 50px;
     background-color: #333333;
     border-radius: 10px;
     box-shadow: 13px 13px 5px #141414, inset 0px 0px 5px #2c2c2c;
+    max-width: 80%;
 }
 
 .modal-enter-active {

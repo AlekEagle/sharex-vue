@@ -58,14 +58,17 @@ export default {
             } else {
                 store.setDisplayState(true);
             }
-            if (typeof duration === 'number') {
+            if (
+                typeof duration === 'number' ||
+                (typeof duration === 'boolean' && duration)
+            ) {
                 this.privateState.usesTimeout = true;
                 this.privateState.timeout = setTimeout(
                     () => {
                         store.setDisplayState(false);
                         this.privateState.timeout = null;
                     },
-                    duration ? duration : 5000
+                    typeof duration === 'number' ? duration : 5000
                 );
             } else this.privateState.usesTimeout = false;
         },

@@ -54,19 +54,23 @@
             optio ipsum obcaecati architecto error.
         </Modal>
     </div>
+
+    <Footer />
 </template>
 
 <script>
 import Header from '@/components/Header.vue';
 import Project from '@/components/Project.vue';
 import Modal from '@/components/Modal.vue';
+import Footer from '@/components/Footer.vue';
 export default {
     title: 'AlekEagle ShareX Dashboard',
     name: 'Home',
     components: {
         Header,
         Project,
-        Modal
+        Modal,
+        Footer
     },
     methods: {
         showModal() {

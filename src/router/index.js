@@ -25,6 +25,16 @@ const routes = [
     component: () => import("../views/Auth.vue")
   },
   {
+    path: "/me/files",
+    name: "Your Files",
+    component: () => import("../views/Files.vue")
+  },
+  {
+    path: "/me/edit",
+    name: "Edit your profile",
+    component: () => import("../views/Edit.vue")
+  },
+  {
     path: "/:pathMatch(.*)*",
     name: "Error",
     component: () => import("../views/NotFound.vue")
