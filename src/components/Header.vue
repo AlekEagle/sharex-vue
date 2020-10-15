@@ -76,26 +76,19 @@
     <p class="subtitle" v-text="sharedState.subtitle"></p>
 </template>
 <script>
-import { reactive } from 'vue';
-const store = {
-    debug: false,
-
-    state: reactive({
-        title: '',
-        subtitle: '',
-        buttons: [],
-        to: '',
-        action: null,
-        icon: ''
-    })
-};
-
 export default {
     name: 'Header',
     data() {
         return {
             privateState: {},
-            sharedState: store.state
+            sharedState: {
+                title: '',
+                subtitle: '',
+                buttons: [],
+                to: '',
+                action: null,
+                icon: ''
+            }
         };
     },
     props: {

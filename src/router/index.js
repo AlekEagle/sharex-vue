@@ -34,6 +34,11 @@ const routes = [
     component: () => import('../views/Setup.vue')
   },
   {
+    path: '/set-up/:name/',
+    name: 'Service Setup',
+    component: () => import('../views/SetupService.vue')
+  },
+  {
     path: "/:pathMatch(.*)*",
     name: "Error",
     component: () => import("../views/NotFound.vue")

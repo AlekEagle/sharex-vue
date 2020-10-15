@@ -1,8 +1,7 @@
 <template>
     <Header
         title="AlekEagle ShareX Server"
-        subtitle="A Server that
-        can host your ShareX uploads"
+        subtitle="A Server that can host your ShareX uploads"
         :buttons="[
             {
                 title: 'Manage Your Account',
@@ -13,41 +12,49 @@
     />
     <div class="projects">
         <Project
-            title="Test"
+            title="Easy and Free"
             :classes="['float']"
-            icon="/img/mombot.png"
+            icon="/img/circle.png"
             :disabled="false"
-            :action="showModal"
         >
-            <div class="project_description">
-                hi
-            </div>
+            Super easy to use and configure, all you need is an account.
         </Project>
-
-        <Modal
-            title="Modal"
-            :buttons="[
-                {
-                    text: 'Show Toast for 10 seconds',
-                    action: temporaryToast
-                },
-                {
-                    text: 'Show toast permanently',
-                    action: permanentToast
-                },
-                {
-                    text: 'Get rid of toast',
-                    action: hideToast
-                }
-            ]"
-            :cancelable="true"
-            ref="modal"
+        <Project
+            title="Wide Support"
+            :classes="['float']"
+            icon="/img/circle.png"
+            :disabled="false"
         >
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora
-            consequuntur, ex nobis laudantium id similique nisi error fugit
-            deleniti cum officia distinctio obcaecati nostrum. Voluptatibus
-            optio ipsum obcaecati architecto error.
-        </Modal>
+            Not just screenshots, just about any file type. (with a few
+            exceptions)
+        </Project>
+        <Project
+            title="Fast and Secure"
+            :classes="['float']"
+            icon="/img/circle.png"
+            :disabled="false"
+        >
+            We encrypt your data, and our database is inaccessible without going
+            through our API.
+        </Project>
+        <Project
+            title="More Features Constantly"
+            :classes="['float']"
+            icon="/img/circle.png"
+            :disabled="false"
+        >
+            Actively worked on and quickly updated with new features all the
+            time!
+        </Project>
+        <Project
+            title="Contact Me"
+            :classes="['float']"
+            icon="/img/me_irl.webp"
+            :disabled="false"
+            :action="openDiscord"
+        >
+            Contact me in the discord server if you have any questions!
+        </Project>
     </div>
 
     <Footer />
@@ -56,7 +63,6 @@
 <script>
 import Header from '@/components/Header.vue';
 import Project from '@/components/Project.vue';
-import Modal from '@/components/Modal.vue';
 import Footer from '@/components/Footer.vue';
 export default {
     title: 'AlekEagle ShareX Dashboard',
@@ -64,26 +70,11 @@ export default {
     components: {
         Header,
         Project,
-        Modal,
         Footer
     },
     methods: {
-        showModal() {
-            this.$refs.modal.showModal();
-        },
-        temporaryToast() {
-            this.$parent.$parent.temporaryToast(
-                'This will disappear in 10 seconds!',
-                10 * 1000
-            );
-        },
-        permanentToast() {
-            this.$parent.$parent.permanentToast(
-                "This won't disappear until you hit the hide toast button!"
-            );
-        },
-        hideToast() {
-            this.$parent.$parent.hideToast();
+        openDiscord() {
+            window.open('https://alekeagle.com/d', '_blank');
         }
     }
 };
