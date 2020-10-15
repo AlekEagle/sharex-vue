@@ -1094,7 +1094,7 @@ app.post('/upload/', upload.single('file'), (req, res) => {
         res.sendStatus(err ? 500 : 401);
     });
 });
-app.use(express.static('../sharex-server-vue/dist', { acceptRanges: false }));
+app.use(express.static('./dist', { acceptRanges: false }));
 
 server.listen(port);
 console.log(`Server listening on port ${port}`);
