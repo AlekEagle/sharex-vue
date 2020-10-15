@@ -266,15 +266,9 @@ app.use('/api/', ratelimit({
     }
 }));
 app.use((req, res, next) => {
-    if (req.url.startsWith('/api')) {
-        res.set({
-            'Cache-Control': 'no-cache'
-        });
-    } else {
-        res.set({
-            'Cache-Control': 'public, max-age=172800'
-        });
-    }
+    res.set({
+        'Cache-Control': 'no-cache'
+    });
     console.log(`${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${req.protocol}://${req.headers.host}${req.url}`);
     next();
 }, express.static('uploads', { acceptRanges: false }), (req, res, next) => {
@@ -1094,7 +1088,13 @@ app.post('/upload/', upload.single('file'), (req, res) => {
         res.sendStatus(err ? 500 : 401);
     });
 });
-app.use(express.static('./dist', { acceptRanges: false }));
+
+app.use((req, res, next) => {
+    res.set({
+        'Cache-Control': 'public, max-age=172800'
+    });
+    next();
+}, express.static('./dist', { acceptRanges: false }));
 
 server.listen(port);
 console.log(`Server listening on port ${port}`);
