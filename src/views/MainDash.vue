@@ -28,6 +28,28 @@
         >
             See all of the files you've uploaded.
         </Project>
+        <Project
+            icon="/img/circle.png"
+            title="Get Set Up"
+            to="/set-up/"
+            :classes="['float']"
+        >
+            Get instructions on how to set up with popular services like ShareX
+            for Windows{{
+                Math.random() > 0.98 ? ' (more like stupid am I right?) ' : ' '
+            }}or ShareNiX for linux!
+        </Project>
+        <Project
+            icon="/img/circle.png"
+            title="Upload From Browser (Coming Soon)"
+            to="/me/upload/"
+            :classes="['float']"
+            :disabled="true"
+        >
+            Upload files directly from your browser! (Coming soon, along with
+            the ability to share files through the native share menu with the
+            installed app on mobile!)
+        </Project>
     </div>
 
     <Footer />
@@ -47,7 +69,7 @@ export default {
     },
     methods: {
         logout() {
-            fetch('/api/user/logout/', {
+            fetch('/api/logout/', {
                 credentials: 'include'
             }).then(() => {
                 this.$router.push(
@@ -56,7 +78,7 @@ export default {
             });
         }
     },
-    beforeMount() {
+    beforeCreate() {
         fetch('/api/authenticate/', {
             credentials: 'include'
         }).then(res => {
@@ -65,28 +87,22 @@ export default {
                     `/auth/?redirect=${window.location.pathname}`
                 );
             } else {
-                fetch('/api/self/', {
-                    credentials: 'include'
-                }).then(data => {
-                    data.json().then(
-                        json => {
-                            this.$refs.header.sharedState.subtitle = `Welcome Back, ${json.displayName}!`;
-                            if (json.staff !== null) {
-                                this.$refs.header.sharedState.buttons.push({
-                                    title:
-                                        'As a cool person, you get to visit the cool people place.',
-                                    text: 'Cool admin zone.',
-                                    to: '/admin/'
-                                });
-                            }
-                        },
-                        () => {
-                            this.$parent.$parent.temporaryToast(
-                                'Development lol'
-                            );
+                res.json().then(
+                    json => {
+                        this.$refs.header.sharedState.subtitle = `Welcome Back, ${json.displayName}!`;
+                        if (json.staff !== null && json.staff !== '') {
+                            this.$refs.header.sharedState.buttons.push({
+                                title:
+                                    'As a cool person, you get to visit the cool people place.',
+                                text: 'Cool admin zone.',
+                                to: '/admin/'
+                            });
                         }
-                    );
-                });
+                    },
+                    () => {
+                        this.$parent.$parent.temporaryToast('Development lol');
+                    }
+                );
             }
         });
     }

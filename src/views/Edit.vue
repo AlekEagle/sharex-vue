@@ -23,8 +23,7 @@
             <br />
             ID: {{ user.id }}
             <br />
-            Password: Hashed and Salted (We can't show you it because we don't
-            know what it is)
+            Password: ¯\_(ツ)_/¯
             <br />
             Staff?: {{ user.staff !== '' ? user.staff : 'No' }}
         </Project>
@@ -40,8 +39,9 @@
             title="Edit Your Information"
             :buttons="[
                 {
-                    text: 'Submit',
-                    action: updateProfile
+                    text: 'Change it',
+                    action: updateProfile,
+                    title: 'Confirm the changes to your profile.'
                 }
             ]"
             :cancelable="true"
@@ -52,7 +52,7 @@
                     name="name"
                     placeholder="New Username"
                     autocomplete="off"
-                    maxlength="30"
+                    maxlength="60"
                     type="text"
                     class="darktextbox"
                 />
@@ -61,7 +61,7 @@
                     name="email"
                     placeholder="New Email"
                     autocomplete="email"
-                    maxlength="30"
+                    maxlength="60"
                     type="email"
                     class="darktextbox"
                 />
@@ -70,7 +70,6 @@
                     name="newPassword"
                     placeholder="New Password"
                     autocomplete="new-password"
-                    maxlength="30"
                     type="password"
                     class="darktextbox"
                 />
@@ -79,7 +78,6 @@
                     name="password"
                     placeholder="Current Password"
                     autocomplete="password"
-                    maxlength="30"
                     type="password"
                     required
                     class="darktextbox"
@@ -98,13 +96,14 @@
             title="Change Your Domain"
             :buttons="[
                 {
-                    text: 'Submit',
-                    action: submitDomain
+                    text: 'That one',
+                    action: submitDomain,
+                    title: 'Confirm your choice for your domain.'
                 }
             ]"
             :cancelable="true"
         >
-            <form @submit.prevent="submitDomain">
+            <form @submit.prevent="submitDomain" ref="domainForm">
                 <div id="domain">
                     <input
                         v-if="allowsSubdomains()"
@@ -137,6 +136,109 @@
                         >
                     </select>
                 </div>
+            </form>
+        </Modal>
+        <Project
+            title="Regenerate API Token"
+            :classes="['auth', 'float']"
+            :action="showRegenTokenModal"
+        >
+            Regenerate your API Token here!
+        </Project>
+        <Modal
+            ref="regenTokenModal"
+            title="Regenerate Your API Token"
+            :buttons="[
+                {
+                    text: 'I\'m sure, let\'s do it',
+                    action: regenerateToken
+                }
+            ]"
+            :cancelable="true"
+        >
+            <form @submit.prevent="regenerateToken">
+                <p>
+                    Regenerating your token will invalidate your previous token!
+                    Your token is used for API calls and for uploading images to
+                    the server, if you are 100% sure you want to do this, enter
+                    your current password and hit the button.
+                </p>
+                <input
+                    placeholder="Current Password"
+                    class="darktextbox"
+                    name="password"
+                    type="password"
+                    autocomplete="password"
+                    required
+                />
+            </form>
+        </Modal>
+        <Modal
+            ref="regenTokenSuccessModal"
+            title="Success!"
+            :buttons="[
+                {
+                    text: 'Alright, I got it',
+                    action: hideRegenTokenSuccessModal
+                }
+            ]"
+        >
+            Alright, here's your new token, this is <b>PRIVATE INFORMATION</b>,
+            AKA, people can do bad stuff with it if you give it to someone else!
+            <br />
+            <br />
+            <code>{{ user.apiToken }}</code>
+            <br />
+            <br />
+            To close this, you need to hit the button below, this was done
+            intentionally because we didn't want you to accidentally loose the
+            token and have to get it again.
+        </Modal>
+        <Project
+            title="Delete your account"
+            :classes="['auth', 'float']"
+            :action="showDeleteAccountModal"
+        >
+            Click here to delete your account.
+        </Project>
+        <Modal
+            ref="deleteAccountModal"
+            title="Delete Your Account"
+            :buttons="[
+                {
+                    title:
+                        'Confirm the deletion of your account, this can\'t be taken back!',
+                    text: 'I\'m sure, let\'s do it.',
+                    action: deleteAccount
+                }
+            ]"
+            :cancelable="true"
+        >
+            <p>
+                Deleting your account is a very serious and irreversible
+                process, so we want a little bit of extra confirmation that you
+                want to delete your account. So not only do you need to confirm
+                your password, but you also need to enter your username
+                <code>{{ user.username }}</code> in the username box.
+            </p>
+            <form @submit.prevent="deleteAccount">
+                <input
+                    type="text"
+                    name="username"
+                    class="darktextbox"
+                    autocomplete="username"
+                    required
+                    placeholder="Username"
+                />
+                <br />
+                <input
+                    type="password"
+                    name="password"
+                    class="darktextbox"
+                    autocomplete="password"
+                    required
+                    placeholder="Confirm Password"
+                />
             </form>
         </Modal>
     </div>
@@ -262,6 +364,9 @@ export default {
                 document.querySelector('#domain > input').disabled = false;
                 document.querySelector('#domain > input').title = '';
             } else {
+                this.$parent.$parent.temporaryToast(
+                    "This domain doesn't support subdomains, sorry!"
+                );
                 document.querySelector('#domain > input').disabled = true;
                 document.querySelector('#domain > input').title =
                     "This domain doesn't support subdomains, sorry!";
@@ -278,11 +383,16 @@ export default {
             let profileData = new FormData(
                 document.querySelector('div.modal-content > form')
             );
-            fetch('/api/user/update/', {
+            fetch('/api/user/', {
                 credentials: 'include',
                 method: 'PATCH',
                 body: profileData
             }).then(res => {
+                document
+                    .querySelectorAll('div.modal-content > form > input')
+                    .forEach(e => {
+                        e.value = '';
+                    });
                 switch (res.status) {
                     case 200:
                         res.json().then(json => {
@@ -300,9 +410,80 @@ export default {
                         break;
                 }
             });
+        },
+        showRegenTokenModal() {
+            this.$refs.regenTokenModal.showModal();
+        },
+        regenerateToken() {
+            let tokenData = new FormData(
+                document.querySelector('div.modal-content > form')
+            );
+            fetch('/api/user/token/', {
+                credentials: 'include',
+                method: 'PATCH',
+                body: tokenData
+            }).then(res => {
+                document
+                    .querySelectorAll('div.modal-content > form > input')
+                    .forEach(e => {
+                        e.value = '';
+                    });
+                switch (res.status) {
+                    case 200:
+                        res.json().then(json => {
+                            this.user.apiToken = json.token;
+                            this.$refs.regenTokenModal.hideModal();
+                            this.$refs.regenTokenSuccessModal.showModal();
+                        });
+                        break;
+                    default:
+                        this.$parent.$parent.temporaryToast(
+                            'An unknown error occurred, if this issue persists contact AlekEagle.'
+                        );
+                        break;
+                }
+            });
+        },
+        hideRegenTokenSuccessModal() {
+            this.$refs.regenTokenSuccessModal.hideModal();
+        },
+        showDeleteAccountModal() {
+            this.$refs.deleteAccountModal.showModal();
+        },
+        deleteAccount() {
+            let delAccData = new FormData(
+                document.querySelector('div.modal-content > form')
+            );
+            if (delAccData.get('username') !== this.user.username) {
+                this.$parent.$parent.temporaryToast(
+                    "Username provided doesn't match required input!"
+                );
+                return;
+            }
+            delAccData.delete('username');
+            fetch('/api/user/', {
+                credentials: 'include',
+                method: 'DELETE',
+                body: delAccData
+            }).then(res => {
+                document
+                    .querySelectorAll('div.modal-content > form > input')
+                    .forEach(e => {
+                        e.value = '';
+                    });
+                switch (res.status) {
+                    case 200: {
+                        this.$refs.deleteAccountModal.hideModal();
+                        this.$parent.$parent.temporaryToast(
+                            "It's been done, your account has been deleted, you will be redirected to the homepage momentarily."
+                        );
+                        setTimeout(() => this.$router.push('/'), 5000);
+                    }
+                }
+            });
         }
     },
-    beforeMount() {
+    beforeCreate() {
         fetch('/api/authenticate/', {
             credentials: 'include'
         }).then(res => {
@@ -311,20 +492,14 @@ export default {
                     `/auth/?redirect=${window.location.pathname}`
                 );
             } else {
-                fetch('/api/self/', {
-                    credentials: 'include'
-                }).then(data => {
-                    data.json().then(
-                        json => {
-                            this.user = json;
-                        },
-                        () => {
-                            this.$parent.$parent.temporaryToast(
-                                'Development lol'
-                            );
-                        }
-                    );
-                });
+                res.json().then(
+                    json => {
+                        this.user = json;
+                    },
+                    () => {
+                        this.$parent.$parent.temporaryToast('Development lol');
+                    }
+                );
                 fetch('/api/domains/', { credentials: 'include' }).then(
                     domains => {
                         domains.json().then(json => {

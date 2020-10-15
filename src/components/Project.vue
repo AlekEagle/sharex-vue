@@ -7,10 +7,10 @@
         />
         <div class="project_title" v-text="sharedState.title" />
         <div class="project_description"><slot /></div>
-        <router-link v-if="sharedState.to" :to="sharedState.to">
-            <span v-if="!sharedState.disabled" class="project_link" />
-            <span v-else class="project_link disabled" />
+        <router-link v-if="!sharedState.disabled" :to="sharedState.to">
+            <span class="project_link" />
         </router-link>
+        <span v-else class="project_link disabled" />
     </div>
     <div v-else-if="sharedState.action" :class="getClasses()">
         <img

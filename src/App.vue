@@ -326,6 +326,13 @@ input {
     color: black;
 }
 
+code {
+    font-family: 'Source Code Pro', monospace;
+    background: #1d1d1d;
+    border-radius: 3px;
+    padding: 5px 3.5px;
+}
+
 #folderpath {
     cursor: pointer;
     color: #5151ce;

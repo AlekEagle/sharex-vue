@@ -4,7 +4,7 @@
     "theme_color": "#3a3a3a",
     "background_color": "#212121",
     "display": "standalone",
-    "Scope": "/",
+    "scope": "/",
     "gcm_sender_id": "267615612426",
     "start_url": "/me/",
     "icons": [
@@ -49,18 +49,5 @@
             "type": "image/png"
         }
     ],
-    "share_target": {
-        "action": "/me/upload/",
-        "method": "POST",
-        "enctype": "multipart/form-data",
-        "params": {
-            "files": [
-                {
-                    "name": "file",
-                    "accept": ["*/*", ".*"]
-                }
-            ]
-        }
-    },
     "splash_pages": null
 }

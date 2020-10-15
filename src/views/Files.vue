@@ -13,7 +13,7 @@
     />
     <div ref="files" class="projects">
         <Project
-            v-for="file in sharedState.uploads"
+            v-for="file in sharedState.files"
             :key="file.filename"
             :classes="['auth', 'float']"
             :to="`/me/files/info?file=${file.filename}`"
@@ -47,7 +47,7 @@ import Footer from '@/components/Footer.vue';
 import { reactive } from 'vue';
 const store = {
     state: reactive({
-        uploads: []
+        files: []
     })
 };
 export default {
@@ -68,7 +68,7 @@ export default {
             sharedState: store.state
         };
     },
-    beforeMount() {
+    beforeCreate() {
         fetch('/api/authenticate/', {
             credentials: 'include'
         }).then(res => {
@@ -77,7 +77,7 @@ export default {
                     `/auth/?redirect=${window.location.pathname}`
                 );
             } else {
-                fetch('/api/user/uploads?offset=' + this.privateState.offset, {
+                fetch('/api/files?offset=' + this.privateState.offset, {
                     credentials: 'include'
                 }).then(uploads => {
                     if (uploads.status === 200) {
@@ -85,8 +85,8 @@ export default {
                             this.$refs.header.sharedState.subtitle =
                                 this.$refs.header.sharedState.subtitle +
                                 `\nYou've uploaded ${json.count} files.`;
-                            this.privateState.offset += json.uploads.length;
-                            this.sharedState.uploads.push(...json.uploads);
+                            this.privateState.offset += json.files.length;
+                            this.sharedState.files.push(...json.files);
                             this.privateState.loading = false;
                         });
                     }
@@ -97,16 +97,16 @@ export default {
     methods: {
         loadMore() {
             this.privateState.loading = true;
-            fetch('/api/user/uploads?offset=' + this.privateState.offset, {
+            fetch('/api/files?offset=' + this.privateState.offset, {
                 credentials: 'include'
             }).then(uploads => {
                 if (uploads.status === 200) {
                     uploads.json().then(json => {
-                        this.privateState.offset += json.uploads.length;
-                        if (json.uploads.length < 1) {
+                        this.privateState.offset += json.files.length;
+                        if (json.files.length < 1) {
                             this.privateState.hideLoadMore = true;
                         }
-                        this.sharedState.uploads.push(...json.uploads);
+                        this.sharedState.files.push(...json.files);
                         this.privateState.loading = false;
                     });
                 }

@@ -20,7 +20,7 @@
                             :key="index"
                         >
                             <button
-                                title="Click to close"
+                                :title="button.title"
                                 class="button modal-button"
                                 @click="__handleButtonClick(index)"
                             >

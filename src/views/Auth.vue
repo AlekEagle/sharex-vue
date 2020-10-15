@@ -128,7 +128,7 @@ export default {
         },
         login(e) {
             let data = new FormData(e.target);
-            fetch('/api/user/login/', {
+            fetch('/api/login/', {
                 credentials: 'include',
                 method: 'POST',
                 body: data
@@ -194,7 +194,7 @@ export default {
                 return;
             }
             data.delete('password-conf');
-            fetch('/api/user/create/', {
+            fetch('/api/user/', {
                 credentials: 'include',
                 method: 'POST',
                 body: data
@@ -227,6 +227,18 @@ export default {
         return {
             hasAccount: true
         };
+    },
+    beforeMount() {
+        fetch('/api/authenticate/', { credentials: 'include' }).then(res => {
+            if (res.status === 200) {
+                this.$router.push(
+                    window.location.href.split('?').length > 1
+                        ? parseQueryString(window.location.href.split('?')[1])
+                              .redirect
+                        : '/me/'
+                );
+            }
+        });
     }
 };
 </script>

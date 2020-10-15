@@ -129,6 +129,7 @@ export default {
     margin-bottom: 20px;
     margin-left: 25px;
     margin-right: 25px;
+    white-space: pre;
 }
 
 .header {
