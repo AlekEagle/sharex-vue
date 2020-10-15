@@ -37,8 +37,39 @@ export default {
     },
     beforeMount() {
         fetch('/api/authenticate/', { credentials: 'include' }).then(res => {
-            if (res.status !== 200) {
-                this.$router.push('/auth/?redirect=/set-up/');
+            switch (res.status) {
+                case 200:
+                    break;
+                case 429:
+                    this.$parent.$parent.temporaryToast(
+                        `Woah, slow down! Please wait ${Math.floor(
+                            (res.headers.get('x-ratelimit-reset') * 1000 -
+                                Date.now()) /
+                                1000 /
+                                60
+                        )} minutes ${
+                            Math.floor(
+                                ((res.headers.get('x-ratelimit-reset') * 1000 -
+                                    Date.now()) /
+                                    1000) %
+                                    60
+                            ) !== 0
+                                ? `and ${Math.floor(
+                                      ((res.headers.get('x-ratelimit-reset') *
+                                          1000 -
+                                          Date.now()) /
+                                          1000) %
+                                          60
+                                  )} seconds`
+                                : ''
+                        } before trying again!`
+                    );
+                    break;
+                default:
+                    this.$router.push(
+                        `/auth/?redirect=${window.location.pathname}`
+                    );
+                    break;
             }
         });
     }

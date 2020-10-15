@@ -72,25 +72,53 @@ export default {
         fetch('/api/authenticate/', {
             credentials: 'include'
         }).then(res => {
-            if (res.status !== 200) {
-                this.$router.push(
-                    `/auth/?redirect=${window.location.pathname}`
-                );
-            } else {
-                fetch('/api/files?offset=' + this.privateState.offset, {
-                    credentials: 'include'
-                }).then(uploads => {
-                    if (uploads.status === 200) {
-                        uploads.json().then(json => {
-                            this.$refs.header.sharedState.subtitle =
-                                this.$refs.header.sharedState.subtitle +
-                                `\nYou've uploaded ${json.count} files.`;
-                            this.privateState.offset += json.files.length;
-                            this.sharedState.files.push(...json.files);
-                            this.privateState.loading = false;
-                        });
-                    }
-                });
+            switch (res.status) {
+                case 200:
+                    fetch('/api/files?offset=' + this.privateState.offset, {
+                        credentials: 'include'
+                    }).then(uploads => {
+                        if (uploads.status === 200) {
+                            uploads.json().then(json => {
+                                this.$refs.header.sharedState.subtitle =
+                                    this.$refs.header.sharedState.subtitle +
+                                    `\nYou've uploaded ${json.count} files.`;
+                                this.privateState.offset += json.files.length;
+                                this.sharedState.files.push(...json.files);
+                                this.privateState.loading = false;
+                            });
+                        }
+                    });
+                    break;
+                case 429:
+                    this.$parent.$parent.temporaryToast(
+                        `Woah, slow down! Please wait ${Math.floor(
+                            (res.headers.get('x-ratelimit-reset') * 1000 -
+                                Date.now()) /
+                                1000 /
+                                60
+                        )} minutes ${
+                            Math.floor(
+                                ((res.headers.get('x-ratelimit-reset') * 1000 -
+                                    Date.now()) /
+                                    1000) %
+                                    60
+                            ) !== 0
+                                ? `and ${Math.floor(
+                                      ((res.headers.get('x-ratelimit-reset') *
+                                          1000 -
+                                          Date.now()) /
+                                          1000) %
+                                          60
+                                  )} seconds`
+                                : ''
+                        } before trying again!`
+                    );
+                    break;
+                default:
+                    this.$router.push(
+                        `/auth/?redirect=${window.location.pathname}`
+                    );
+                    break;
             }
         });
     },
@@ -100,15 +128,51 @@ export default {
             fetch('/api/files?offset=' + this.privateState.offset, {
                 credentials: 'include'
             }).then(uploads => {
-                if (uploads.status === 200) {
-                    uploads.json().then(json => {
-                        this.privateState.offset += json.files.length;
-                        if (json.files.length < 1) {
-                            this.privateState.hideLoadMore = true;
-                        }
-                        this.sharedState.files.push(...json.files);
-                        this.privateState.loading = false;
-                    });
+                switch (uploads.status) {
+                    case 200:
+                        uploads.json().then(json => {
+                            this.privateState.offset += json.files.length;
+                            if (json.files.length < 1) {
+                                this.privateState.hideLoadMore = true;
+                            }
+                            this.sharedState.files.push(...json.files);
+                            this.privateState.loading = false;
+                        });
+                        break;
+                    case 429:
+                        this.$parent.$parent.temporaryToast(
+                            `Woah, slow down! Please wait ${Math.floor(
+                                (uploads.headers.get('x-ratelimit-reset') *
+                                    1000 -
+                                    Date.now()) /
+                                    1000 /
+                                    60
+                            )} minutes ${
+                                Math.floor(
+                                    ((uploads.headers.get('x-ratelimit-reset') *
+                                        1000 -
+                                        Date.now()) /
+                                        1000) %
+                                        60
+                                ) !== 0
+                                    ? `and ${Math.floor(
+                                          ((uploads.headers.get(
+                                              'x-ratelimit-reset'
+                                          ) *
+                                              1000 -
+                                              Date.now()) /
+                                              1000) %
+                                              60
+                                      )} seconds`
+                                    : ''
+                            } before trying again!`
+                        );
+                        break;
+                    default:
+                        this.$router.push(
+                            `/auth/?redirect=${window.location.pathname}`
+                        );
+                        break;
                 }
             });
         }

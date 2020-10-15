@@ -8,11 +8,6 @@
                 title: 'Manage Your Account',
                 to: '/me/',
                 text: 'My Dashboard'
-            },
-            {
-                title: 'What is this even for?',
-                to: '/about/',
-                text: 'About'
             }
         ]"
     />
