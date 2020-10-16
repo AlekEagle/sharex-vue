@@ -10,7 +10,7 @@
             }
         ]"
     />
-    <div class="projects" v-if="file.filename !== undefined">
+    <div class="projects" v-if="user.id !== undefined">
         <Project
             title="File Info"
             :classes="['float', 'auth']"
