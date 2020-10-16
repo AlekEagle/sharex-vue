@@ -44,7 +44,6 @@
 import Header from '@/components/Header.vue';
 import Project from '@/components/Project.vue';
 import Footer from '@/components/Footer.vue';
-import { reactive } from 'vue';
 export default {
     name: 'Files',
     title: 'Your Files',
