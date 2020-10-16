@@ -328,14 +328,14 @@ app.get('/api/brew-coffee/', (req, res) => {
         res.status(418).json({ error: 'I\'m a teapot.', body: 'The requested entitiy body is short and stout.', addInfo: 'Tip me over and pour me out.' });
     }, ran);
 });
-app.get('/api/user/', (req, res) => {
+app.get('/api/user/:id', (req, res) => {
     authenticate(req).then(u => {
-        if (!req.query.id) res.sendStatus(400);
+        if (!req.params.id) res.sendStatus(400);
         else {
-            if (u.staff !== '') {
+            if ((u.staff === '' && u.id !== req.params.id) || u.staff !== '') {
                 user.findOne({
                     where: {
-                        id: req.query.id
+                        id: req.params.id
                     }
                 }).then(user => {
                     if (user === null) res.status(404).json({
@@ -821,11 +821,11 @@ app.patch('/api/user/domain/', upload.none(), (req, res) => {
 app.get('/api/files/', (req, res) => {
     authenticate(req).then(u => {
         let {
-            id
+            user
         } = req.query,
             count = parseInt(req.query.count) || 50,
             offset = parseInt(req.query.offset) || 0;
-        if (!id) {
+        if (!user) {
             uploads.findAll({
                 offset,
                 limit: count,
@@ -860,13 +860,13 @@ app.get('/api/files/', (req, res) => {
                         ['updatedAt', 'DESC']
                     ],
                     where: {
-                        userid: id
+                        userid: user
                     }
                 }).then(files => {
                     if (files.length !== 0 && files !== null) {
                         uploads.findAll({
                             where: {
-                                userid: id
+                                userid: user
                             }
                         }).then(count => {
                             res.status(200).json({
@@ -889,19 +889,19 @@ app.get('/api/files/', (req, res) => {
         res.sendStatus(err ? 500 : 401);
     });
 });
-app.get('/api/file/', (req, res) => {
+app.get('/api/file/:file', (req, res) => {
     authenticate(req).then(u => {
         let {
-            name
-        } = req.query;
-        if (!name) {
+            file
+        } = req.params;
+        if (!file) {
             res.sendStatus(400);
             return;
         }
         uploads.findOne({
             where: {
                 [Op.or]: [{
-                    filename: name
+                    filename: file
                 }]
             }
         }).then(file => {
@@ -987,24 +987,24 @@ app.get('/api/setup/save/:name/', (req, res) => {
         res.sendStatus(err ? 500 : 401);
     });
 });
-app.delete('/api/file/', upload.none(), (req, res) => {
-    authenticate(req).then(() => {
+app.delete('/api/file/:file', upload.none(), (req, res) => {
+    authenticate(req).then(u => {
         let {
-            name
-        } = req.body;
-        if (!name) {
+            file
+        } = req.params;
+        if (!file) {
             res.sendStatus(400);
             return;
         }
         uploads.findOne({
             where: {
                 [Op.or]: [{
-                    filename: name
+                    filename: file
                 }]
             }
         }).then(file => {
             if (file !== null) {
-                if (u.userid === u.id) {
+                if (file.userid === u.id) {
                     fs.unlink(`uploads/${file.filename}`, err => {
                         if (err) {
                             res.sendStatus(500);

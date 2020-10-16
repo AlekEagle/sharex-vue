@@ -16,7 +16,7 @@
             v-for="file in sharedState.files"
             :key="file.filename"
             :classes="['auth', 'float']"
-            :to="`/me/files/info?file=${file.filename}`"
+            :to="`/me/file/${file.filename}/`"
             :title="file.filename"
         >
             Click me to look at info about the file {{ file.filename }}
