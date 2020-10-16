@@ -13,7 +13,7 @@
     />
     <div ref="files" class="projects">
         <Project
-            v-for="file in sharedState.files"
+            v-for="file in files"
             :key="file.filename"
             :classes="['auth', 'float']"
             :to="`/me/file/${file.filename}/`"
@@ -23,15 +23,12 @@
         </Project>
     </div>
     <Footer>
-        <div
-            v-if="!privateState.loading && !privateState.hideLoadMore"
-            class="loadmore"
-        >
+        <div v-if="!loading && !hideLoadMore" class="loadmore">
             <p class="footer_text" @click="loadMore">
                 Load More
             </p>
         </div>
-        <div v-else-if="!privateState.hideLoadMore" class="lds-ellipsis">
+        <div v-else-if="!hideLoadMore" class="lds-ellipsis">
             <div></div>
             <div></div>
             <div></div>
