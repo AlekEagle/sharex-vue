@@ -27,20 +27,7 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', function (event) {
-    if (event.request.method === 'POST' && event.request.url.includes('/me/upload/')) {
-        event.respondWith((async () => {
-            const formData = await event.request.formData();
-            const file = formData.get('file');
-            function recieveReadyMessage(event) {
-                if (event.data.action === 'receive-share-file') {
-                    event.source.postMessage({ file, action: 'load-image' });
-                    self.removeEventListener('message', recieveReadyMessage);
-                }
-            }
-            self.addEventListener('message', recieveReadyMessage);
-            return Response.redirect('/me/upload/', 303);
-        })());
-    } else if (event.request.method !== 'POST') {
+    if (event.request.method !== 'POST') {
         event.respondWith(
             caches.match(event.request)
                 .then(function (response) {
@@ -62,7 +49,7 @@ self.addEventListener('fetch', function (event) {
                             // to clone it so we have two streams.
                             var responseToCache = response.clone();
 
-                            caches.open(CACHE_NAME)
+                            caches.open('cache')
                                 .then(function (cache) {
                                     cache.put(event.request, responseToCache);
                                 });
