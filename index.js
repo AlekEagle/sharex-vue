@@ -332,7 +332,7 @@ app.get('/api/user/:id', (req, res) => {
     authenticate(req).then(u => {
         if (!req.params.id) res.sendStatus(400);
         else {
-            if ((u.staff === '' && u.id !== req.params.id) || u.staff !== '') {
+            if ((u.staff === '' && u.id === req.params.id) || u.staff !== '') {
                 user.findOne({
                     where: {
                         id: req.params.id

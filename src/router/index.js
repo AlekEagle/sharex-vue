@@ -8,23 +8,23 @@ const routes = [
     component: Home
   },
   {
-    path: "/me",
+    path: "/me/",
     name: "Main Dashboard",
     component: () =>
       import("../views/MainDash.vue")
   },
   {
-    path: "/auth",
+    path: "/auth/",
     name: "Login or Register",
     component: () => import("../views/Auth.vue")
   },
   {
-    path: "/me/files",
+    path: "/me/files/",
     name: "Your Files",
     component: () => import("../views/Files.vue")
   },
   {
-    path: "/me/edit",
+    path: "/me/edit/",
     name: "Edit your profile",
     component: () => import("../views/Edit.vue")
   },
