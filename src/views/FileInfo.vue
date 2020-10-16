@@ -68,6 +68,7 @@ import Project from '@/components/Project.vue';
 import Modal from '@/components/Modal.vue';
 export default {
     name: 'FileInfo',
+    title: 'Your Files',
     components: {
         Header,
         Footer,
