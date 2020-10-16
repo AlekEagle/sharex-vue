@@ -45,11 +45,6 @@ import Header from '@/components/Header.vue';
 import Project from '@/components/Project.vue';
 import Footer from '@/components/Footer.vue';
 import { reactive } from 'vue';
-const store = {
-    state: reactive({
-        files: []
-    })
-};
 export default {
     name: 'Files',
     title: 'Your Files',
@@ -60,12 +55,10 @@ export default {
     },
     data() {
         return {
-            privateState: {
-                loading: true,
-                hideLoadMore: false,
-                offset: 0
-            },
-            sharedState: store.state
+            loading: true,
+            hideLoadMore: false,
+            offset: 0,
+            files: []
         };
     },
     beforeCreate() {
@@ -74,7 +67,7 @@ export default {
         }).then(res => {
             switch (res.status) {
                 case 200:
-                    fetch('/api/files?offset=' + this.privateState.offset, {
+                    fetch('/api/files?offset=' + this.offset, {
                         credentials: 'include'
                     }).then(uploads => {
                         if (uploads.status === 200) {
@@ -82,9 +75,9 @@ export default {
                                 this.$refs.header.sharedState.subtitle =
                                     this.$refs.header.sharedState.subtitle +
                                     `\nYou've uploaded ${json.count} files.`;
-                                this.privateState.offset += json.files.length;
-                                this.sharedState.files.push(...json.files);
-                                this.privateState.loading = false;
+                                this.offset += json.files.length;
+                                this.files.push(...json.files);
+                                this.loading = false;
                             });
                         }
                     });
@@ -124,19 +117,19 @@ export default {
     },
     methods: {
         loadMore() {
-            this.privateState.loading = true;
-            fetch('/api/files?offset=' + this.privateState.offset, {
+            this.loading = true;
+            fetch('/api/files?offset=' + this.offset, {
                 credentials: 'include'
             }).then(uploads => {
                 switch (uploads.status) {
                     case 200:
                         uploads.json().then(json => {
-                            this.privateState.offset += json.files.length;
+                            this.offset += json.files.length;
                             if (json.files.length < 1) {
-                                this.privateState.hideLoadMore = true;
+                                this.hideLoadMore = true;
                             }
-                            this.sharedState.files.push(...json.files);
-                            this.privateState.loading = false;
+                            this.files.push(...json.files);
+                            this.loading = false;
                         });
                         break;
                     case 429:
@@ -176,9 +169,6 @@ export default {
                 }
             });
         }
-    },
-    beforeUnmount() {
-        this.sharedState.files = [];
     }
 };
 </script>
