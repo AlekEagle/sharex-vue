@@ -10,7 +10,7 @@
             }
         ]"
     />
-    <div class="projects">
+    <div class="projects" v-if="file.filename !== undefined">
         <Project
             title="File Info"
             :classes="['float', 'auth']"
@@ -22,7 +22,10 @@
             <br />
             Uploaded on: {{ new Date(file.createdAt).toLocaleString() }}
             <br />
-            Uploaded by: {{ user.displayName }}
+            Uploaded by:
+            {{
+                user.displayName !== undefined ? user.displayName : 'Loading...'
+            }}
             <br />
             Click on me to view the file!
         </Project>
@@ -33,6 +36,12 @@
         >
             Click on me to delete the file, FOREVER.
         </Project>
+    </div>
+    <div v-else class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
     </div>
     <Modal
         ref="modal"

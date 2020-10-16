@@ -1,5 +1,5 @@
 {
-    "name": "AlekEagle ShareX User Dashboard",
+    "name": "AlekEagle ShareX Dashboard",
     "short_name": "ShareX Dashboard",
     "theme_color": "#3a3a3a",
     "background_color": "#212121",
@@ -47,6 +47,12 @@
             "src": "img/icons/icon-512x512.png",
             "sizes": "512x512",
             "type": "image/png"
+        },
+        {
+            "src": "img/icons/maskable_icon.png",
+            "sizes": "627x627",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ],
     "splash_pages": null

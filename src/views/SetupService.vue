@@ -10,7 +10,7 @@
             }
         ]"
     />
-    <div class="projects">
+    <div class="projects" v-if="service.name !== ''">
         <template v-for="(step, index) in service.steps" :key="index">
             <Project
                 v-if="index === 0"
@@ -26,6 +26,12 @@
                 >{{ step }}</Project
             >
         </template>
+    </div>
+    <div v-else class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
     </div>
     <Footer />
 </template>

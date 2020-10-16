@@ -11,7 +11,7 @@
         ]"
     />
 
-    <div class="projects">
+    <div class="projects" v-if="user.id !== ''">
         <Project
             title="Your Profile Info"
             :classes="['auth', 'float']"
@@ -242,7 +242,12 @@
             </form>
         </Modal>
     </div>
-
+    <div v-else class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+    </div>
     <Footer />
 </template>
 

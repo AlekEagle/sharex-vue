@@ -257,7 +257,7 @@ function authenticate(req) {
     });
 }
 app.use('/api/', ratelimit({
-    windowMs: ms('1 minute'), max: 1000, keyGenerator: (req, res) => {
+    windowMs: ms('1 minute'), max: 50, keyGenerator: (req, res) => {
         authenticate(req).then(u => {
             return u.id;
         }, err => {

@@ -10,7 +10,7 @@
             }
         ]"
     />
-    <div class="projects">
+    <div class="projects" v-if="services.length !== 0">
         <Project
             v-for="service in services"
             :key="service.name"
@@ -29,6 +29,12 @@
         >
             Join the discord server and ask AlekEagle if he can add it!
         </Project>
+    </div>
+    <div v-else class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
     </div>
     <Footer />
 </template>
