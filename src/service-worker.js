@@ -7,7 +7,7 @@ let urlsToCache = [
     '/me/upload/',
     '/me/uploads/',
     '/me/uploads/info/',
-    '//img/circle.png',
+    '/img/circle.png',
     '/img/me_irl.webp',
     '/img/empty.gif',
     '/brew-coffee/'
