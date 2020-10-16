@@ -176,6 +176,9 @@ export default {
                 }
             });
         }
+    },
+    beforeUnmount() {
+        this.sharedState.files = [];
     }
 };
 </script>
