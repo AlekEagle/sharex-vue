@@ -5,8 +5,8 @@ let urlsToCache = [
     'https://fonts.gstatic.com/s/k2d/v3/J7aTnpF2V0EjcKUs.woff2',
     '/me/',
     '/me/upload/',
-    '/me/uploads/',
-    '/me/uploads/info/',
+    '/me/files/',
+    '/me/files/info/',
     '/img/circle.png',
     '/img/me_irl.webp',
     '/img/empty.gif',
@@ -55,7 +55,7 @@ self.addEventListener('fetch', function (event) {
                     return fetch(event.request).then(
                         function (response) {
                             // Check if we received a valid response
-                            if (!response || response.status !== 200 || response.type === 'opaque' || response.url.includes('/api/') || response.headers.get('Cache-Control') === 'no-cache') {
+                            if (!response || response.status !== 200 || response.type === 'opaque' || response.url.includes('/api/') || response.headers.get('Cache-Control') === 'no-cache' || response.url.includes('manifest.json')) {
                                 return response;
                             }
 
