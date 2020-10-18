@@ -267,7 +267,7 @@ app.use('/api/', ratelimit({
 }));
 app.use((req, res, next) => {
     res.set({
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'no-store'
     });
     console.log(`${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${req.protocol}://${req.headers.host}${req.url}`);
     next();
