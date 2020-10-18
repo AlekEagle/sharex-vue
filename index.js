@@ -1090,7 +1090,7 @@ app.post('/upload/', upload.single('file'), (req, res) => {
 });
 
 app.use((req, res, next) => {
-    if (req.path === '/manifest.json') {
+    if (req.path.includes('manifest.json')) {
         next();
     }
     res.set({

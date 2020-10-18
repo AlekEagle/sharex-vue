@@ -41,6 +41,7 @@ self.addEventListener('fetch', function (event) {
                     'X-Filename': file.name
                 }
             }));
+            console.log(`Received share event!`);
             return Response.redirect(`/me/upload/?file=${now}`, 303);
         })());
     } else if (event.request.method !== 'POST') {
@@ -67,6 +68,7 @@ self.addEventListener('fetch', function (event) {
 
                             caches.open('cache')
                                 .then(function (cache) {
+                                    console.log(`Adding ${new URL(event.request.url).pathname} to cache.`)
                                     cache.put(event.request, responseToCache);
                                 });
 
