@@ -184,7 +184,8 @@ app.use(history({
                 return context.parsedUrl.path
             }
         }
-    ]
+    ],
+    index: '/'
 }));
 let server;
 if (process.env.DEBUG) {
@@ -207,7 +208,7 @@ app.use(session({
     cookie: {
         httpOnly: true,
         path: '/',
-        secure: false,
+        secure: process.env.DEBUG ? false : true,
         sameSite: 'lax'
     }
 }));
@@ -257,7 +258,7 @@ function authenticate(req) {
     });
 }
 app.use('/api/', ratelimit({
-    windowMs: ms('1 minute'), max: 50, keyGenerator: (req, res) => {
+    windowMs: ms('5mins'), max: 50, keyGenerator: (req, res) => {
         authenticate(req).then(u => {
             return u.id;
         }, err => {
@@ -1090,12 +1091,12 @@ app.post('/upload/', upload.single('file'), (req, res) => {
 });
 
 app.use((req, res, next) => {
-    if (req.path.includes('manifest.json')) {
+    if (req.path.includes('manifest.json') || req.path.includes('service-worker.js')) {
         next();
         return;
     }
     res.set({
-        'Cache-Control': 'public, max-age=172800'
+        'Cache-Control': `public, max-age=604800`
     });
     next();
 }, express.static('./dist', { acceptRanges: false }));
