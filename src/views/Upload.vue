@@ -39,10 +39,24 @@
         <Project
             v-if="link"
             title="Success!"
+            @click="copyLinkToast"
             :data-clipboard-text="link"
             :classes="['float', 'auth', 'clipboard']"
         >
             Click me to get the file!
+        </Project>
+        <Project
+            v-if="uploading"
+            title="Uploading..."
+            :classes="['float', 'auth']"
+            :disabled="true"
+        >
+            <div class="lds-ellipsis">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
         </Project>
     </div>
 
@@ -134,7 +148,8 @@ export default {
                 default: 'Your file here.'
             },
             state: 'default',
-            link: undefined
+            link: undefined,
+            uploading: false
         };
     },
     methods: {
@@ -150,7 +165,7 @@ export default {
             this.file = e.dataTransfer.files[0];
         },
         fileAdded(e) {
-            if (e.files.length > 1) {
+            if (e.target.files.length > 1) {
                 this.state = 'manyFiles';
                 setTimeout(() => {
                     this.state = 'default';
@@ -158,9 +173,10 @@ export default {
                 return;
             }
             this.state = 'default';
-            this.file = e.files[0];
+            this.file = e.target.files[0];
         },
         uploadFile() {
+            this.uploading = true;
             this.link = null;
             let data = new FormData();
             data.append('file', this.file);
@@ -172,6 +188,7 @@ export default {
                 switch (res.status) {
                     case 201:
                         res.text().then(link => {
+                            this.uploading = false;
                             this.file = undefined;
                             this.$parent.$parent.temporaryToast('Success!');
                             this.link = link;
@@ -213,6 +230,9 @@ export default {
                         break;
                 }
             });
+        },
+        copyLinkToast() {
+            this.$parent.$parent.temporaryToast('Link copied to clipboard!');
         }
     }
 };
