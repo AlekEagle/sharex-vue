@@ -285,7 +285,7 @@ export default {
         };
     },
     beforeMount() {
-        fetch('/api/authenticate/', { credentials: 'include' }).then(res => {
+        fetch('/api/user/', { credentials: 'include' }).then(res => {
             if (res.status === 200) {
                 this.$router.push(
                     window.location.href.split('?').length > 1

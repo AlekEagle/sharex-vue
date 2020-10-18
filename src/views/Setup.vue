@@ -52,7 +52,7 @@ export default {
         Project
     },
     beforeMount() {
-        fetch('/api/authenticate/', { credentials: 'include' }).then(res => {
+        fetch('/api/user/', { credentials: 'include' }).then(res => {
             switch (res.status) {
                 case 200:
                     fetch('/api/setup/', { credentials: 'include' }).then(

@@ -160,7 +160,7 @@ export default {
         }
     },
     beforeMount() {
-        fetch('/api/authenticate/', { credentials: 'include' }).then(res => {
+        fetch('/api/user/', { credentials: 'include' }).then(res => {
             switch (res.status) {
                 case 200:
                     fetch(`/api/file/${this.$route.params.file}/`).then(res => {

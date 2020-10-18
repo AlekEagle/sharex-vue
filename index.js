@@ -1,3 +1,5 @@
+const { url } = require('inspector');
+
 require('./logger')('INFO');
 const fs = require('fs'),
     dotenv = require('dotenv'),
@@ -236,23 +238,25 @@ function authenticate(req) {
                     reject(err);
                 });
             } else {
-                user.findOne({
-                    where: {
-                        apiToken: req.headers.authorization.replace('Bearer ', '')
-                    }
-                }).then(u => {
-                    if (!u) {
-                        reject();
-                    } else {
-                        if (u.bannedAt !== null) {
+                if (req.headers.authorization.startsWith('Bearer ')) {
+                    user.findOne({
+                        where: {
+                            apiToken: req.headers.authorization.replace('Bearer ', '')
+                        }
+                    }).then(u => {
+                        if (!u) {
                             reject();
                         } else {
-                            resolve(u);
+                            if (u.bannedAt !== null) {
+                                reject();
+                            } else {
+                                resolve(u);
+                            }
                         }
-                    }
-                }).catch(err => {
-                    reject(err);
-                });
+                    }).catch(err => {
+                        reject(err);
+                    });
+                }
             }
         }
     });
@@ -291,7 +295,7 @@ app.get('/api/users/', (req, res) => {
         let count = parseInt(req.query.count) || 50,
             offset = parseInt(req.query.offset) || 0;
         if (u.staff !== '') {
-            user.findAll({
+            user.findAndCountAll({
                 offset,
                 limit: count,
                 order: [
@@ -299,28 +303,32 @@ app.get('/api/users/', (req, res) => {
                 ]
             }).then(u => {
                 if (u !== null) {
-                    res.status(200).json(u.map(user => {
-                        return {
-                            id: user.id,
-                            username: user.username,
-                            displayName: user.displayName,
-                            staff: user.staff,
-                            createdAt: user.createdAt,
-                            bannedAt: user.bannedAt
-                        }
-                    }));
+                    res.status(200).json({
+                        count: u.count,
+                        users: u.rows.map(user => {
+                            return {
+                                id: user.id,
+                                username: user.username,
+                                displayName: user.displayName,
+                                staff: user.staff,
+                                createdAt: user.createdAt,
+                                bannedAt: user.bannedAt
+                            }
+                        })
+                    });
                 } else {
-                    res.sendStatus(204);
+                    res.status(200).json({ count: 0, users: [] });
                 }
             }).catch(err => {
-                res.sendStatus(500);
+                res.status(500).json({ error: "Internal Server Error" });
                 console.error(err);
             });
         } else {
-            res.sendStatus(403);
+            res.status(403).json({ error: "Missing Permissions" });
         }
-    }).catch(() => {
-        res.sendStatus(401);
+    }).catch(err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.get('/api/brew-coffee/', (req, res) => {
@@ -331,7 +339,7 @@ app.get('/api/brew-coffee/', (req, res) => {
 });
 app.get('/api/user/:id/', (req, res) => {
     authenticate(req).then(u => {
-        if (!req.params.id) res.sendStatus(400);
+        if (!req.params.id) res.status(400).json({ error: 'Bad Request', missing: ['id'] });
         else {
             if ((u.staff === '' && u.id === req.params.id) || u.staff !== '') {
                 user.findOne({
@@ -340,7 +348,7 @@ app.get('/api/user/:id/', (req, res) => {
                     }
                 }).then(user => {
                     if (user === null) res.status(404).json({
-                        error: 'Not found'
+                        error: 'Not Found'
                     });
                     else res.status(200).json({
                         id: user.id,
@@ -351,15 +359,16 @@ app.get('/api/user/:id/', (req, res) => {
                         bannedAt: user.bannedAt
                     });
                 }, err => {
-                    res.sendStatus(500);
+                    res.status(500).json({ error: "Internal Server Error" });
                     console.error(err);
                 });
             } else {
-                res.sendStatus(403);
+                res.status(403).json({ error: "Missing Permissions" });
             }
         }
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.post('/api/user/', upload.none(), (req, res) => {
@@ -368,19 +377,22 @@ app.post('/api/user/', upload.none(), (req, res) => {
         email,
         password
     } = req.body;
+    let vars = { name, email, password };
+    let undefinedVars = Object.keys(vars).map(e => vars[e] !== undefined ? null : e).filter(e => e !== null);
     if (!name || !email || !password) {
-        res.sendStatus(400);
+        res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
         return;
     } else {
         let username = name.toLowerCase();
         user.findOne({
             where: {
-                [Op.or]: [{
-                    username
-                },
-                {
-                    email
-                }
+                [Op.or]: [
+                    {
+                        username
+                    },
+                    {
+                        email
+                    }
                 ]
             }
         }).then(u => {
@@ -410,19 +422,19 @@ app.post('/api/user/', upload.none(), (req, res) => {
                             console.log('New user created');
                         });
                     }, err => {
-                        res.sendStatus(500);
+                        res.status(500).json({ error: "Internal Server Error" });
                         console.error(err);
                     });
                 }, err => {
-                    res.sendStatus(500);
+                    res.status(500).json({ error: "Internal Server Error" });
                     console.error(err);
                 });
             } else {
-                res.sendStatus(401);
+                res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
                 return;
             }
         }, err => {
-            res.sendStatus(500);
+            res.status(500).json({ error: "Internal Server Error" });
             console.error(err);
         });
     }
@@ -436,14 +448,16 @@ app.patch('/api/user/', upload.none(), (req, res) => {
             newPassword,
             id
         } = req.body;
+        let vars = { name, email, password };
+        let undefinedVars = Object.keys(vars).map(e => vars[e] !== undefined ? null : e).filter(e => e !== null);
         if (!(email || name || newPassword)) {
-            res.sendStatus(400);
+            res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
             return;
         } else {
             let username = name.toLowerCase();
             if (id) {
                 if (u.staff === '') {
-                    res.sendStatus(401);
+                    res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
                     return;
                 } else {
                     user.findOne({
@@ -452,7 +466,9 @@ app.patch('/api/user/', upload.none(), (req, res) => {
                         }
                     }).then(us => {
                         if (us === null) {
-                            res.sendStatus(404);
+                            res.status(404).json({
+                                error: 'Not Found'
+                            });
                             return;
                         } else {
                             let now = new Date(Date.now());
@@ -474,22 +490,22 @@ app.patch('/api/user/', upload.none(), (req, res) => {
                                     let noPass = { ...updatedUser.toJSON(), password: null };
                                     res.status(200).json(noPass);
                                 }, err => {
-                                    res.sendStatus(500);
+                                    res.status(500).json({ error: "Internal Server Error" });
                                     console.error(err);
                                 });
                             }, err => {
-                                res.sendStatus(500);
+                                res.status(500).json({ error: "Internal Server Error" });
                                 console.error(err);
                             });
                         }
                     }, err => {
-                        res.sendStatus(500);
+                        res.status(500).json({ error: "Internal Server Error" });
                         console.error(err);
                     });
                 }
             } else {
                 if (!password) {
-                    res.sendStatus(400);
+                    res.status(400).json({ error: 'Bad Request', missing: ['password'] });
                     return;
                 }
                 let now = new Date(Date.now());
@@ -514,51 +530,88 @@ app.patch('/api/user/', upload.none(), (req, res) => {
                                 let noPass = { ...updatedUser.toJSON(), password: null };
                                 res.status(200).json(noPass);
                             }, err => {
-                                res.sendStatus(500);
+                                res.status(500).json({ error: "Internal Server Error" });
                                 console.error(err);
                             });
                         }, err => {
-                            res.sendStatus(500);
+                            res.status(500).json({ error: "Internal Server Error" });
                             console.error(err);
                         });
                     }
                 }, err => {
-                    res.sendStatus(500);
+                    res.status(500).json({ error: "Internal Server Error" });
                     console.error(err);
                 });
             }
         }
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 
-app.patch('/api/user/ban/', upload.none(), (req, res) => {
+app.patch('/api/user/:id/ban/', upload.none(), (req, res) => {
     authenticate(req).then(u => {
         if (u.staff !== '') {
-            let { id, banned } = req.body;
-            if (!id) {
-                res.sendStatus(400);
+            let { banned } = req.body;
+            if (!req.params.id) {
+                res.status(400).json({ error: 'Bad Request', missing: ['id'] });
                 return;
             }
-            user.findOne({ where: { id } }).then(usr => {
-                usr.update({ bannedAt: banned ? new Date(Date.now()).toISOString() : null }).then(() => {
-                    res.sendStatus(204);
+            user.findOne({ where: { id: req.params.id } }).then(usr => {
+                usr.update({ bannedAt: banned ? new Date(Date.now()).toISOString() : null }).then(ur => {
+                    res.status(200).json({ ...ur.toJSON(), password: null });
                 }, err => {
                     res.status(500).json({ error: 'Internal server error.' });
                     console.error('bruh ', err);
                 });
             });
-        } else res.sendStatus(403);
+        } else res.status(403).json({ error: "Missing Permissions" });
     });
 });
-
 app.delete('/api/user/', upload.none(), (req, res) => {
     authenticate(req).then(u => {
         let {
-            password,
-            id
+            password
         } = req.body;
+        if (password) {
+            bcrypt.compare(password, u.password).then(match => {
+                if (match) {
+                    u.destroy().then(() => {
+                        actions.create({
+                            type: 4,
+                            by: req.session.user.id,
+                            to: req.session.user.id
+                        }).then(() => {
+                            console.log('User Deleted');
+                        });
+                        req.session.reset();
+                        res.status(200).json({ success: true });
+                    }, err => {
+                        res.status(500).json({ error: 'Internal server error.' });
+                        console.error(err);
+                    });
+                } else {
+                    res.status(401).json({ error: 'Invalid password.' });
+                    return;
+                }
+            }), err => {
+                res.status(500).json({ error: 'Internal server error.' });
+                console.error(err);
+            };
+        } else {
+            res.status(400).json({ error: 'Bad Request', missing: ['password'] });
+        }
+    }, err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+});
+app.delete('/api/user/:id/', upload.none(), (req, res) => {
+    authenticate(req).then(u => {
+        let {
+            id
+        } = req.params;
         if (id) {
             if (u.staff !== '') {
                 user.findOne({
@@ -574,59 +627,39 @@ app.delete('/api/user/', upload.none(), (req, res) => {
                                 to: id
                             }).then(() => {
                                 console.log('User Deleted');
-                                res.sendStatus(200);
+                                res.status(200).json({ success: true });
                             });
                         });
                     }
                 });
             } else {
-                res.sendStatus(403);
+                res.status(403).json({ error: "Missing Permissions" });
             }
-        } else if (password) {
-            bcrypt.compare(password, u.password).then(match => {
-                if (match) {
-                    u.destroy().then(() => {
-                        actions.create({
-                            type: 4,
-                            by: req.session.user.id,
-                            to: req.session.user.id
-                        }).then(() => {
-                            console.log('User Deleted');
-                        });
-                        req.session.reset();
-                        res.sendStatus(200);
-                    }, err => {
-                        res.status(500).json({ error: 'Internal server error.' });
-                        console.error(err);
-                    });
-                } else {
-                    res.status(401).json({ error: 'Invalid password.' });
-                    return;
-                }
-            }), err => {
-                res.status(500).json({ error: 'Internal server error.' });
-                console.error(err);
-            };
+        } else {
+            res.status(400).json({ error: 'Bad Request', missing: ['id'] });
         }
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.get('/api/logout/', (req, res) => {
     if (!req.session.user) {
-        res.sendStatus(401);
+        res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
         return;
     }
     req.session.reset();
-    res.sendStatus(200);
+    res.status(200).json({ success: true });
 });
 app.post('/api/login/', upload.none(), (req, res) => {
     let {
         name,
         password
     } = req.body;
-    if (!name || !password) {
-        res.sendStatus(400);
+    let vars = { name, password };
+    let undefinedVars = Object.keys(vars).map(e => vars[e] !== undefined ? null : e).filter(e => e !== null);
+    if (undefinedVars.length < 0) {
+        res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
         return;
     } else {
         name = name.toLowerCase();
@@ -653,7 +686,7 @@ app.post('/api/login/', upload.none(), (req, res) => {
                                 console.log('User login');
                             });
                             req.session.user = u;
-                            res.sendStatus(200);
+                            res.status(200).json({ success: true });
                         } else {
                             res.status(401).json({ error: 'Invalid password.' });
                         }
@@ -675,20 +708,20 @@ app.post('/api/login/', upload.none(), (req, res) => {
         });
     }
 });
-app.get('/api/authenticate/', (req, res) => {
+app.get('/api/user/', (req, res) => {
     authenticate(req).then(u => {
         let us = { ...u.toJSON() };
         delete us.password;
         res.status(200).json(us);
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.patch('/api/user/token/', upload.none(), (req, res) => {
     authenticate(req).then(u => {
         let {
-            password,
-            id
+            password
         } = req.body;
         if (password) {
             bcrypt.compare(password, u.password).then(match => {
@@ -708,64 +741,79 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
                             console.log('API Token refreshed');
                         });
                     }, err => {
-                        res.sendStatus(500);
+                        res.status(500).json({ error: "Internal Server Error" });
                         console.error(err);
                     });
                 } else {
-                    res.sendStatus(401);
+                    res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
                 }
             }, err => {
-                res.sendStatus(500);
+                res.status(500).json({ error: "Internal Server Error" });
                 console.error(err);
             });
         } else {
-            if (u.staff !== '') {
-                if (!id) {
-                    res.sendStatus(400);
-                } else {
-                    user.findOne({
-                        where: {
-                            id
-                        }
-                    }).then(us => {
-                        if (us) {
-                            us.update({ apiToken: tokenGen(us.id) }).then(updatedUser => {
-                                res.status(200).json({ token: updatedUser.apiToken });
-                            }, err => {
-                                res.sendStatus(500);
-                                console.error(err);
-                            })
-                        }
-                    })
-                }
-            } else {
-                res.sendStatus(403);
-            }
+
         }
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
+
+app.patch('/api/user/:id/token', (req, res) => {
+    authenticate(req).then(u => {
+        if (!req.params.id) {
+            if (u.staff !== '') {
+                res.status(403).json({ error: "Missing Permissions" });
+            } else {
+                user.findOne({
+                    where: {
+                        id: req.params.id
+                    }
+                }).then(us => {
+                    if (us) {
+                        us.update({ apiToken: tokenGen(us.id) }).then(updatedUser => {
+                            res.status(200).json({ token: updatedUser.apiToken });
+                        }, err => {
+                            res.status(500).json({ error: "Internal Server Error" });
+                            console.error(err);
+                        })
+                    }
+                })
+            }
+        } else {
+            res.status(400).json({ error: "Bad Request", missing: ['id'] });
+        }
+    }, err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+});
+
 app.get('/api/domains/', (req, res) => {
     authenticate(req).then(() => {
         domains.findAll().then(d => {
             res.status(200).json(d);
         });
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-app.patch('/api/user/domain/', upload.none(), (req, res) => {
+app.patch('/api/user/:id/domain/', upload.none(), (req, res) => {
     authenticate(req).then(u => {
         let {
             domain,
-            subdomain,
-            id
+            subdomain
         } = req.body;
+        let id = req.params.id;
         subdomain = subdomain !== undefined ? subdomain.replace(/ /g, '-') : '';
         if (domain === 'alekeagle.com' && u.staff === '') {
-            res.sendStatus(403);
+            res.status(403).json({ error: "Missing Permissions" });
             return;
+        }
+        if (!domain) {
+            res.status(400).json({ error: 'Bad Request', missing: ['domain'] })
         }
         domains.findOne({
             where: {
@@ -774,49 +822,87 @@ app.patch('/api/user/domain/', upload.none(), (req, res) => {
         }).then(d => {
             if (d !== null) {
                 if (d.allowsSubdomains ? true : (subdomain === undefined || subdomain === '')) {
-                    if (!id) {
-                        u.update({
-                            domain,
-                            subdomain
+                    if (u.staff !== '') {
+                        user.findOne({
+                            where: {
+                                id
+                            }
                         }).then(us => {
-                            req.session.user = us;
-                            res.status(200).json({
-                                domain,
-                                subdomain
-                            });
-                        });
+                            if (us !== null) {
+                                us.update({ domain, subdomain }).then(() => {
+                                    res.status(200).json({ domain, subdomain });
+                                }, err => {
+                                    res.status(500).json({ error: "Internal Server Error" });
+                                    console.error(err);
+                                });
+                            }
+                        })
                     } else {
-                        if (u.staff !== '') {
-                            user.findOne({
-                                where: {
-                                    id
-                                }
-                            }).then(us => {
-                                if (us !== null) {
-                                    us.update({ domain, subdomain }).then(() => {
-                                        res.status(200).json({ domain, subdomain });
-                                    }, err => {
-                                        res.sendStatus(500);
-                                        console.error(err);
-                                    });
-                                }
-                            })
-                        } else {
-                            res.sendStatus(403);
-                        }
+                        res.status(403).json({ error: "Missing Permissions" });
                     }
                 } else {
-                    res.sendStatus(400);
+                    res.status(400).json({ error: `Domain "${domain}" doesn't support subdomains.` });
                 }
             } else {
-                res.sendStatus(404);
+                res.status(404).json({
+                    error: 'Not Found'
+                });
             }
         }).catch(err => {
-            res.sendStatus(500);
+            res.status(500).json({ error: "Internal Server Error" });
             console.error(err);
         });
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+});
+app.patch('/api/user/domain/', upload.none(), (req, res) => {
+    authenticate(req).then(u => {
+        let {
+            domain,
+            subdomain
+        } = req.body;
+        subdomain = subdomain !== undefined ? subdomain.replace(/ /g, '-') : '';
+        if (domain === 'alekeagle.com' && u.staff === '') {
+            res.status(403).json({ error: "Missing Permissions" });
+            return;
+        }
+        if (!domain) {
+            res.status(400).json({ error: 'Bad Request', missing: ['domain'] })
+        }
+        domains.findOne({
+            where: {
+                domain
+            }
+        }).then(d => {
+            if (d !== null) {
+                if (d.allowsSubdomains ? true : (subdomain === undefined || subdomain === '')) {
+                    u.update({
+                        domain,
+                        subdomain
+                    }).then(us => {
+                        req.session.user = us;
+                        res.status(200).json({
+                            domain,
+                            subdomain
+                        });
+                    });
+                } else {
+                    res.status(400).json({ error: `Domain "${domain}" doesn't support subdomains.` });
+                }
+            } else {
+                res.status(404).json({
+                    error: 'Not Found'
+                });
+            }
+        }).catch(err => {
+            res.status(500).json({ error: "Internal Server Error" });
+            console.error(err);
+        });
+    }, err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.get('/api/files/', (req, res) => {
@@ -879,24 +965,33 @@ app.get('/api/files/', (req, res) => {
                         res.status(200).json({ count: 0, files: [] });
                     }
                 }).catch(err => {
-                    res.sendStatus(500);
+                    res.status(500).json({ error: "Internal Server Error" });
                     console.error(err);
                 });
             } else {
-                res.sendStatus(403);
+                res.status(403).json({ error: "Missing Permissions" });
             }
         }
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-app.get('/api/file/:file', (req, res) => {
+app.get('/api/file/', (req, res) => {
+    authenticate(req).then(u => {
+        res.status(400).json({ error: 'Bad Request', missing: ['file'] });
+    }).catch(() => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+});
+app.get('/api/file/:file/', (req, res) => {
     authenticate(req).then(u => {
         let {
             file
         } = req.params;
         if (!file) {
-            res.sendStatus(400);
+            res.status(400).json({ error: 'Bad Request', missing: ['file'] });
             return;
         }
         uploads.findOne({
@@ -913,35 +1008,50 @@ app.get('/api/file/:file', (req, res) => {
                     if (u.staff !== '') {
                         res.status(200).json(file);
                     } else {
-                        res.sendStatus(403);
+                        res.status(403).json({ error: "Missing Permissions" });
                         return;
                     }
                 }
             } else {
-                res.sendStatus(404);
+                res.status(404).json({
+                    error: 'Not Found'
+                });
                 return;
             }
         });
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.get('/api/files/count/', (req, res) => {
     authenticate(req).then(u => {
-        let { id } = req.body;
+        uploads.findAll({
+            where: {
+                userid: u.id
+            }
+        }).then(files => {
+            res.status(200).send(files.length.toString());
+        });
+    }, err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+});
+app.get('/api/files/:id/count/', (req, res) => {
+    authenticate(req).then(u => {
+        let { id } = req.params;
         uploads.findAll({
             where: {
                 userid: id || u.id
             }
         }).then(files => {
-            if (id) {
-                if (u.staff !== '') res.status(200).send(files.length.toString());
-                else res.sendStatus(403);
-            } else res.status(200).send(files.length.toString());
-
+            if (u.staff !== '') res.status(200).send(files.length.toString());
+            else res.status(403).json({ error: "Missing Permissions" });
         });
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.get('/api/setup/', (req, res) => {
@@ -950,7 +1060,8 @@ app.get('/api/setup/', (req, res) => {
             res.status(200).json(ins);
         })
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.get('/api/setup/:name/', (req, res) => {
@@ -963,11 +1074,14 @@ app.get('/api/setup/:name/', (req, res) => {
             if (ins !== null) {
                 res.status(200).json(ins.toJSON());
             } else {
-                res.sendStatus(404);
+                res.status(404).json({
+                    error: 'Not Found'
+                });
             }
         })
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.get('/api/setup/save/:name/', (req, res) => {
@@ -981,20 +1095,31 @@ app.get('/api/setup/save/:name/', (req, res) => {
                 res.set('Content-Disposition', `attachment; filename="${ins.filename}"`);
                 res.status(200).send(ins.fileContent.replace(/(\{\{apiToken\}\})/g, u.apiToken));
             } else {
-                res.sendStatus(404);
+                res.status(404).json({
+                    error: 'Not Found'
+                });
             }
         });
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-app.delete('/api/file/:file', upload.none(), (req, res) => {
+app.delete('/api/file/', (req, res) => {
+    authenticate(req).then(u => {
+        res.status(400).json({ error: 'Bad Request', missing: ['file'] });
+    }).catch(() => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+})
+app.delete('/api/file/:file/', (req, res) => {
     authenticate(req).then(u => {
         let {
             file
         } = req.params;
         if (!file) {
-            res.sendStatus(400);
+            res.status(400).json({ error: 'Bad Request', missing: ['file'] });
             return;
         }
         uploads.findOne({
@@ -1008,14 +1133,14 @@ app.delete('/api/file/:file', upload.none(), (req, res) => {
                 if (file.userid === u.id) {
                     fs.unlink(`uploads/${file.filename}`, err => {
                         if (err) {
-                            res.sendStatus(500);
+                            res.status(500).json({ error: "Internal Server Error" });
                             return;
                         } else {
                             file.destroy().then(() => {
-                                res.sendStatus(200);
+                                res.status(200).json({ success: true });
                                 return;
                             }).catch(() => {
-                                res.sendStatus(500);
+                                res.status(500).json({ error: "Internal Server Error" });
                                 return;
                             });
                         }
@@ -1023,39 +1148,42 @@ app.delete('/api/file/:file', upload.none(), (req, res) => {
                 } else if (u.staff !== '') {
                     fs.unlink(`uploads/${file.filename}`, err => {
                         if (err) {
-                            res.sendStatus(500);
+                            res.status(500).json({ error: "Internal Server Error" });
                             return;
                         } else {
                             file.destroy().then(() => {
-                                res.sendStatus(200);
+                                res.status(200).json({ success: true });
                                 return;
                             }).catch(() => {
-                                res.sendStatus(500);
+                                res.status(500).json({ error: "Internal Server Error" });
                                 return;
                             });
                         }
                     });
                 } else {
-                    res.sendStatus(403);
+                    res.status(403).json({ error: "Missing Permissions" });
                     return;
                 }
             } else {
-                res.sendStatus(404);
+                res.status(404).json({
+                    error: 'Not Found'
+                });
                 return;
             }
         }).catch(err => {
-            res.sendStatus(500);
+            res.status(500).json({ error: "Internal Server Error" });
             console.error(err);
         });
     }).catch(() => {
-        res.sendStatus(401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 app.post('/upload/', upload.single('file'), (req, res) => {
     authenticate(req).then(u => {
         if (!req.file) {
             if (!req.body.file) {
-                res.sendStatus(400);
+                res.status(400).json({ error: 'Bad Request', missing: ['file'] });
                 return;
             }
             let filename = newString(10),
@@ -1086,7 +1214,8 @@ app.post('/upload/', upload.single('file'), (req, res) => {
             });
         }
     }, err => {
-        res.sendStatus(err ? 500 : 401);
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
 

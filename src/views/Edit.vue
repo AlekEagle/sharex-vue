@@ -606,7 +606,7 @@ export default {
         }
     },
     beforeCreate() {
-        fetch('/api/authenticate/', {
+        fetch('/api/user/', {
             credentials: 'include'
         }).then(res => {
             switch (res.status) {
