@@ -283,7 +283,7 @@ app.use((req, res, next) => {
 app.all('/api/', (req, res) => {
     res.status(200).json({
         hello: 'world',
-        version: '1.0.9'
+        version: '1.0.0'
     });
 });
 app.get('/api/users/', (req, res) => {
@@ -329,7 +329,7 @@ app.get('/api/brew-coffee/', (req, res) => {
         res.status(418).json({ error: 'I\'m a teapot.', body: 'The requested entitiy body is short and stout.', addInfo: 'Tip me over and pour me out.' });
     }, ran);
 });
-app.get('/api/user/:id', (req, res) => {
+app.get('/api/user/:id/', (req, res) => {
     authenticate(req).then(u => {
         if (!req.params.id) res.sendStatus(400);
         else {
