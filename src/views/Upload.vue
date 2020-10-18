@@ -1,0 +1,221 @@
+<template>
+    <Header
+        title="Upload Files"
+        subtitle="Upload files directly from your browser!"
+        :buttons="[
+            {
+                title: 'Back to Dashboard',
+                to: '/me/',
+                text: 'Back'
+            }
+        ]"
+    />
+    <div class="projects">
+        <Project
+            title="File to Upload"
+            :noSpan="true"
+            :classes="['float', 'auth']"
+        >
+            <form @submit.prevent="uploadFile">
+                <input
+                    type="file"
+                    name="file"
+                    @change.prevent="fileAdded"
+                    id="file"
+                    class="uploadfile"
+                />
+                <label
+                    v-text="
+                        file && state === 'default' ? file.name : text[state]
+                    "
+                    @dragover.prevent.stop="state = 'dragover'"
+                    @dragleave.prevent.stop="state = 'default'"
+                    @drop.prevent.stop="drop"
+                    for="file"
+                ></label>
+                <button class="button">Beam it up, Scotty</button>
+            </form>
+        </Project>
+        <Project
+            v-if="link"
+            title="Success!"
+            :data-clipboard-text="link"
+            :classes="['float', 'auth', 'clipboard']"
+        >
+            Click me to get the file!
+        </Project>
+    </div>
+
+    <Footer />
+</template>
+
+<script>
+import Header from '@/components/Header.vue';
+import Footer from '@/components/Footer.vue';
+import Project from '@/components/Project.vue';
+
+function parseQueryString(qs, sep, eq) {
+    let parsed = {};
+    qs.split(sep || '&').forEach(p => {
+        let ps = p.split(eq || '=');
+        parsed[unescape(ps[0])] = ps[1] ? unescape(ps[1]) : true;
+    });
+    return parsed;
+}
+
+export default {
+    name: 'Upload',
+    components: {
+        Header,
+        Footer,
+        Project
+    },
+    beforeMount() {
+        fetch('/api/authenticate/', { credentials: 'include' }).then(res => {
+            switch (res.status) {
+                case 200:
+                    if (window.location.href.split('?').length > 1) {
+                        fetch(
+                            `/tmp/${
+                                parseQueryString(
+                                    window.location.href.split('?')[1]
+                                ).file
+                            }`
+                        ).then(res => {
+                            if (res.headers.get('X-Filename') === null) return;
+                            res.blob().then(slime => {
+                                this.file = new File(
+                                    [slime],
+                                    res.headers.get('X-Filename')
+                                );
+                            });
+                        });
+                    }
+                    break;
+                case 429:
+                    this.$parent.$parent.temporaryToast(
+                        `Woah, slow down! Please wait ${Math.floor(
+                            (res.headers.get('x-ratelimit-reset') * 1000 -
+                                Date.now()) /
+                                1000 /
+                                60
+                        )} minutes ${
+                            Math.floor(
+                                ((res.headers.get('x-ratelimit-reset') * 1000 -
+                                    Date.now()) /
+                                    1000) %
+                                    60
+                            ) !== 0
+                                ? `and ${Math.floor(
+                                      ((res.headers.get('x-ratelimit-reset') *
+                                          1000 -
+                                          Date.now()) /
+                                          1000) %
+                                          60
+                                  )} seconds`
+                                : ''
+                        } before trying again!`
+                    );
+                    break;
+                default:
+                    this.$router.push(
+                        `/auth/?redirect=${window.location.pathname}`
+                    );
+                    break;
+            }
+        });
+    },
+    data() {
+        return {
+            file: undefined,
+            text: {
+                dragover: 'Drop it right here!',
+                manyFiles: "That's too many files for me!",
+                default: 'Your file here.'
+            },
+            state: 'default',
+            link: undefined
+        };
+    },
+    methods: {
+        drop(e) {
+            if (e.dataTransfer.files.length > 1) {
+                this.state = 'manyFiles';
+                setTimeout(() => {
+                    this.state = 'default';
+                }, 5000);
+                return;
+            }
+            this.state = 'default';
+            this.file = e.dataTransfer.files[0];
+        },
+        fileAdded(e) {
+            if (e.files.length > 1) {
+                this.state = 'manyFiles';
+                setTimeout(() => {
+                    this.state = 'default';
+                }, 5000);
+                return;
+            }
+            this.state = 'default';
+            this.file = e.files[0];
+        },
+        uploadFile() {
+            this.link = null;
+            let data = new FormData();
+            data.append('file', this.file);
+            fetch('/upload/', {
+                credentials: 'include',
+                method: 'POST',
+                body: data
+            }).then(res => {
+                switch (res.status) {
+                    case 201:
+                        res.text().then(link => {
+                            this.file = undefined;
+                            this.$parent.$parent.temporaryToast('Success!');
+                            this.link = link;
+                        });
+                        break;
+                    case 429:
+                        this.$parent.$parent.temporaryToast(
+                            `Woah, slow down! Please wait ${Math.floor(
+                                (res.headers.get('x-ratelimit-reset') * 1000 -
+                                    Date.now()) /
+                                    1000 /
+                                    60
+                            )} minutes ${
+                                Math.floor(
+                                    ((res.headers.get('x-ratelimit-reset') *
+                                        1000 -
+                                        Date.now()) /
+                                        1000) %
+                                        60
+                                ) !== 0
+                                    ? `and ${Math.floor(
+                                          ((res.headers.get(
+                                              'x-ratelimit-reset'
+                                          ) *
+                                              1000 -
+                                              Date.now()) /
+                                              1000) %
+                                              60
+                                      )} seconds`
+                                    : ''
+                            } before trying again!`
+                        );
+                        break;
+                    default:
+                        this.$parent.$parent.temporaryToast(
+                            'An unknown error occurred, if this issue persists contact AlekEagle.',
+                            10 * 1000
+                        );
+                        break;
+                }
+            });
+        }
+    }
+};
+</script>
+
+<style></style>

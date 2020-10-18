@@ -41,14 +41,12 @@
         </Project>
         <Project
             icon="/img/circle.png"
-            title="Upload From Browser (Coming Soon)"
+            title="Upload From Browser"
             to="/me/upload/"
             :classes="['float']"
-            :disabled="true"
         >
-            Upload files directly from your browser! (Coming soon, along with
-            the ability to share files through the native share menu with the
-            installed app on mobile!)
+            Upload files directly from your browser! (or share text or a file
+            from any app to here via the native share menu on mobile!)
         </Project>
     </div>
 

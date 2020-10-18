@@ -27,7 +27,23 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', function (event) {
-    if (event.request.method !== 'POST') {
+    if (event.request.method === 'POST' && event.request.url.includes('/me/upload/')) {
+        event.respondWith((async () => {
+            let cache = await caches.open('sharedimages');
+            let data = await event.request.formData();
+            const file = data.get('file');
+            let now = Date.now();
+
+            await cache.put(`/tmp/${now}`, new Response(file, {
+                headers: {
+                    'Content-Type': file.type,
+                    'Content-Length': file.size,
+                    'X-Filename': file.name
+                }
+            }));
+            return Response.redirect(`/me/upload/?file=${now}`, 303);
+        })());
+    } else if (event.request.method !== 'POST') {
         event.respondWith(
             caches.match(event.request)
                 .then(function (response) {

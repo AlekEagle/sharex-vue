@@ -44,6 +44,11 @@ const routes = [
     component: () => import('../views/FileInfo.vue')
   },
   {
+    path: '/me/upload/',
+    name: 'Upload From Browser',
+    component: () => import('../views/Upload.vue')
+  },
+  {
     path: "/:pathMatch(.*)*",
     name: "Error",
     component: () => import("../views/NotFound.vue")

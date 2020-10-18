@@ -55,5 +55,18 @@
             "purpose": "maskable"
         }
     ],
+    "share_target": {
+        "action": "/me/upload/",
+        "method": "POST",
+        "enctype": "multipart/form-data",
+        "params": {
+            "files": [
+                {
+                    "name": "file",
+                    "accept": ["*/*", ".*"]
+                }
+            ]
+        }
+    },
     "splash_pages": null
 }
