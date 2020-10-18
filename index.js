@@ -1092,6 +1092,7 @@ app.post('/upload/', upload.single('file'), (req, res) => {
 app.use((req, res, next) => {
     if (req.path.includes('manifest.json')) {
         next();
+        return;
     }
     res.set({
         'Cache-Control': 'public, max-age=172800'
