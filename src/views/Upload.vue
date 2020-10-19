@@ -186,9 +186,7 @@ export default {
             data.append('file', this.file);
             fetch('/upload/', {
                 headers: {
-                    Authorization: `Bearer ${window.localStorage.getItem(
-                        'token'
-                    )}`
+                    Authorization: window.localStorage.getItem('token')
                 },
                 method: 'POST',
                 body: data

@@ -115,9 +115,7 @@ export default {
         confirmDelete() {
             fetch(`/api/file/${this.file.filename}/`, {
                 headers: {
-                    Authorization: `Bearer ${window.localStorage.getItem(
-                        'token'
-                    )}`
+                    Authorization: window.localStorage.getItem('token')
                 },
                 method: 'DELETE'
             }).then(res => {
@@ -173,9 +171,7 @@ export default {
                 case 200:
                     fetch(`/api/file/${this.$route.params.file}/`, {
                         headers: {
-                            Authorization: `Bearer ${window.localStorage.getItem(
-                                'token'
-                            )}`
+                            Authorization: window.localStorage.getItem('token')
                         }
                     }).then(res => {
                         switch (res.status) {
@@ -184,9 +180,9 @@ export default {
                                     this.file = json;
                                     fetch(`/api/user/${this.file.userid}/`, {
                                         headers: {
-                                            Authorization: `Bearer ${window.localStorage.getItem(
+                                            Authorization: window.localStorage.getItem(
                                                 'token'
-                                            )}`
+                                            )
                                         }
                                     }).then(res => {
                                         switch (res.status) {

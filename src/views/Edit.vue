@@ -317,9 +317,7 @@ export default {
             );
             fetch('/api/user/domain/', {
                 headers: {
-                    Authorization: `Bearer ${window.localStorage.getItem(
-                        'token'
-                    )}`
+                    Authorization: window.localStorage.getItem('token')
                 },
                 method: 'PATCH',
                 body: domainData
@@ -351,9 +349,9 @@ export default {
                         );
                         fetch('/api/domains/', {
                             headers: {
-                                Authorization: `Bearer ${window.localStorage.getItem(
+                                Authorization: window.localStorage.getItem(
                                     'token'
-                                )}`
+                                )
                             }
                         }).then(domains => {
                             domains.json().then(json => {
@@ -431,9 +429,7 @@ export default {
             );
             fetch('/api/user/', {
                 headers: {
-                    Authorization: `Bearer ${window.localStorage.getItem(
-                        'token'
-                    )}`
+                    Authorization: window.localStorage.getItem('token')
                 },
                 method: 'PATCH',
                 body: profileData
@@ -501,9 +497,7 @@ export default {
             );
             fetch('/api/user/token/', {
                 headers: {
-                    Authorization: `Bearer ${window.localStorage.getItem(
-                        'token'
-                    )}`
+                    Authorization: window.localStorage.getItem('token')
                 },
                 method: 'PATCH',
                 body: tokenData
@@ -577,9 +571,7 @@ export default {
             delAccData.delete('username');
             fetch('/api/user/', {
                 headers: {
-                    Authorization: `Bearer ${window.localStorage.getItem(
-                        'token'
-                    )}`
+                    Authorization: window.localStorage.getItem('token')
                 },
                 method: 'DELETE',
                 body: delAccData
@@ -647,9 +639,7 @@ export default {
                     });
                     fetch('/api/domains/', {
                         headers: {
-                            Authorization: `Bearer ${window.localStorage.getItem(
-                                'token'
-                            )}`
+                            Authorization: window.localStorage.getItem('token')
                         }
                     }).then(domains => {
                         domains.json().then(json => {

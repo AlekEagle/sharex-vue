@@ -61,9 +61,7 @@ export default {
                 case 200:
                     fetch('/api/setup/', {
                         headers: {
-                            Authorization: `Bearer ${window.localStorage.getItem(
-                                'token'
-                            )}`
+                            Authorization: window.localStorage.getItem('token')
                         }
                     }).then(ins => {
                         switch (ins.status) {

@@ -130,9 +130,7 @@ export default {
             let data = new FormData(e.target);
             fetch('/api/login/', {
                 headers: {
-                    Authorization: `Bearer ${window.localStorage.getItem(
-                        'token'
-                    )}`
+                    Authorization: window.localStorage.getItem('token')
                 },
                 method: 'POST',
                 body: data
@@ -217,9 +215,7 @@ export default {
             data.delete('password-conf');
             fetch('/api/user/', {
                 headers: {
-                    Authorization: `Bearer ${window.localStorage.getItem(
-                        'token'
-                    )}`
+                    Authorization: window.localStorage.getItem('token')
                 },
                 method: 'POST',
                 body: data

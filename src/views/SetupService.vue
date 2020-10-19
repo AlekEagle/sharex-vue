@@ -72,9 +72,7 @@ export default {
                 case 200:
                     fetch(`/api/setup/${this.$route.params.name}`, {
                         headers: {
-                            Authorization: `Bearer ${window.localStorage.getItem(
-                                'token'
-                            )}`
+                            Authorization: window.localStorage.getItem('token')
                         }
                     }).then(ser => {
                         switch (ser.status) {

@@ -67,9 +67,7 @@ export default {
                 case 200:
                     fetch('/api/files?offset=' + this.offset, {
                         headers: {
-                            Authorization: `Bearer ${window.localStorage.getItem(
-                                'token'
-                            )}`
+                            Authorization: window.localStorage.getItem('token')
                         }
                     }).then(uploads => {
                         if (uploads.status === 200) {
@@ -122,9 +120,7 @@ export default {
             this.loading = true;
             fetch('/api/files?offset=' + this.offset, {
                 headers: {
-                    Authorization: `Bearer ${window.localStorage.getItem(
-                        'token'
-                    )}`
+                    Authorization: window.localStorage.getItem('token')
                 }
             }).then(uploads => {
                 switch (uploads.status) {
