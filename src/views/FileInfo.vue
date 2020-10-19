@@ -114,7 +114,11 @@ export default {
         },
         confirmDelete() {
             fetch(`/api/file/${this.file.filename}/`, {
-                credentials: 'include',
+                headers: {
+                    Authorization: `Bearer ${window.localStorage.getItem(
+                        'token'
+                    )}`
+                },
                 method: 'DELETE'
             }).then(res => {
                 switch (res.status) {
@@ -160,16 +164,30 @@ export default {
         }
     },
     beforeMount() {
-        fetch('/api/user/', { credentials: 'include' }).then(res => {
+        fetch('/api/user/', {
+            headers: {
+                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+            }
+        }).then(res => {
             switch (res.status) {
                 case 200:
-                    fetch(`/api/file/${this.$route.params.file}/`).then(res => {
+                    fetch(`/api/file/${this.$route.params.file}/`, {
+                        headers: {
+                            Authorization: `Bearer ${window.localStorage.getItem(
+                                'token'
+                            )}`
+                        }
+                    }).then(res => {
                         switch (res.status) {
                             case 200:
                                 res.json().then(json => {
                                     this.file = json;
                                     fetch(`/api/user/${this.file.userid}/`, {
-                                        credentials: 'include'
+                                        headers: {
+                                            Authorization: `Bearer ${window.localStorage.getItem(
+                                                'token'
+                                            )}`
+                                        }
                                     }).then(res => {
                                         switch (res.status) {
                                             case 200:

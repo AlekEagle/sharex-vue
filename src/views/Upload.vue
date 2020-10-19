@@ -85,7 +85,11 @@ export default {
         Project
     },
     beforeMount() {
-        fetch('/api/user/', { credentials: 'include' }).then(res => {
+        fetch('/api/user/', {
+            headers: {
+                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+            }
+        }).then(res => {
             switch (res.status) {
                 case 200:
                     if (window.location.href.split('?').length > 1) {
@@ -181,7 +185,11 @@ export default {
             let data = new FormData();
             data.append('file', this.file);
             fetch('/upload/', {
-                credentials: 'include',
+                headers: {
+                    Authorization: `Bearer ${window.localStorage.getItem(
+                        'token'
+                    )}`
+                },
                 method: 'POST',
                 body: data
             }).then(res => {

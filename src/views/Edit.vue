@@ -187,7 +187,7 @@
             AKA, people can do bad stuff with it if you give it to someone else!
             <br />
             <br />
-            <code>{{ user.apiToken }}</code>
+            <code>Bearer {{ user.apiToken }}</code>
             <br />
             <br />
             To close this, you need to hit the button below, this was done
@@ -311,7 +311,11 @@ export default {
                 document.querySelector('#domain > select').value
             );
             fetch('/api/user/domain/', {
-                credentials: 'include',
+                headers: {
+                    Authorization: `Bearer ${window.localStorage.getItem(
+                        'token'
+                    )}`
+                },
                 method: 'PATCH',
                 body: domainData
             }).then(res => {
@@ -340,13 +344,17 @@ export default {
                             "It seems like you just missed that domain, I'm going to go ahead and reload the list of domains so you can see what you have access to.",
                             10 * 1000
                         );
-                        fetch('/api/domains/', { credentials: 'include' }).then(
-                            domains => {
-                                domains.json().then(json => {
-                                    this.domains = json;
-                                });
+                        fetch('/api/domains/', {
+                            headers: {
+                                Authorization: `Bearer ${window.localStorage.getItem(
+                                    'token'
+                                )}`
                             }
-                        );
+                        }).then(domains => {
+                            domains.json().then(json => {
+                                this.domains = json;
+                            });
+                        });
                         break;
                     case 429:
                         this.$parent.$parent.temporaryToast(
@@ -417,7 +425,11 @@ export default {
                 document.querySelector('div.modal-content > form')
             );
             fetch('/api/user/', {
-                credentials: 'include',
+                headers: {
+                    Authorization: `Bearer ${window.localStorage.getItem(
+                        'token'
+                    )}`
+                },
                 method: 'PATCH',
                 body: profileData
             }).then(res => {
@@ -480,7 +492,11 @@ export default {
                 document.querySelector('div.modal-content > form')
             );
             fetch('/api/user/token/', {
-                credentials: 'include',
+                headers: {
+                    Authorization: `Bearer ${window.localStorage.getItem(
+                        'token'
+                    )}`
+                },
                 method: 'PATCH',
                 body: tokenData
             }).then(res => {
@@ -493,6 +509,7 @@ export default {
                     case 200:
                         res.json().then(json => {
                             this.user.apiToken = json.token;
+                            window.localStorage.setItem('token', json.token);
                             this.$refs.regenTokenModal.hideModal();
                             this.$refs.regenTokenSuccessModal.showModal();
                         });
@@ -551,7 +568,11 @@ export default {
             }
             delAccData.delete('username');
             fetch('/api/user/', {
-                credentials: 'include',
+                headers: {
+                    Authorization: `Bearer ${window.localStorage.getItem(
+                        'token'
+                    )}`
+                },
                 method: 'DELETE',
                 body: delAccData
             }).then(res => {
@@ -607,27 +628,26 @@ export default {
     },
     beforeCreate() {
         fetch('/api/user/', {
-            credentials: 'include'
+            headers: {
+                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+            }
         }).then(res => {
             switch (res.status) {
                 case 200:
-                    res.json().then(
-                        json => {
-                            this.user = json;
-                        },
-                        () => {
-                            this.$parent.$parent.temporaryToast(
-                                'Development lol'
-                            );
+                    res.json().then(json => {
+                        this.user = json;
+                    });
+                    fetch('/api/domains/', {
+                        headers: {
+                            Authorization: `Bearer ${window.localStorage.getItem(
+                                'token'
+                            )}`
                         }
-                    );
-                    fetch('/api/domains/', { credentials: 'include' }).then(
-                        domains => {
-                            domains.json().then(json => {
-                                this.domains = json;
-                            });
-                        }
-                    );
+                    }).then(domains => {
+                        domains.json().then(json => {
+                            this.domains = json;
+                        });
+                    });
                     break;
                 case 429:
                     this.$parent.$parent.temporaryToast(

@@ -63,11 +63,19 @@ export default {
         };
     },
     beforeMount() {
-        fetch('/api/user/', { credentials: 'include' }).then(res => {
+        fetch('/api/user/', {
+            headers: {
+                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+            }
+        }).then(res => {
             switch (res.status) {
                 case 200:
                     fetch(`/api/setup/${this.$route.params.name}`, {
-                        credentials: 'include'
+                        headers: {
+                            Authorization: `Bearer ${window.localStorage.getItem(
+                                'token'
+                            )}`
+                        }
                     }).then(ser => {
                         switch (ser.status) {
                             case 200:

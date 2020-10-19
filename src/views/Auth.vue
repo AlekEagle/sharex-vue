@@ -129,19 +129,26 @@ export default {
         login(e) {
             let data = new FormData(e.target);
             fetch('/api/login/', {
-                credentials: 'include',
+                headers: {
+                    Authorization: `Bearer ${window.localStorage.getItem(
+                        'token'
+                    )}`
+                },
                 method: 'POST',
                 body: data
             }).then(res => {
                 switch (res.status) {
                     case 200:
-                        this.$router.push(
-                            window.location.href.split('?').length > 1
-                                ? parseQueryString(
-                                      window.location.href.split('?')[1]
-                                  ).redirect
-                                : '/me/'
-                        );
+                        res.json().then(json => {
+                            window.localStorage.setItem('token', json.apiToken);
+                            this.$router.push(
+                                window.location.href.split('?').length > 1
+                                    ? parseQueryString(
+                                          window.location.href.split('?')[1]
+                                      ).redirect
+                                    : '/me/'
+                            );
+                        });
                         break;
                     case 401:
                         res.json().then(json => {
@@ -149,28 +156,14 @@ export default {
                         });
                         break;
                     case 404:
-                        res.json().then(
-                            json => {
-                                this.$parent.$parent.temporaryToast(json.error);
-                            },
-                            () => {
-                                this.$parent.$parent.temporaryToast(
-                                    'Development lol'
-                                );
-                            }
-                        );
+                        res.json().then(json => {
+                            this.$parent.$parent.temporaryToast(json.error);
+                        });
                         break;
                     case 500:
-                        res.json().then(
-                            json => {
-                                this.$parent.$parent.temporaryToast(json.error);
-                            },
-                            () => {
-                                this.$parent.$parent.temporaryToast(
-                                    'Development lol'
-                                );
-                            }
-                        );
+                        res.json().then(json => {
+                            this.$parent.$parent.temporaryToast(json.error);
+                        });
                         break;
                     case 400:
                         this.$parent.$parent.temporaryToast(
@@ -223,19 +216,26 @@ export default {
             }
             data.delete('password-conf');
             fetch('/api/user/', {
-                credentials: 'include',
+                headers: {
+                    Authorization: `Bearer ${window.localStorage.getItem(
+                        'token'
+                    )}`
+                },
                 method: 'POST',
                 body: data
             }).then(res => {
                 switch (res.status) {
                     case 201:
-                        this.$router.push(
-                            window.location.href.split('?').length > 1
-                                ? parseQueryString(
-                                      window.location.href.split('?')[1]
-                                  ).redirect
-                                : '/me/'
-                        );
+                        res.json().then(json => {
+                            window.localStorage.setItem('token', json.apiToken);
+                            this.$router.push(
+                                window.location.href.split('?').length > 1
+                                    ? parseQueryString(
+                                          window.location.href.split('?')[1]
+                                      ).redirect
+                                    : '/me/'
+                            );
+                        });
                         break;
                     case 401:
                         this.$parent.$parent.temporaryToast(
@@ -285,7 +285,11 @@ export default {
         };
     },
     beforeMount() {
-        fetch('/api/user/', { credentials: 'include' }).then(res => {
+        fetch('/api/user/', {
+            headers: {
+                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+            }
+        }).then(res => {
             if (res.status === 200) {
                 this.$router.push(
                     window.location.href.split('?').length > 1
@@ -293,6 +297,8 @@ export default {
                               .redirect
                         : '/me/'
                 );
+            } else {
+                window.localStorage.removeItem('token');
             }
         });
     }

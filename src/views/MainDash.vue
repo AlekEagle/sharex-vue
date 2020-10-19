@@ -5,7 +5,7 @@
         :buttons="[
             {
                 title: 'This will log you out. Who knew?',
-                action: this.logout,
+                action: logout,
                 text: 'Logout'
             }
         ]"
@@ -67,39 +67,29 @@ export default {
     },
     methods: {
         logout() {
-            fetch('/api/logout/', {
-                credentials: 'include'
-            }).then(() => {
-                this.$router.push(
-                    `/auth/?redirect=${window.location.pathname}`
-                );
-            });
+            window.localStorage.removeItem('token');
+            this.$router.push(`/auth/?redirect=${window.location.pathname}`);
         }
     },
     beforeCreate() {
         fetch('/api/user/', {
-            credentials: 'include'
+            headers: {
+                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+            }
         }).then(res => {
             switch (res.status) {
                 case 200:
-                    res.json().then(
-                        json => {
-                            this.$refs.header.sharedState.subtitle = `Welcome Back, ${json.displayName}!`;
-                            if (json.staff !== null && json.staff !== '') {
-                                this.$refs.header.sharedState.buttons.push({
-                                    title:
-                                        'As a cool person, you get to visit the cool people place.',
-                                    text: 'Cool admin zone.',
-                                    to: '/admin/'
-                                });
-                            }
-                        },
-                        () => {
-                            this.$parent.$parent.temporaryToast(
-                                'Development lol'
-                            );
+                    res.json().then(json => {
+                        this.$refs.header.sharedState.subtitle = `Welcome Back, ${json.displayName}!`;
+                        if (json.staff !== null && json.staff !== '') {
+                            this.$refs.header.sharedState.buttons.push({
+                                title:
+                                    'As a cool person, you get to visit the cool people place.',
+                                text: 'Cool admin zone.',
+                                to: '/admin/'
+                            });
                         }
-                    );
+                    });
                     break;
                 case 429:
                     this.$parent.$parent.temporaryToast(

@@ -5,7 +5,6 @@ const fs = require('fs'),
     cors = require('cors'),
     multer = require('multer'),
     Sequelize = require('sequelize'),
-    session = require('client-sessions'),
     ratelimit = require('express-rate-limit'),
     fileType = require('file-type'),
     upload = multer(),
@@ -199,65 +198,28 @@ function tokenGen(id) {
     return `${Buffer.from(id).toString('base64').replace(/==/g, '')}.${Buffer.from(now.split('').slice(now.length - 3, now.length).join('')).toString('base64')}.${Buffer.from(newString(24)).toString('base64')}`;
 
 }
-
-app.use(session({
-    cookieName: 'session',
-    secret: Math.random().toString(),
-    duration: ms('30 days'),
-    activeDuration: ms('1 hour'),
-    cookie: {
-        httpOnly: true,
-        path: '/',
-        secure: process.env.DEBUG ? false : true,
-        sameSite: 'lax'
-    }
-}));
 function authenticate(req) {
     return new Promise((resolve, reject) => {
-        if (!req.session.user && !req.headers.authorization) {
+        if (!req.headers.authorization) {
             reject();
         } else {
-            if (req.session.user) {
-                user.findOne({
-                    where: {
-                        id: req.session.user.id || 'none'
-                    }
-                }).then(u => {
-                    if (!u) {
+            user.findOne({
+                where: {
+                    apiToken: req.headers.authorization.replace('Bearer ', '')
+                }
+            }).then(u => {
+                if (!u) {
+                    reject();
+                } else {
+                    if (u.bannedAt !== null) {
                         reject();
                     } else {
-                        if (u.bannedAt !== null) {
-                            reject();
-                        } else {
-                            resolve(u);
-                        }
+                        resolve(u);
                     }
-                }).catch(err => {
-                    reject(err);
-                });
-            } else {
-                if (req.headers.authorization.startsWith('Bearer ')) {
-                    user.findOne({
-                        where: {
-                            apiToken: req.headers.authorization.replace('Bearer ', '')
-                        }
-                    }).then(u => {
-                        if (!u) {
-                            reject();
-                        } else {
-                            if (u.bannedAt !== null) {
-                                reject();
-                            } else {
-                                resolve(u);
-                            }
-                        }
-                    }).catch(err => {
-                        reject(err);
-                    });
-                } else {
-                    reject();
                 }
-            }
+            }).catch(err => {
+                reject(err);
+            });
         }
     });
 }
@@ -379,7 +341,7 @@ app.post('/api/user/', upload.none(), (req, res) => {
     } = req.body;
     let vars = { name, email, password };
     let undefinedVars = Object.keys(vars).map(e => vars[e] !== undefined ? null : e).filter(e => e !== null);
-    if (!name || !email || !password) {
+    if (undefinedVars.length < 0) {
         res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
         return;
     } else {
@@ -429,7 +391,9 @@ app.post('/api/user/', upload.none(), (req, res) => {
                     console.error(err);
                 });
             } else {
-                res.status(401).json({ error: 'User already exists' });
+                let lolData = { name, email };
+                let alreadyExists = Object.keys(lolData).map(e => u[e === 'name' ? 'username' : e] === lolData[e] ? e : null).filter(e => e !== null);
+                res.status(401).json({ error: 'User already exists', with: alreadyExists });
                 return;
             }
         }, err => {
@@ -437,152 +401,6 @@ app.post('/api/user/', upload.none(), (req, res) => {
             console.error(err);
         });
     }
-});
-app.patch('/api/user/:id/', upload.none(), (req, res) => {
-    authenticate(req).then(u => {
-        let {
-            email,
-            name,
-            newPassword
-        } = req.body;
-        let vars = { name, email, newPassword, id: req.params.id };
-        let undefinedVars = Object.keys(vars).map(e => vars[e] !== undefined ? null : e).filter(e => e !== null);
-        if (!(email || name || newPassword) || !req.params.id) {
-            res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
-            return;
-        }
-        if (u.staff === '') {
-            res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
-            return;
-        } else {
-            let username = name.toLowerCase();
-            user.findOne({
-                where: {
-                    id: req.params.id
-                }
-            }).then(us => {
-                if (us === null) {
-                    res.status(404).json({
-                        error: 'Not Found'
-                    });
-                    return;
-                } else {
-                    let now = new Date(Date.now());
-                    if (newPassword) {
-                        bcrypt.hash(newPassword, Math.floor(Math.random() * 10)).then(hashedPass => {
-                            us.update({
-                                email: email || us.email,
-                                displayName: name || us.displayName,
-                                username: username || us.username,
-                                updatedAt: now,
-                                password: hashedPass
-                            }).then(updatedUser => {
-                                actions.create({
-                                    type: 2,
-                                    by: u.id,
-                                    to: req.params.id
-                                }).then(() => {
-                                    console.log('User updated');
-                                });
-                                let noPass = { ...updatedUser.toJSON(), password: null };
-                                res.status(200).json(noPass);
-                            }, err => {
-                                res.status(500).json({ error: "Internal Server Error" });
-                                console.error(err);
-                            });
-                        }, err => {
-                            res.status(500).json({ error: "Internal Server Error" });
-                            console.error(err);
-                        });
-                    } else {
-                        us.update({
-                            email: email || us.email,
-                            displayName: name || us.displayName,
-                            username: username || us.username,
-                            updatedAt: now
-                        }).then(updatedUser => {
-                            actions.create({
-                                type: 2,
-                                by: u.id,
-                                to: req.params.id
-                            }).then(() => {
-                                console.log('User updated');
-                            });
-                            let noPass = { ...updatedUser.toJSON(), password: null };
-                            res.status(200).json(noPass);
-                        }, err => {
-                            res.status(500).json({ error: "Internal Server Error" });
-                            console.error(err);
-                        });
-                    }
-                }
-            }, err => {
-                res.status(500).json({ error: "Internal Server Error" });
-                console.error(err);
-            });
-        }
-    }, err => {
-        if (err) res.status(500).json({ error: "Internal Server Error" });
-        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
-    });
-});
-app.patch('/api/user/', upload.none(), (req, res) => {
-    authenticate(req).then(u => {
-        let {
-            email,
-            name,
-            password,
-            newPassword
-        } = req.body;
-        let vars = { name, email, password };
-        let undefinedVars = Object.keys(vars).map(e => vars[e] !== undefined ? null : e).filter(e => e !== null);
-        if (!(email || name || newPassword)) {
-            res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
-            return;
-        } else {
-            let username = name.toLowerCase();
-            if (!password) {
-                res.status(400).json({ error: 'Bad Request', missing: ['password'] });
-                return;
-            }
-            let now = new Date(Date.now());
-            bcrypt.compare(password, u.password).then(match => {
-                if (match) {
-                    bcrypt.hash(newPassword ? newPassword : password, Math.floor(Math.random() * 10)).then(hashedPass => {
-                        us.update({
-                            email: email || u.email,
-                            displayName: name || u.displayName,
-                            username: username || u.username,
-                            updatedAt: now,
-                            password: hashedPass
-                        }).then(updatedUser => {
-                            actions.create({
-                                type: 2,
-                                by: updatedUser.id,
-                                to: updatedUser.id
-                            }).then(() => {
-                                console.log('User updated');
-                            });
-                            let noPass = { ...updatedUser.toJSON(), password: null };
-                            res.status(200).json(noPass);
-                        }, err => {
-                            res.status(500).json({ error: "Internal Server Error" });
-                            console.error(err);
-                        });
-                    }, err => {
-                        res.status(500).json({ error: "Internal Server Error" });
-                        console.error(err);
-                    });
-                }
-            }, err => {
-                res.status(500).json({ error: "Internal Server Error" });
-                console.error(err);
-            });
-        }
-    }, err => {
-        if (err) res.status(500).json({ error: "Internal Server Error" });
-        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
-    });
 });
 app.patch('/api/user/:id/ban/', upload.none(), (req, res) => {
     authenticate(req).then(u => {
@@ -622,7 +440,6 @@ app.delete('/api/user/', upload.none(), (req, res) => {
                         }).then(() => {
                             console.log('User Deleted');
                         });
-                        req.session.reset();
                         res.status(200).json({ success: true });
                     }, err => {
                         res.status(500).json({ error: 'Internal server error.' });
@@ -682,14 +499,6 @@ app.delete('/api/user/:id/', upload.none(), (req, res) => {
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-app.get('/api/logout/', (req, res) => {
-    if (!u) {
-        res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
-        return;
-    }
-    req.session.reset();
-    res.status(200).json({ success: true });
-});
 app.post('/api/login/', upload.none(), (req, res) => {
     let {
         name,
@@ -724,8 +533,8 @@ app.post('/api/login/', upload.none(), (req, res) => {
                             }).then(() => {
                                 console.log('User login');
                             });
-                            u = u;
-                            res.status(200).json({ success: true });
+                            let noPass = { ...u.toJSON(), password: null };
+                            res.status(200).json(noPass);
                         } else {
                             res.status(401).json({ error: 'Invalid password.' });
                         }
@@ -767,15 +576,14 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
                 if (match) {
                     u.update({
                         apiToken: tokenGen(u.id)
-                    }).then(u => {
-                        u = u;
+                    }).then(us => {
                         res.status(200).json({
-                            token: u.apiToken
+                            token: us.apiToken
                         });
-                        actions.create({
+                        actions.crxeate({
                             type: 3,
-                            by: u.id,
-                            to: u.id
+                            by: us.id,
+                            to: us.id
                         }).then(() => {
                             console.log('API Token refreshed');
                         });
@@ -784,7 +592,7 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
                         console.error(err);
                     });
                 } else {
-                    res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+                    res.status(401).json({ error: 'Invalid password.' });
                 }
             }, err => {
                 res.status(500).json({ error: "Internal Server Error" });
@@ -800,8 +608,8 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
 });
 app.patch('/api/user/:id/token', (req, res) => {
     authenticate(req).then(u => {
-        if (!req.params.id) {
-            if (u.staff !== '') {
+        if (req.params.id) {
+            if (u.staff === '') {
                 res.status(403).json({ error: "Missing Permissions" });
             } else {
                 user.findOne({
@@ -936,6 +744,154 @@ app.patch('/api/user/domain/', upload.none(), (req, res) => {
             res.status(500).json({ error: "Internal Server Error" });
             console.error(err);
         });
+    }, err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+});
+app.patch('/api/user/:id/', upload.none(), (req, res) => {
+    authenticate(req).then(u => {
+        let {
+            email,
+            name,
+            newPassword
+        } = req.body;
+        let vars = { name, email, newPassword, id: req.params.id };
+        let undefinedVars = Object.keys(vars).map(e => vars[e] !== undefined ? null : e).filter(e => e !== null);
+        if (undefinedVars.length < 0 || !req.params.id) {
+            res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
+            return;
+        }
+        if (u.staff === '') {
+            res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+            return;
+        } else {
+            let username = name.toLowerCase();
+            user.findOne({
+                where: {
+                    id: req.params.id
+                }
+            }).then(us => {
+                if (us === null) {
+                    res.status(404).json({
+                        error: 'Not Found'
+                    });
+                    return;
+                } else {
+                    let now = new Date(Date.now());
+                    if (newPassword) {
+                        bcrypt.hash(newPassword, Math.floor(Math.random() * 10)).then(hashedPass => {
+                            us.update({
+                                email: email || us.email,
+                                displayName: name || us.displayName,
+                                username: username || us.username,
+                                updatedAt: now,
+                                password: hashedPass
+                            }).then(updatedUser => {
+                                actions.create({
+                                    type: 2,
+                                    by: u.id,
+                                    to: req.params.id
+                                }).then(() => {
+                                    console.log('User updated');
+                                });
+                                let noPass = { ...updatedUser.toJSON(), password: null };
+                                res.status(200).json(noPass);
+                            }, err => {
+                                res.status(500).json({ error: "Internal Server Error" });
+                                console.error(err);
+                            });
+                        }, err => {
+                            res.status(500).json({ error: "Internal Server Error" });
+                            console.error(err);
+                        });
+                    } else {
+                        us.update({
+                            email: email || us.email,
+                            displayName: name || us.displayName,
+                            username: username || us.username,
+                            updatedAt: now
+                        }).then(updatedUser => {
+                            actions.create({
+                                type: 2,
+                                by: u.id,
+                                to: req.params.id
+                            }).then(() => {
+                                console.log('User updated');
+                            });
+                            let noPass = { ...updatedUser.toJSON(), password: null };
+                            res.status(200).json(noPass);
+                        }, err => {
+                            res.status(500).json({ error: "Internal Server Error" });
+                            console.error(err);
+                        });
+                    }
+                }
+            }, err => {
+                res.status(500).json({ error: "Internal Server Error" });
+                console.error(err);
+            });
+        }
+    }, err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+});
+app.patch('/api/user/', upload.none(), (req, res) => {
+    authenticate(req).then(u => {
+        let {
+            email,
+            name,
+            password,
+            newPassword
+        } = req.body;
+        let vars = { name, email, password };
+        let undefinedVars = Object.keys(vars).map(e => vars[e] !== undefined ? null : e).filter(e => e !== null);
+        if (undefinedVars.length < 0) {
+            res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
+            return;
+        } else {
+            let username = name.toLowerCase();
+            if (!password) {
+                res.status(400).json({ error: 'Bad Request', missing: ['password'] });
+                return;
+            }
+            let now = new Date(Date.now());
+            bcrypt.compare(password, u.password).then(match => {
+                if (match) {
+                    bcrypt.hash(newPassword ? newPassword : password, Math.floor(Math.random() * 10)).then(hashedPass => {
+                        u.update({
+                            email: email || u.email,
+                            displayName: name || u.displayName,
+                            username: username || u.username,
+                            updatedAt: now,
+                            password: hashedPass
+                        }).then(updatedUser => {
+                            actions.create({
+                                type: 2,
+                                by: updatedUser.id,
+                                to: updatedUser.id
+                            }).then(() => {
+                                console.log('User updated');
+                            });
+                            let noPass = { ...updatedUser.toJSON(), password: null };
+                            res.status(200).json(noPass);
+                        }, err => {
+                            res.status(500).json({ error: "Internal Server Error" });
+                            console.error(err);
+                        });
+                    }, err => {
+                        res.status(500).json({ error: "Internal Server Error" });
+                        console.error(err);
+                    });
+                } else {
+                    res.status(401).json({ error: 'Invalid password.' });
+                }
+            }, err => {
+                res.status(500).json({ error: "Internal Server Error" });
+                console.error(err);
+            });
+        }
     }, err => {
         if (err) res.status(500).json({ error: "Internal Server Error" });
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });

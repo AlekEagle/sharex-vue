@@ -52,58 +52,64 @@ export default {
         Project
     },
     beforeMount() {
-        fetch('/api/user/', { credentials: 'include' }).then(res => {
+        fetch('/api/user/', {
+            headers: {
+                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+            }
+        }).then(res => {
             switch (res.status) {
                 case 200:
-                    fetch('/api/setup/', { credentials: 'include' }).then(
-                        ins => {
-                            switch (ins.status) {
-                                case 200:
-                                    ins.json().then(json => {
-                                        this.services = json;
-                                    });
-                                    break;
-                                case 429:
-                                    this.$parent.$parent.temporaryToast(
-                                        `Woah, slow down! Please wait ${Math.floor(
-                                            (ins.headers.get(
+                    fetch('/api/setup/', {
+                        headers: {
+                            Authorization: `Bearer ${window.localStorage.getItem(
+                                'token'
+                            )}`
+                        }
+                    }).then(ins => {
+                        switch (ins.status) {
+                            case 200:
+                                ins.json().then(json => {
+                                    this.services = json;
+                                });
+                                break;
+                            case 429:
+                                this.$parent.$parent.temporaryToast(
+                                    `Woah, slow down! Please wait ${Math.floor(
+                                        (ins.headers.get('x-ratelimit-reset') *
+                                            1000 -
+                                            Date.now()) /
+                                            1000 /
+                                            60
+                                    )} minutes ${
+                                        Math.floor(
+                                            ((ins.headers.get(
                                                 'x-ratelimit-reset'
                                             ) *
                                                 1000 -
                                                 Date.now()) /
-                                                1000 /
+                                                1000) %
                                                 60
-                                        )} minutes ${
-                                            Math.floor(
-                                                ((ins.headers.get(
-                                                    'x-ratelimit-reset'
-                                                ) *
-                                                    1000 -
-                                                    Date.now()) /
-                                                    1000) %
-                                                    60
-                                            ) !== 0
-                                                ? `and ${Math.floor(
-                                                      ((ins.headers.get(
-                                                          'x-ratelimit-reset'
-                                                      ) *
-                                                          1000 -
-                                                          Date.now()) /
-                                                          1000) %
-                                                          60
-                                                  )} seconds`
-                                                : ''
-                                        } before trying again!`
-                                    );
-                                    break;
-                                default:
-                                    this.$parent.$parent.temporaryToast(
-                                        'An unknown error occurred, if this issue persists contact AlekEagle.'
-                                    );
-                                    break;
-                            }
+                                        ) !== 0
+                                            ? `and ${Math.floor(
+                                                  ((ins.headers.get(
+                                                      'x-ratelimit-reset'
+                                                  ) *
+                                                      1000 -
+                                                      Date.now()) /
+                                                      1000) %
+                                                      60
+                                              )} seconds`
+                                            : ''
+                                    } before trying again!`
+                                );
+                                break;
+                            default:
+                                this.$parent.$parent.temporaryToast(
+                                    'An unknown error occurred, if this issue persists contact AlekEagle.'
+                                );
+                                break;
                         }
-                    );
+                    });
                     break;
                 case 429:
                     this.$parent.$parent.temporaryToast(

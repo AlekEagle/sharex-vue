@@ -59,12 +59,18 @@ export default {
     },
     beforeCreate() {
         fetch('/api/user/', {
-            credentials: 'include'
+            headers: {
+                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+            }
         }).then(res => {
             switch (res.status) {
                 case 200:
                     fetch('/api/files?offset=' + this.offset, {
-                        credentials: 'include'
+                        headers: {
+                            Authorization: `Bearer ${window.localStorage.getItem(
+                                'token'
+                            )}`
+                        }
                     }).then(uploads => {
                         if (uploads.status === 200) {
                             uploads.json().then(json => {
@@ -115,7 +121,11 @@ export default {
         loadMore() {
             this.loading = true;
             fetch('/api/files?offset=' + this.offset, {
-                credentials: 'include'
+                headers: {
+                    Authorization: `Bearer ${window.localStorage.getItem(
+                        'token'
+                    )}`
+                }
             }).then(uploads => {
                 switch (uploads.status) {
                     case 200:
