@@ -256,6 +256,8 @@ function authenticate(req) {
                     }).catch(err => {
                         reject(err);
                     });
+                } else {
+                    reject();
                 }
             }
         }
@@ -549,7 +551,6 @@ app.patch('/api/user/', upload.none(), (req, res) => {
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-
 app.patch('/api/user/:id/ban/', upload.none(), (req, res) => {
     authenticate(req).then(u => {
         if (u.staff !== '') {
@@ -759,7 +760,6 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-
 app.patch('/api/user/:id/token', (req, res) => {
     authenticate(req).then(u => {
         if (!req.params.id) {
@@ -789,7 +789,6 @@ app.patch('/api/user/:id/token', (req, res) => {
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-
 app.get('/api/domains/', (req, res) => {
     authenticate(req).then(() => {
         domains.findAll().then(d => {
