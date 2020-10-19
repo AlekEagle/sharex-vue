@@ -187,7 +187,7 @@
             AKA, people can do bad stuff with it if you give it to someone else!
             <br />
             <br />
-            <code>Bearer {{ user.apiToken }}</code>
+            <code>{{ user.apiToken }}</code>
             <br />
             <br />
             To close this, you need to hit the button below, this was done
