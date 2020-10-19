@@ -174,26 +174,31 @@
             </form>
         </Modal>
         <Modal
-            ref="regenTokenSuccessModal"
-            title="Success!"
+            ref="showTokenModal"
+            title="Your Token"
             :buttons="[
                 {
                     text: 'Alright, I got it',
-                    action: hideRegenTokenSuccessModal
+                    action: hideShowTokenModal
                 }
             ]"
+            :cancelable="true"
         >
-            Alright, here's your new token, this is <b>PRIVATE INFORMATION</b>,
-            AKA, people can do bad stuff with it if you give it to someone else!
+            Alright, here's your token, this is PRIVATE INFORMATION, AKA, people
+            can do bad stuff with it if you give it to someone else!
             <br />
             <br />
             <code>{{ user.apiToken }}</code>
             <br />
             <br />
-            To close this, you need to hit the button below, this was done
-            intentionally because we didn't want you to accidentally loose the
-            token and have to get it again.
         </Modal>
+        <Project
+            title="Show your token"
+            :classes="['auth', 'float']"
+            :action="showShowTokenModal"
+        >
+            Click here to see your token.
+        </Project>
         <Project
             title="Delete your account"
             :classes="['auth', 'float']"
@@ -487,6 +492,9 @@ export default {
         showRegenTokenModal() {
             this.$refs.regenTokenModal.showModal();
         },
+        showShowTokenModal() {
+            this.$refs.showTokenModal.showModal();
+        },
         regenerateToken() {
             let tokenData = new FormData(
                 document.querySelector('div.modal-content > form')
@@ -511,7 +519,7 @@ export default {
                             this.user.apiToken = json.token;
                             window.localStorage.setItem('token', json.token);
                             this.$refs.regenTokenModal.hideModal();
-                            this.$refs.regenTokenSuccessModal.showModal();
+                            this.$refs.showTokenModal.showModal();
                         });
                         break;
                     case 429:
@@ -550,8 +558,8 @@ export default {
                 }
             });
         },
-        hideRegenTokenSuccessModal() {
-            this.$refs.regenTokenSuccessModal.hideModal();
+        hideShowTokenModal() {
+            this.$refs.showTokenModal.hideModal();
         },
         showDeleteAccountModal() {
             this.$refs.deleteAccountModal.showModal();
