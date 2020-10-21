@@ -1215,11 +1215,11 @@ app.post('/upload/', upload.single('file'), (req, res) => {
                         return;
                     } else {
                         uploads.create({
-                            filename: `${filename}.${ft ? ft.ext : map[req.file.mimetype]}`,
+                            filename: `${filename}.${ft ? ft.ext : (map[req.file.mimetype] !== undefined ? map[req.file.mimetype] : 'txt')}`,
                             userid: u.id,
                             size: req.file.size
                         }).then(() => {
-                            res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.${ft ? ft.ext : map[req.file.mimetype]}`);
+                            res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.${ft ? ft.ext : (map[req.file.mimetype] !== undefined ? map[req.file.mimetype] : 'txt')}`);
                         });
                     }
                     writeStream.end();
@@ -1260,18 +1260,18 @@ app.post('/api/upload/', upload.single('file'), (req, res) => {
         } else {
             fileType.fromBuffer(req.file.buffer.slice(0, fileType.minimumBytes)).then(ft => {
                 let filename = newString(10),
-                    writeStream = fs.createWriteStream(`${__dirname}/uploads/${filename}.${ft ? ft.ext : map[req.file.mimetype]}`);
+                    writeStream = fs.createWriteStream(`${__dirname}/uploads/${filename}.${ft ? ft.ext : (map[req.file.mimetype] !== undefined ? map[req.file.mimetype] : 'txt')}`);
                 writeStream.write(req.file.buffer, error => {
                     if (error) {
                         res.status(500).json({ error: "Internal Server Error" });
                         return;
                     } else {
                         uploads.create({
-                            filename: `${filename}.${ft ? ft.ext : map[req.file.mimetype]}`,
+                            filename: `${filename}.${ft ? ft.ext : (map[req.file.mimetype] !== undefined ? map[req.file.mimetype] : 'txt')}`,
                             userid: u.id,
                             size: req.file.size
                         }).then(() => {
-                            res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.${ft ? ft.ext : map[req.file.mimetype]}`);
+                            res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.${ft ? ft.ext : (map[req.file.mimetype] !== undefined ? map[req.file.mimetype] : 'txt')}`);
                         });
                     }
                     writeStream.end();
