@@ -1184,29 +1184,95 @@ app.post('/upload/', upload.single('file'), (req, res) => {
             }
             let filename = newString(10),
                 writeStream = fs.createWriteStream(`${__dirname}/uploads/${filename}.txt`);
-            writeStream.write(req.body.file);
-            writeStream.end();
-            writeStream.destroy();
-            res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.txt`);
-            uploads.create({
-                filename: `${filename}.txt`,
-                userid: u.id,
-                size: req.body.file.length
+            writeStream.write(new Buffer.from(req.body.file), error => {
+                if (error) {
+                    res.status(500).json({ error: "Internal Server Error" });
+                    return;
+                } else {
+                    uploads.create({
+                        filename: `${filename}.txt`,
+                        userid: u.id,
+                        size: req.body.file.length
+                    }).then(() => {
+                        res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.txt`);
+                    });
+                }
+                writeStream.end();
+                writeStream.destroy();
             });
         } else {
             fileType.fromBuffer(req.file.buffer.slice(0, fileType.minimumBytes)).then(ft => {
                 let filename = newString(10),
                     writeStream = fs.createWriteStream(`${__dirname}/uploads/${filename}.${ft ? ft.ext : map[req.file.mimetype]}`);
-                res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.${ft ? ft.ext : map[req.file.mimetype]}`);
-                uploads.create({
-                    filename: `${filename}.${ft ? ft.ext : map[req.file.mimetype]}`,
-                    userid: u.id,
-                    size: req.file.size
-                }).then(() => {
-                    writeStream.write(req.file.buffer);
+                writeStream.write(req.file.buffer, error => {
+                    if (error) {
+                        res.status(500).json({ error: "Internal Server Error" });
+                        return;
+                    } else {
+                        uploads.create({
+                            filename: `${filename}.${ft ? ft.ext : map[req.file.mimetype]}`,
+                            userid: u.id,
+                            size: req.file.size
+                        }).then(() => {
+                            res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.${ft ? ft.ext : map[req.file.mimetype]}`);
+                        });
+                    }
                     writeStream.end();
                     writeStream.destroy();
-                })
+                });
+            });
+        }
+    }, err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+});
+
+app.post('/api/upload/', upload.single('file'), (req, res) => {
+    authenticate(req).then(u => {
+        if (!req.file) {
+            if (!req.body.file) {
+                res.status(400).json({ error: 'Bad Request', missing: ['file'] });
+                return;
+            }
+            let filename = newString(10),
+                writeStream = fs.createWriteStream(`${__dirname}/uploads/${filename}.txt`);
+            writeStream.write(new Buffer.from(req.body.file), error => {
+                if (error) {
+                    res.status(500).json({ error: "Internal Server Error" });
+                    return;
+                } else {
+                    uploads.create({
+                        filename: `${filename}.txt`,
+                        userid: u.id,
+                        size: req.body.file.length
+                    }).then(() => {
+                        res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.txt`);
+                    });
+                }
+                writeStream.end();
+                writeStream.destroy();
+            });
+        } else {
+            fileType.fromBuffer(req.file.buffer.slice(0, fileType.minimumBytes)).then(ft => {
+                let filename = newString(10),
+                    writeStream = fs.createWriteStream(`${__dirname}/uploads/${filename}.${ft ? ft.ext : map[req.file.mimetype]}`);
+                writeStream.write(req.file.buffer, error => {
+                    if (error) {
+                        res.status(500).json({ error: "Internal Server Error" });
+                        return;
+                    } else {
+                        uploads.create({
+                            filename: `${filename}.${ft ? ft.ext : map[req.file.mimetype]}`,
+                            userid: u.id,
+                            size: req.file.size
+                        }).then(() => {
+                            res.status(201).end(`https://${u.subdomain ? `${u.subdomain}.` : ''}${u.domain}/${filename}.${ft ? ft.ext : map[req.file.mimetype]}`);
+                        });
+                    }
+                    writeStream.end();
+                    writeStream.destroy();
+                });
             });
         }
     }, err => {
