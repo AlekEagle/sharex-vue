@@ -55,6 +55,16 @@
         >
             Contact me in the discord server if you have any questions!
         </Project>
+        <Project
+            title="Public API Documentation"
+            :classes="['float']"
+            icon="/img/circle.png"
+            :disabled="false"
+            :action="openDocs"
+        >
+            Public (WIP) API Documentation means anyone can create things that
+            interact with the API! Click me to check them out!
+        </Project>
     </div>
 
     <Footer />
@@ -75,6 +85,9 @@ export default {
     methods: {
         openDiscord() {
             window.open('https://alekeagle.com/d', '_blank');
+        },
+        openDocs() {
+            window.open('https://docs.alekeagle.me', '_blank');
         }
     }
 };

@@ -237,6 +237,10 @@ app.use((req, res, next) => {
         'Cache-Control': 'no-store'
     });
     console.log(`${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${req.protocol}://${req.headers.host}${req.url}`);
+    if (req.hostname.startsWith('docs.')) {
+        express.static('./docs/dist', { acceptRanges: false })(req, res, next);
+        return;
+    }
     next();
 }, express.static('uploads', { acceptRanges: false }), (req, res, next) => {
     if (req.headers.host !== 'alekeagle.me' && !req.headers.host.includes('localhost') && !req.headers.host.includes('192.168.') && !req.headers.host.includes('127.0.0.1') && !req.headers.host.includes('::1') && !req.headers.host.includes('.local')) {
@@ -851,7 +855,7 @@ app.patch('/api/user/', upload.none(), (req, res) => {
             res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
             return;
         } else {
-            let username = name.toLowerCase();
+            let username = name ? name.toLowerCase() : null;
             if (!password) {
                 res.status(400).json({ error: 'Bad Request', missing: ['password'] });
                 return;
