@@ -193,6 +193,12 @@ export default {
             this.file = e.target.files[0];
         },
         uploadFile() {
+            if (this.uploading) {
+                this.$parent.$parent.temporaryToast(
+                    'You can only upload one thing at a time!'
+                );
+                return;
+            }
             this.uploading = true;
             this.link = null;
             let data = new FormData();
@@ -257,6 +263,7 @@ export default {
                     }
                 },
                 err => {
+                    this.uploading = false;
                     this.$parent.$parent.temporaryToast(
                         'An unknown error occurred, if this issue persists contact AlekEagle.',
                         10 * 1000
