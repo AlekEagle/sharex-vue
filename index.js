@@ -1208,7 +1208,7 @@ app.post('/upload/', upload.single('file'), (req, res) => {
         } else {
             fileType.fromBuffer(req.file.buffer.slice(0, fileType.minimumBytes)).then(ft => {
                 let filename = newString(10),
-                    writeStream = fs.createWriteStream(`${__dirname}/uploads/${filename}.${ft ? ft.ext : map[req.file.mimetype]}`);
+                    writeStream = fs.createWriteStream(`${__dirname}/uploads/${filename}.${ft ? ft.ext : (map[req.file.mimetype] !== undefined ? map[req.file.mimetype] : 'txt')}`);
                 writeStream.write(req.file.buffer, error => {
                     if (error) {
                         res.status(500).json({ error: "Internal Server Error" });
