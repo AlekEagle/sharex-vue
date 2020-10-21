@@ -89,59 +89,72 @@ export default {
             headers: {
                 Authorization: `Bearer ${window.localStorage.getItem('token')}`
             }
-        }).then(res => {
-            switch (res.status) {
-                case 200:
-                    if (window.location.href.split('?').length > 1) {
-                        fetch(
-                            `/tmp/${
-                                parseQueryString(
-                                    window.location.href.split('?')[1]
-                                ).file
-                            }`
-                        ).then(res => {
-                            if (res.headers.get('X-Filename') === null) return;
-                            res.blob().then(slime => {
-                                this.file = new File(
-                                    [slime],
-                                    res.headers.get('X-Filename')
-                                );
+        }).then(
+            res => {
+                switch (res.status) {
+                    case 200:
+                        if (window.location.href.split('?').length > 1) {
+                            fetch(
+                                `/tmp/${
+                                    parseQueryString(
+                                        window.location.href.split('?')[1]
+                                    ).file
+                                }`
+                            ).then(res => {
+                                if (res.headers.get('X-Filename') === null)
+                                    return;
+                                res.blob().then(slime => {
+                                    this.file = new File(
+                                        [slime],
+                                        res.headers.get('X-Filename')
+                                    );
+                                });
                             });
-                        });
-                    }
-                    break;
-                case 429:
-                    this.$parent.$parent.temporaryToast(
-                        `Woah, slow down! Please wait ${Math.floor(
-                            (res.headers.get('x-ratelimit-reset') * 1000 -
-                                Date.now()) /
-                                1000 /
-                                60
-                        )} minutes ${
-                            Math.floor(
-                                ((res.headers.get('x-ratelimit-reset') * 1000 -
+                        }
+                        break;
+                    case 429:
+                        this.$parent.$parent.temporaryToast(
+                            `Woah, slow down! Please wait ${Math.floor(
+                                (res.headers.get('x-ratelimit-reset') * 1000 -
                                     Date.now()) /
-                                    1000) %
+                                    1000 /
                                     60
-                            ) !== 0
-                                ? `and ${Math.floor(
-                                      ((res.headers.get('x-ratelimit-reset') *
-                                          1000 -
-                                          Date.now()) /
-                                          1000) %
-                                          60
-                                  )} seconds`
-                                : ''
-                        } before trying again!`
-                    );
-                    break;
-                default:
-                    this.$router.push(
-                        `/auth/?redirect=${window.location.pathname}`
-                    );
-                    break;
+                            )} minutes ${
+                                Math.floor(
+                                    ((res.headers.get('x-ratelimit-reset') *
+                                        1000 -
+                                        Date.now()) /
+                                        1000) %
+                                        60
+                                ) !== 0
+                                    ? `and ${Math.floor(
+                                          ((res.headers.get(
+                                              'x-ratelimit-reset'
+                                          ) *
+                                              1000 -
+                                              Date.now()) /
+                                              1000) %
+                                              60
+                                      )} seconds`
+                                    : ''
+                            } before trying again!`
+                        );
+                        break;
+                    default:
+                        this.$router.push(
+                            `/auth/?redirect=${window.location.pathname}`
+                        );
+                        break;
+                }
+            },
+            err => {
+                this.$parent.$parent.temporaryToast(
+                    'An unknown error occurred, if this issue persists contact AlekEagle.',
+                    10 * 1000
+                );
+                console.error(err);
             }
-        });
+        );
     },
     data() {
         return {
@@ -190,52 +203,67 @@ export default {
                 },
                 method: 'POST',
                 body: data
-            }).then(res => {
-                switch (res.status) {
-                    case 201:
-                        res.text().then(link => {
-                            this.uploading = false;
-                            this.file = undefined;
-                            this.$parent.$parent.temporaryToast('Success!');
-                            this.link = link;
-                        });
-                        break;
-                    case 429:
-                        this.$parent.$parent.temporaryToast(
-                            `Woah, slow down! Please wait ${Math.floor(
-                                (res.headers.get('x-ratelimit-reset') * 1000 -
-                                    Date.now()) /
-                                    1000 /
-                                    60
-                            )} minutes ${
-                                Math.floor(
-                                    ((res.headers.get('x-ratelimit-reset') *
+            }).then(
+                res => {
+                    this.uploading = false;
+                    switch (res.status) {
+                        case 201:
+                            res.text().then(link => {
+                                this.file = undefined;
+                                this.$parent.$parent.temporaryToast('Success!');
+                                this.link = link;
+                            });
+                            break;
+                        case 413:
+                            this.$parent.$parent.temporaryToast(
+                                'The file is too big, The maximum file size is 100MB!'
+                            );
+                            break;
+                        case 429:
+                            this.$parent.$parent.temporaryToast(
+                                `Woah, slow down! Please wait ${Math.floor(
+                                    (res.headers.get('x-ratelimit-reset') *
                                         1000 -
                                         Date.now()) /
-                                        1000) %
+                                        1000 /
                                         60
-                                ) !== 0
-                                    ? `and ${Math.floor(
-                                          ((res.headers.get(
-                                              'x-ratelimit-reset'
-                                          ) *
-                                              1000 -
-                                              Date.now()) /
-                                              1000) %
-                                              60
-                                      )} seconds`
-                                    : ''
-                            } before trying again!`
-                        );
-                        break;
-                    default:
-                        this.$parent.$parent.temporaryToast(
-                            'An unknown error occurred, if this issue persists contact AlekEagle.',
-                            10 * 1000
-                        );
-                        break;
+                                )} minutes ${
+                                    Math.floor(
+                                        ((res.headers.get('x-ratelimit-reset') *
+                                            1000 -
+                                            Date.now()) /
+                                            1000) %
+                                            60
+                                    ) !== 0
+                                        ? `and ${Math.floor(
+                                              ((res.headers.get(
+                                                  'x-ratelimit-reset'
+                                              ) *
+                                                  1000 -
+                                                  Date.now()) /
+                                                  1000) %
+                                                  60
+                                          )} seconds`
+                                        : ''
+                                } before trying again!`
+                            );
+                            break;
+                        default:
+                            this.$parent.$parent.temporaryToast(
+                                'An unknown error occurred, if this issue persists contact AlekEagle.',
+                                10 * 1000
+                            );
+                            break;
+                    }
+                },
+                err => {
+                    this.$parent.$parent.temporaryToast(
+                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                        10 * 1000
+                    );
+                    console.error(err);
                 }
-            });
+            );
         },
         copyLinkToast() {
             this.$parent.$parent.temporaryToast('Link copied to clipboard!');

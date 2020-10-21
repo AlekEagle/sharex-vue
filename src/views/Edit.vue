@@ -321,79 +321,98 @@ export default {
                 },
                 method: 'PATCH',
                 body: domainData
-            }).then(res => {
-                switch (res.status) {
-                    case 200:
-                        res.json().then(json => {
-                            this.$parent.$parent.temporaryToast(
-                                `Success! Your file link is now ${
-                                    json.subdomain
-                                }${json.subdomain !== '' ? '.' : ''}${
-                                    json.domain
-                                }`
-                            );
-                            this.user.domain = json.domain;
-                            this.user.subdomain = json.subdomain;
-                            this.$refs.domainModal.hideModal();
-                        });
-                        break;
-                    case 400:
-                        this.$parent.$parent.temporaryToast(
-                            "You somehow tried to get a subdomain with a domain that doesn't support subdomains!"
-                        );
-                        break;
-                    case 404:
-                        this.$parent.$parent.temporaryToast(
-                            "It seems like you just missed that domain, I'm going to go ahead and reload the list of domains so you can see what you have access to.",
-                            10 * 1000
-                        );
-                        fetch('/api/domains/', {
-                            headers: {
-                                Authorization: window.localStorage.getItem(
-                                    'token'
-                                )
-                            }
-                        }).then(domains => {
-                            domains.json().then(json => {
-                                this.domains = json;
+            }).then(
+                res => {
+                    switch (res.status) {
+                        case 200:
+                            res.json().then(json => {
+                                this.$parent.$parent.temporaryToast(
+                                    `Success! Your file link is now ${
+                                        json.subdomain
+                                    }${json.subdomain !== '' ? '.' : ''}${
+                                        json.domain
+                                    }`
+                                );
+                                this.user.domain = json.domain;
+                                this.user.subdomain = json.subdomain;
+                                this.$refs.domainModal.hideModal();
                             });
-                        });
-                        break;
-                    case 429:
-                        this.$parent.$parent.temporaryToast(
-                            `Woah, slow down! Please wait ${Math.floor(
-                                (res.headers.get('x-ratelimit-reset') * 1000 -
-                                    Date.now()) /
-                                    1000 /
-                                    60
-                            )} minutes ${
-                                Math.floor(
-                                    ((res.headers.get('x-ratelimit-reset') *
+                            break;
+                        case 400:
+                            this.$parent.$parent.temporaryToast(
+                                "You somehow tried to get a subdomain with a domain that doesn't support subdomains!"
+                            );
+                            break;
+                        case 404:
+                            this.$parent.$parent.temporaryToast(
+                                "It seems like you just missed that domain, I'm going to go ahead and reload the list of domains so you can see what you have access to.",
+                                10 * 1000
+                            );
+                            fetch('/api/domains/', {
+                                headers: {
+                                    Authorization: window.localStorage.getItem(
+                                        'token'
+                                    )
+                                }
+                            }).then(
+                                domains => {
+                                    domains.json().then(json => {
+                                        this.domains = json;
+                                    });
+                                },
+                                err => {
+                                    this.$parent.$parent.temporaryToast(
+                                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                                        10 * 1000
+                                    );
+                                    console.error(err);
+                                }
+                            );
+                            break;
+                        case 429:
+                            this.$parent.$parent.temporaryToast(
+                                `Woah, slow down! Please wait ${Math.floor(
+                                    (res.headers.get('x-ratelimit-reset') *
                                         1000 -
                                         Date.now()) /
-                                        1000) %
+                                        1000 /
                                         60
-                                ) !== 0
-                                    ? `and ${Math.floor(
-                                          ((res.headers.get(
-                                              'x-ratelimit-reset'
-                                          ) *
-                                              1000 -
-                                              Date.now()) /
-                                              1000) %
-                                              60
-                                      )} seconds`
-                                    : ''
-                            } before trying again!`
-                        );
-                        break;
-                    default:
-                        this.$parent.$parent.temporaryToast(
-                            'An unknown error occurred, if this issue persists contact AlekEagle.'
-                        );
-                        break;
+                                )} minutes ${
+                                    Math.floor(
+                                        ((res.headers.get('x-ratelimit-reset') *
+                                            1000 -
+                                            Date.now()) /
+                                            1000) %
+                                            60
+                                    ) !== 0
+                                        ? `and ${Math.floor(
+                                              ((res.headers.get(
+                                                  'x-ratelimit-reset'
+                                              ) *
+                                                  1000 -
+                                                  Date.now()) /
+                                                  1000) %
+                                                  60
+                                          )} seconds`
+                                        : ''
+                                } before trying again!`
+                            );
+                            break;
+                        default:
+                            this.$parent.$parent.temporaryToast(
+                                'An unknown error occurred, if this issue persists contact AlekEagle.'
+                            );
+                            break;
+                    }
+                },
+                err => {
+                    this.$parent.$parent.temporaryToast(
+                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                        10 * 1000
+                    );
+                    console.error(err);
                 }
-            });
+            );
         },
         domainChange() {
             if (
@@ -433,57 +452,67 @@ export default {
                 },
                 method: 'PATCH',
                 body: profileData
-            }).then(res => {
-                document
-                    .querySelectorAll('div.modal-content > form > input')
-                    .forEach(e => {
-                        e.value = '';
-                    });
-                switch (res.status) {
-                    case 200:
-                        res.json().then(json => {
-                            this.user = json;
-                            this.$parent.$parent.temporaryToast(
-                                'Successfully updated your profile!'
-                            );
-                            this.$refs.accInfoModal.hideModal();
+            }).then(
+                res => {
+                    document
+                        .querySelectorAll('div.modal-content > form > input')
+                        .forEach(e => {
+                            e.value = '';
                         });
-                        break;
-                    case 429:
-                        this.$parent.$parent.temporaryToast(
-                            `Woah, slow down! Please wait ${Math.floor(
-                                (res.headers.get('x-ratelimit-reset') * 1000 -
-                                    Date.now()) /
-                                    1000 /
-                                    60
-                            )} minutes ${
-                                Math.floor(
-                                    ((res.headers.get('x-ratelimit-reset') *
+                    switch (res.status) {
+                        case 200:
+                            res.json().then(json => {
+                                this.user = json;
+                                this.$parent.$parent.temporaryToast(
+                                    'Successfully updated your profile!'
+                                );
+                                this.$refs.accInfoModal.hideModal();
+                            });
+                            break;
+                        case 429:
+                            this.$parent.$parent.temporaryToast(
+                                `Woah, slow down! Please wait ${Math.floor(
+                                    (res.headers.get('x-ratelimit-reset') *
                                         1000 -
                                         Date.now()) /
-                                        1000) %
+                                        1000 /
                                         60
-                                ) !== 0
-                                    ? `and ${Math.floor(
-                                          ((res.headers.get(
-                                              'x-ratelimit-reset'
-                                          ) *
-                                              1000 -
-                                              Date.now()) /
-                                              1000) %
-                                              60
-                                      )} seconds`
-                                    : ''
-                            } before trying again!`
-                        );
-                        break;
-                    default:
-                        this.$parent.$parent.temporaryToast(
-                            'An unknown error occurred, if this issue persists contact AlekEagle.'
-                        );
-                        break;
+                                )} minutes ${
+                                    Math.floor(
+                                        ((res.headers.get('x-ratelimit-reset') *
+                                            1000 -
+                                            Date.now()) /
+                                            1000) %
+                                            60
+                                    ) !== 0
+                                        ? `and ${Math.floor(
+                                              ((res.headers.get(
+                                                  'x-ratelimit-reset'
+                                              ) *
+                                                  1000 -
+                                                  Date.now()) /
+                                                  1000) %
+                                                  60
+                                          )} seconds`
+                                        : ''
+                                } before trying again!`
+                            );
+                            break;
+                        default:
+                            this.$parent.$parent.temporaryToast(
+                                'An unknown error occurred, if this issue persists contact AlekEagle.'
+                            );
+                            break;
+                    }
+                },
+                err => {
+                    this.$parent.$parent.temporaryToast(
+                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                        10 * 1000
+                    );
+                    console.error(err);
                 }
-            });
+            );
         },
         showRegenTokenModal() {
             this.$refs.regenTokenModal.showModal();
@@ -501,56 +530,69 @@ export default {
                 },
                 method: 'PATCH',
                 body: tokenData
-            }).then(res => {
-                document
-                    .querySelectorAll('div.modal-content > form > input')
-                    .forEach(e => {
-                        e.value = '';
-                    });
-                switch (res.status) {
-                    case 200:
-                        res.json().then(json => {
-                            this.user.apiToken = json.token;
-                            window.localStorage.setItem('token', json.token);
-                            this.$refs.regenTokenModal.hideModal();
-                            this.$refs.showTokenModal.showModal();
+            }).then(
+                res => {
+                    document
+                        .querySelectorAll('div.modal-content > form > input')
+                        .forEach(e => {
+                            e.value = '';
                         });
-                        break;
-                    case 429:
-                        this.$parent.$parent.temporaryToast(
-                            `Woah, slow down! Please wait ${Math.floor(
-                                (res.headers.get('x-ratelimit-reset') * 1000 -
-                                    Date.now()) /
-                                    1000 /
-                                    60
-                            )} minutes ${
-                                Math.floor(
-                                    ((res.headers.get('x-ratelimit-reset') *
+                    switch (res.status) {
+                        case 200:
+                            res.json().then(json => {
+                                this.user.apiToken = json.token;
+                                window.localStorage.setItem(
+                                    'token',
+                                    json.token
+                                );
+                                this.$refs.regenTokenModal.hideModal();
+                                this.$refs.showTokenModal.showModal();
+                            });
+                            break;
+                        case 429:
+                            this.$parent.$parent.temporaryToast(
+                                `Woah, slow down! Please wait ${Math.floor(
+                                    (res.headers.get('x-ratelimit-reset') *
                                         1000 -
                                         Date.now()) /
-                                        1000) %
+                                        1000 /
                                         60
-                                ) !== 0
-                                    ? `and ${Math.floor(
-                                          ((res.headers.get(
-                                              'x-ratelimit-reset'
-                                          ) *
-                                              1000 -
-                                              Date.now()) /
-                                              1000) %
-                                              60
-                                      )} seconds`
-                                    : ''
-                            } before trying again!`
-                        );
-                        break;
-                    default:
-                        this.$parent.$parent.temporaryToast(
-                            'An unknown error occurred, if this issue persists contact AlekEagle.'
-                        );
-                        break;
+                                )} minutes ${
+                                    Math.floor(
+                                        ((res.headers.get('x-ratelimit-reset') *
+                                            1000 -
+                                            Date.now()) /
+                                            1000) %
+                                            60
+                                    ) !== 0
+                                        ? `and ${Math.floor(
+                                              ((res.headers.get(
+                                                  'x-ratelimit-reset'
+                                              ) *
+                                                  1000 -
+                                                  Date.now()) /
+                                                  1000) %
+                                                  60
+                                          )} seconds`
+                                        : ''
+                                } before trying again!`
+                            );
+                            break;
+                        default:
+                            this.$parent.$parent.temporaryToast(
+                                'An unknown error occurred, if this issue persists contact AlekEagle.'
+                            );
+                            break;
+                    }
+                },
+                err => {
+                    this.$parent.$parent.temporaryToast(
+                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                        10 * 1000
+                    );
+                    console.error(err);
                 }
-            });
+            );
         },
         hideShowTokenModal() {
             this.$refs.showTokenModal.hideModal();
@@ -575,55 +617,65 @@ export default {
                 },
                 method: 'DELETE',
                 body: delAccData
-            }).then(res => {
-                document
-                    .querySelectorAll('div.modal-content > form > input')
-                    .forEach(e => {
-                        e.value = '';
-                    });
-                switch (res.status) {
-                    case 200:
-                        this.$refs.deleteAccountModal.hideModal();
-                        this.$parent.$parent.temporaryToast(
-                            "It's been done, your account has been deleted, you will be redirected to the homepage momentarily."
-                        );
-                        setTimeout(() => this.$router.push('/'), 5000);
-                        break;
-                    case 429:
-                        this.$parent.$parent.temporaryToast(
-                            `Woah, slow down! Please wait ${Math.floor(
-                                (res.headers.get('x-ratelimit-reset') * 1000 -
-                                    Date.now()) /
-                                    1000 /
-                                    60
-                            )} minutes ${
-                                Math.floor(
-                                    ((res.headers.get('x-ratelimit-reset') *
+            }).then(
+                res => {
+                    document
+                        .querySelectorAll('div.modal-content > form > input')
+                        .forEach(e => {
+                            e.value = '';
+                        });
+                    switch (res.status) {
+                        case 200:
+                            this.$refs.deleteAccountModal.hideModal();
+                            this.$parent.$parent.temporaryToast(
+                                "It's been done, your account has been deleted, you will be redirected to the homepage momentarily."
+                            );
+                            setTimeout(() => this.$router.push('/'), 5000);
+                            break;
+                        case 429:
+                            this.$parent.$parent.temporaryToast(
+                                `Woah, slow down! Please wait ${Math.floor(
+                                    (res.headers.get('x-ratelimit-reset') *
                                         1000 -
                                         Date.now()) /
-                                        1000) %
+                                        1000 /
                                         60
-                                ) !== 0
-                                    ? `and ${Math.floor(
-                                          ((res.headers.get(
-                                              'x-ratelimit-reset'
-                                          ) *
-                                              1000 -
-                                              Date.now()) /
-                                              1000) %
-                                              60
-                                      )} seconds`
-                                    : ''
-                            } before trying again!`
-                        );
-                        break;
-                    default:
-                        this.$parent.$parent.temporaryToast(
-                            'An unknown error occurred, if this issue persists contact AlekEagle.'
-                        );
-                        break;
+                                )} minutes ${
+                                    Math.floor(
+                                        ((res.headers.get('x-ratelimit-reset') *
+                                            1000 -
+                                            Date.now()) /
+                                            1000) %
+                                            60
+                                    ) !== 0
+                                        ? `and ${Math.floor(
+                                              ((res.headers.get(
+                                                  'x-ratelimit-reset'
+                                              ) *
+                                                  1000 -
+                                                  Date.now()) /
+                                                  1000) %
+                                                  60
+                                          )} seconds`
+                                        : ''
+                                } before trying again!`
+                            );
+                            break;
+                        default:
+                            this.$parent.$parent.temporaryToast(
+                                'An unknown error occurred, if this issue persists contact AlekEagle.'
+                            );
+                            break;
+                    }
+                },
+                err => {
+                    this.$parent.$parent.temporaryToast(
+                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                        10 * 1000
+                    );
+                    console.error(err);
                 }
-            });
+            );
         }
     },
     beforeCreate() {

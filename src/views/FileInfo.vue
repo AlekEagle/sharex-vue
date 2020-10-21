@@ -173,104 +173,129 @@ export default {
                         headers: {
                             Authorization: window.localStorage.getItem('token')
                         }
-                    }).then(res => {
-                        switch (res.status) {
-                            case 200:
-                                res.json().then(json => {
-                                    this.file = json;
-                                    fetch(`/api/user/${this.file.userid}/`, {
-                                        headers: {
-                                            Authorization: window.localStorage.getItem(
-                                                'token'
-                                            )
-                                        }
-                                    }).then(res => {
-                                        switch (res.status) {
-                                            case 200:
-                                                res.json().then(json => {
-                                                    this.user = json;
-                                                });
-                                                break;
-                                            case 429:
-                                                this.$parent.$parent.temporaryToast(
-                                                    `Woah, slow down! Please wait ${Math.floor(
-                                                        (res.headers.get(
-                                                            'x-ratelimit-reset'
-                                                        ) *
-                                                            1000 -
-                                                            Date.now()) /
-                                                            1000 /
-                                                            60
-                                                    )} minutes ${
-                                                        Math.floor(
-                                                            ((res.headers.get(
-                                                                'x-ratelimit-reset'
-                                                            ) *
-                                                                1000 -
-                                                                Date.now()) /
-                                                                1000) %
-                                                                60
-                                                        ) !== 0
-                                                            ? `and ${Math.floor(
-                                                                  ((res.headers.get(
-                                                                      'x-ratelimit-reset'
-                                                                  ) *
-                                                                      1000 -
-                                                                      Date.now()) /
-                                                                      1000) %
-                                                                      60
-                                                              )} seconds`
-                                                            : ''
-                                                    } before trying again!`
-                                                );
-                                                break;
-                                            default:
+                    }).then(
+                        res => {
+                            switch (res.status) {
+                                case 200:
+                                    res.json().then(json => {
+                                        this.file = json;
+                                        fetch(
+                                            `/api/user/${this.file.userid}/`,
+                                            {
+                                                headers: {
+                                                    Authorization: window.localStorage.getItem(
+                                                        'token'
+                                                    )
+                                                }
+                                            }
+                                        ).then(
+                                            res => {
+                                                switch (res.status) {
+                                                    case 200:
+                                                        res.json().then(
+                                                            json => {
+                                                                this.user = json;
+                                                            }
+                                                        );
+                                                        break;
+                                                    case 429:
+                                                        this.$parent.$parent.temporaryToast(
+                                                            `Woah, slow down! Please wait ${Math.floor(
+                                                                (res.headers.get(
+                                                                    'x-ratelimit-reset'
+                                                                ) *
+                                                                    1000 -
+                                                                    Date.now()) /
+                                                                    1000 /
+                                                                    60
+                                                            )} minutes ${
+                                                                Math.floor(
+                                                                    ((res.headers.get(
+                                                                        'x-ratelimit-reset'
+                                                                    ) *
+                                                                        1000 -
+                                                                        Date.now()) /
+                                                                        1000) %
+                                                                        60
+                                                                ) !== 0
+                                                                    ? `and ${Math.floor(
+                                                                          ((res.headers.get(
+                                                                              'x-ratelimit-reset'
+                                                                          ) *
+                                                                              1000 -
+                                                                              Date.now()) /
+                                                                              1000) %
+                                                                              60
+                                                                      )} seconds`
+                                                                    : ''
+                                                            } before trying again!`
+                                                        );
+                                                        break;
+                                                    default:
+                                                        this.$parent.$parent.temporaryToast(
+                                                            'An unknown error occurred, if this issue persists contact AlekEagle.',
+                                                            10 * 1000
+                                                        );
+                                                }
+                                            },
+                                            err => {
                                                 this.$parent.$parent.temporaryToast(
                                                     'An unknown error occurred, if this issue persists contact AlekEagle.',
                                                     10 * 1000
                                                 );
-                                        }
+                                                console.error(err);
+                                            }
+                                        );
                                     });
-                                });
-                                break;
-                            case 429:
-                                this.$parent.$parent.temporaryToast(
-                                    `Woah, slow down! Please wait ${Math.floor(
-                                        (res.headers.get('x-ratelimit-reset') *
-                                            1000 -
-                                            Date.now()) /
-                                            1000 /
-                                            60
-                                    )} minutes ${
-                                        Math.floor(
-                                            ((res.headers.get(
+                                    break;
+                                case 429:
+                                    this.$parent.$parent.temporaryToast(
+                                        `Woah, slow down! Please wait ${Math.floor(
+                                            (res.headers.get(
                                                 'x-ratelimit-reset'
                                             ) *
                                                 1000 -
                                                 Date.now()) /
-                                                1000) %
+                                                1000 /
                                                 60
-                                        ) !== 0
-                                            ? `and ${Math.floor(
-                                                  ((res.headers.get(
-                                                      'x-ratelimit-reset'
-                                                  ) *
-                                                      1000 -
-                                                      Date.now()) /
-                                                      1000) %
-                                                      60
-                                              )} seconds`
-                                            : ''
-                                    } before trying again!`
-                                );
-                                break;
-                            default:
-                                this.$parent.$parent.temporaryToast(
-                                    'An unknown error occurred, if this issue persists contact AlekEagle.',
-                                    10 * 1000
-                                );
+                                        )} minutes ${
+                                            Math.floor(
+                                                ((res.headers.get(
+                                                    'x-ratelimit-reset'
+                                                ) *
+                                                    1000 -
+                                                    Date.now()) /
+                                                    1000) %
+                                                    60
+                                            ) !== 0
+                                                ? `and ${Math.floor(
+                                                      ((res.headers.get(
+                                                          'x-ratelimit-reset'
+                                                      ) *
+                                                          1000 -
+                                                          Date.now()) /
+                                                          1000) %
+                                                          60
+                                                  )} seconds`
+                                                : ''
+                                        } before trying again!`
+                                    );
+                                    break;
+                                default:
+                                    this.$parent.$parent.temporaryToast(
+                                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                                        10 * 1000
+                                    );
+                            }
+                        },
+                        err => {
+                            this.$parent.$parent.temporaryToast(
+                                'An unknown error occurred, if this issue persists contact AlekEagle.',
+                                10 * 1000
+                            );
+                            console.error(err);
                         }
-                    });
+                    );
                     break;
                 case 429:
                     this.$parent.$parent.temporaryToast(
@@ -298,8 +323,9 @@ export default {
                     );
                     break;
                 default:
-                    this.$router.push(
-                        `/auth/?redirect=${window.location.pathname}`
+                    this.$parent.$parent.temporaryToast(
+                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                        10 * 1000
                     );
                     break;
             }

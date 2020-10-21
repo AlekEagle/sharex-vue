@@ -76,53 +76,65 @@ export default {
             headers: {
                 Authorization: `Bearer ${window.localStorage.getItem('token')}`
             }
-        }).then(res => {
-            switch (res.status) {
-                case 200:
-                    res.json().then(json => {
-                        this.$refs.header.sharedState.subtitle = `Welcome Back, ${json.displayName}!`;
-                        if (json.staff !== null && json.staff !== '') {
-                            this.$refs.header.sharedState.buttons.push({
-                                title:
-                                    'As a cool person, you get to visit the cool people place.',
-                                text: 'Cool admin zone.',
-                                to: '/admin/'
-                            });
-                        }
-                    });
-                    break;
-                case 429:
-                    this.$parent.$parent.temporaryToast(
-                        `Woah, slow down! Please wait ${Math.floor(
-                            (res.headers.get('x-ratelimit-reset') * 1000 -
-                                Date.now()) /
-                                1000 /
-                                60
-                        )} minutes ${
-                            Math.floor(
-                                ((res.headers.get('x-ratelimit-reset') * 1000 -
+        }).then(
+            res => {
+                switch (res.status) {
+                    case 200:
+                        res.json().then(json => {
+                            this.$refs.header.sharedState.subtitle = `Welcome Back, ${json.displayName}!`;
+                            if (json.staff !== null && json.staff !== '') {
+                                this.$refs.header.sharedState.buttons.push({
+                                    title:
+                                        'As a cool person, you get to visit the cool people place.',
+                                    text: 'Cool admin zone.',
+                                    to: '/admin/'
+                                });
+                            }
+                        });
+                        break;
+                    case 429:
+                        this.$parent.$parent.temporaryToast(
+                            `Woah, slow down! Please wait ${Math.floor(
+                                (res.headers.get('x-ratelimit-reset') * 1000 -
                                     Date.now()) /
-                                    1000) %
+                                    1000 /
                                     60
-                            ) !== 0
-                                ? `and ${Math.floor(
-                                      ((res.headers.get('x-ratelimit-reset') *
-                                          1000 -
-                                          Date.now()) /
-                                          1000) %
-                                          60
-                                  )} seconds`
-                                : ''
-                        } before trying again!`
-                    );
-                    break;
-                default:
-                    this.$router.push(
-                        `/auth/?redirect=${window.location.pathname}`
-                    );
-                    break;
+                            )} minutes ${
+                                Math.floor(
+                                    ((res.headers.get('x-ratelimit-reset') *
+                                        1000 -
+                                        Date.now()) /
+                                        1000) %
+                                        60
+                                ) !== 0
+                                    ? `and ${Math.floor(
+                                          ((res.headers.get(
+                                              'x-ratelimit-reset'
+                                          ) *
+                                              1000 -
+                                              Date.now()) /
+                                              1000) %
+                                              60
+                                      )} seconds`
+                                    : ''
+                            } before trying again!`
+                        );
+                        break;
+                    default:
+                        this.$router.push(
+                            `/auth/?redirect=${window.location.pathname}`
+                        );
+                        break;
+                }
+            },
+            err => {
+                this.$parent.$parent.temporaryToast(
+                    'An unknown error occurred, if this issue persists contact AlekEagle.',
+                    10 * 1000
+                );
+                console.error(err);
             }
-        });
+        );
     }
 };
 </script>

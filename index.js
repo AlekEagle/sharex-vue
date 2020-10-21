@@ -238,6 +238,9 @@ app.use((req, res, next) => {
     });
     console.log(`${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${req.protocol}://${req.headers.host}${req.url}`);
     if (req.hostname.startsWith('docs.')) {
+        res.set({
+            'Cache-Control': `public, max-age=604800`
+        });
         express.static('./docs/dist', { acceptRanges: false })(req, res, next);
         return;
     }
@@ -1177,6 +1180,8 @@ app.delete('/api/file/:file/', (req, res) => {
 });
 app.post('/upload/', upload.single('file'), (req, res) => {
     authenticate(req).then(u => {
+        res.set('X-Deprecated', 'https://alekeagle.me/api/upload/');
+        res.set('X-Deprecated-Documentation', 'https://docs.alekeagle.me/api/user.html#upload');
         if (!req.file) {
             if (!req.body.file) {
                 res.status(400).json({ error: 'Bad Request', missing: ['file'] });
@@ -1227,7 +1232,6 @@ app.post('/upload/', upload.single('file'), (req, res) => {
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-
 app.post('/api/upload/', upload.single('file'), (req, res) => {
     authenticate(req).then(u => {
         if (!req.file) {
