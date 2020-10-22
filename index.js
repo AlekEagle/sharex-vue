@@ -906,12 +906,46 @@ app.patch('/api/user/', upload.none(), (req, res) => {
 });
 app.get('/api/files/', (req, res) => {
     authenticate(req).then(u => {
+        let count = parseInt(req.query.count) || 50,
+            offset = parseInt(req.query.offset) || 0;
+        uploads.findAll({
+            offset,
+            limit: count,
+            order: [
+                ['updatedAt', 'DESC']
+            ],
+            where: {
+                userid: u.id
+            }
+        }).then(files => {
+            if (files !== null || files.length !== 0) {
+                uploads.findAll({
+                    where: {
+                        userid: u.id
+                    }
+                }).then(count => {
+                    res.status(200).json({
+                        count: count.length,
+                        files
+                    });
+                });
+            } else {
+                res.status(200).json({ count: 0, files: [] });
+            }
+        });
+    }, err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+});
+app.get('/api/files/:id/', (req, res) => {
+    authenticate(req).then(u => {
         let {
-            user
-        } = req.query,
+            id
+        } = req.params,
             count = parseInt(req.query.count) || 50,
             offset = parseInt(req.query.offset) || 0;
-        if (!user) {
+        if (u.staff !== '') {
             uploads.findAll({
                 offset,
                 limit: count,
@@ -919,13 +953,13 @@ app.get('/api/files/', (req, res) => {
                     ['updatedAt', 'DESC']
                 ],
                 where: {
-                    userid: u.id
+                    userid: id
                 }
             }).then(files => {
-                if (files !== null || files.length !== 0) {
+                if (files.length !== 0 && files !== null) {
                     uploads.findAll({
                         where: {
-                            userid: u.id
+                            userid: id
                         }
                     }).then(count => {
                         res.status(200).json({
@@ -936,41 +970,14 @@ app.get('/api/files/', (req, res) => {
                 } else {
                     res.status(200).json({ count: 0, files: [] });
                 }
+            }).catch(err => {
+                res.status(500).json({ error: "Internal Server Error" });
+                console.error(err);
             });
         } else {
-            if (u.staff !== '') {
-                uploads.findAll({
-                    offset,
-                    limit: count,
-                    order: [
-                        ['updatedAt', 'DESC']
-                    ],
-                    where: {
-                        userid: user
-                    }
-                }).then(files => {
-                    if (files.length !== 0 && files !== null) {
-                        uploads.findAll({
-                            where: {
-                                userid: user
-                            }
-                        }).then(count => {
-                            res.status(200).json({
-                                count: count.length,
-                                files
-                            });
-                        });
-                    } else {
-                        res.status(200).json({ count: 0, files: [] });
-                    }
-                }).catch(err => {
-                    res.status(500).json({ error: "Internal Server Error" });
-                    console.error(err);
-                });
-            } else {
-                res.status(403).json({ error: "Missing Permissions" });
-            }
+            res.status(403).json({ error: "Missing Permissions" });
         }
+
     }, err => {
         if (err) res.status(500).json({ error: "Internal Server Error" });
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
