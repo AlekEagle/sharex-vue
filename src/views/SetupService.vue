@@ -155,7 +155,21 @@ export default {
     },
     methods: {
         downloadConfigFile() {
-            window.open(`/api/setup/save/${this.service.name}`, '_blank');
+            fetch(`/api/setup/save/${this.service.name}`, {
+                headers: {
+                    Authorization: window.localStorage.getItem('token')
+                }
+            }).then(res => {
+                res.blob().then(slime => {
+                    let url = window.URL.createObjectURL(slime);
+                    let a = document.createElement('a');
+                    a.href = url;
+                    a.download = this.service.filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                });
+            });
         }
     }
 };
