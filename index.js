@@ -1099,7 +1099,7 @@ app.get('/api/setup/save/:name/', (req, res) => {
         }).then(ins => {
             if (ins !== null) {
                 res.set('Content-Disposition', `attachment; filename="${ins.filename}"`);
-                res.status(200).send(ins.fileContent.replace(/(\{\{apiToken\}\})/g, `Bearer ${u.apiToken}`));
+                res.status(200).send(ins.fileContent.replace(/(\{\{apiToken\}\})/g, `${u.apiToken}`));
             } else {
                 res.status(404).json({
                     error: 'Not Found'
