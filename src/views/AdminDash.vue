@@ -47,6 +47,7 @@ import Project from '@/components/Project.vue';
 import Footer from '@/components/Footer.vue';
 
 export default {
+    title: 'Admin Panel',
     name: 'AdminDash',
     components: {
         Header,

@@ -193,6 +193,7 @@ function getSelectedOption(sel) {
     return opt;
 }
 export default {
+    title: 'User Info',
     name: 'UserInfo',
     components: {
         Header,

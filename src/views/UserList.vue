@@ -42,6 +42,7 @@ import Header from '@/components/Header.vue';
 import Project from '@/components/Project.vue';
 import Footer from '@/components/Footer.vue';
 export default {
+    title: 'User List',
     name: 'UserList',
     components: {
         Header,
