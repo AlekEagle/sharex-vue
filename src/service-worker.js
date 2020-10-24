@@ -15,6 +15,7 @@ let urlsToCache = [
 
 self.addEventListener('install', event => {
     self.skipWaiting();
+    caches.delete('cache');
     caches.delete('sharedimages');
     event.waitUntil(
         caches.open('cache').then(function (cache) {
@@ -77,7 +78,7 @@ self.addEventListener('fetch', function (event) {
                     );
                 })
         );
-        if (navigator.onLine) {
+        if (navigator.onLine && !event.request.url.includes('/api/')) {
             fetch(event.request).then(res => {
                 if (res.headers.get('Last-Modified')) {
                     caches.open('cache').then(cache => {

@@ -455,18 +455,41 @@ app.delete('/api/user/', upload.none(), (req, res) => {
         if (password) {
             bcrypt.compare(password, u.password).then(match => {
                 if (match) {
-                    u.destroy().then(() => {
-                        actions.create({
-                            type: 4,
-                            by: u.id,
-                            to: u.id
-                        }).then(() => {
-                            console.log('User Deleted');
-                        });
-                        res.status(200).json({ success: true });
-                    }, err => {
-                        res.status(500).json({ error: 'Internal server error.' });
-                        console.error(err);
+                    uploads.findAll({
+                        where: {
+                            userid: u.id
+                        }
+                    }).then(files => {
+                        let errored = false;
+                        for (let i = 0; i < files.length; i++) {
+                            if (errored) break;
+                            fs.unlink(`uploads/${files[i].filename}`, err => {
+                                if (err) {
+                                    res.status(500).json({ error: "Internal Server Error" });
+                                    errored = true;
+                                } else {
+                                    files[i].destroy().then(() => { }).catch(() => {
+                                        res.status(500).json({ error: "Internal Server Error" });
+                                        errored = true;
+                                    });
+                                }
+                            });
+                        }
+                        if (!errored) {
+                            u.destroy().then(() => {
+                                actions.create({
+                                    type: 4,
+                                    by: u.id,
+                                    to: u.id
+                                }).then(() => {
+                                    console.log('User Deleted');
+                                });
+                                res.status(200).json({ success: true });
+                            }, err => {
+                                res.status(500).json({ error: 'Internal server error.' });
+                                console.error(err);
+                            });
+                        }
                     });
                 } else {
                     res.status(401).json({ error: 'Invalid password.' });
@@ -497,15 +520,41 @@ app.delete('/api/user/:id/', upload.none(), (req, res) => {
                     }
                 }).then(us => {
                     if (us !== null) {
-                        us.destroy().then(() => {
-                            actions.create({
-                                type: 4,
-                                by: u.id,
-                                to: id
-                            }).then(() => {
-                                console.log('User Deleted');
-                                res.status(200).json({ success: true });
-                            });
+                        uploads.findAll({
+                            where: {
+                                userid: us.id
+                            }
+                        }).then(files => {
+                            let errored = false;
+                            for (let i = 0; i < files.length; i++) {
+                                if (errored) break;
+                                fs.unlink(`uploads/${files[i].filename}`, err => {
+                                    if (err) {
+                                        res.status(500).json({ error: "Internal Server Error" });
+                                        errored = true;
+                                    } else {
+                                        files[i].destroy().then(() => { }).catch(() => {
+                                            res.status(500).json({ error: "Internal Server Error" });
+                                            errored = true;
+                                        });
+                                    }
+                                });
+                            }
+                            if (!errored) {
+                                us.destroy().then(() => {
+                                    actions.create({
+                                        type: 4,
+                                        by: u.id,
+                                        to: us.id
+                                    }).then(() => {
+                                        console.log('User Deleted');
+                                    });
+                                    res.status(200).json({ success: true });
+                                }, err => {
+                                    res.status(500).json({ error: 'Internal server error.' });
+                                    console.error(err);
+                                });
+                            }
                         });
                     } else {
                         res.status(404).json({ error: 'No account.' });

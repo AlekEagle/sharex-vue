@@ -122,12 +122,12 @@
         </Project>
         <Modal
             ref="domainModal"
-            title="Change Your Domain"
+            title="Change Their Domain"
             :buttons="[
                 {
                     text: 'That one',
                     action: submitDomain,
-                    title: 'Confirm your choice for your domain.'
+                    title: 'Confirm your choice for their domain.'
                 }
             ]"
             :cancelable="true"
@@ -166,6 +166,29 @@
                     </select>
                 </div>
             </form>
+        </Modal>
+        <Project
+            :title="`Delete ${user.username}'s account`"
+            :classes="['float', 'auth']"
+            :action="showDeleteUserModal"
+        >
+            Permanently delete {{ user.username }}.
+        </Project>
+        <Modal
+            ref="deleteUserModal"
+            title="Delete Their Account"
+            :buttons="[
+                {
+                    text: 'Bye bye!',
+                    action: confirmDeleteUser,
+                    title:
+                        'Send them off, they won\'t be back (well, not this account)'
+                }
+            ]"
+        >
+            By deleting their account, they will NEVER be able to access this
+            account again, and ALL of their files will be deleted. If you're
+            absolutely sure you want to do this, press confirm.
         </Modal>
     </div>
     <div v-else class="lds-ellipsis">
@@ -233,7 +256,6 @@ export default {
                                     case 200:
                                         res.json().then(json => {
                                             this.user = json;
-                                            console.log(this.user);
                                         });
                                         break;
                                     case 429:
@@ -655,6 +677,44 @@ export default {
                     console.error(err);
                 }
             );
+        },
+        confirmDeleteUser() {
+            fetch(`/api/user/${this.user.id}`, {
+                headers: {
+                    Authorization: window.localStorage.getItem('token')
+                },
+                method: 'DELETE'
+            }).then(
+                res => {
+                    switch (res.status) {
+                        case 200:
+                            this.$parent.$parent.temporaryToast('Done!');
+                            this.$router.push('/admin/users/');
+                            break;
+                        case 403:
+                            this.$parent.$parent.temporaryToast(
+                                "Woah, you aren't staff anymore! Get outta here!"
+                            );
+                            this.$router.push('/me/');
+                            break;
+                        default:
+                            this.$parent.$parent.temporaryToast(
+                                'An unknown error occurred, if this issue persists contact AlekEagle.'
+                            );
+                            break;
+                    }
+                },
+                err => {
+                    this.$parent.$parent.temporaryToast(
+                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                        10 * 1000
+                    );
+                    console.error(err);
+                }
+            );
+        },
+        showDeleteUserModal() {
+            this.$refs.deleteUserModal.showModal();
         }
     }
 };
