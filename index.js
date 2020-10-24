@@ -241,11 +241,11 @@ app.use((req, res, next) => {
         res.set({
             'Cache-Control': `public, max-age=604800`
         });
-        express.static('./docs/dist', { acceptRanges: false })(req, res, next);
+        express.static('./docs/dist', { acceptRanges: false, lastModified: true })(req, res, next);
         return;
     }
     next();
-}, express.static('uploads', { acceptRanges: false }), (req, res, next) => {
+}, express.static('uploads', { acceptRanges: false, lastModified: true }), (req, res, next) => {
     if (req.headers.host !== 'alekeagle.me' && !req.headers.host.includes('localhost') && !req.headers.host.includes('192.168.') && !req.headers.host.includes('127.0.0.1') && !req.headers.host.includes('::1') && !req.headers.host.includes('.local')) {
         res.redirect(301, 'https://alekeagle.me' + req.path);
         return;
@@ -1307,7 +1307,7 @@ app.use((req, res, next) => {
         'Cache-Control': `public, max-age=604800`
     });
     next();
-}, express.static('./dist', { acceptRanges: false }));
+}, express.static('./dist', { acceptRanges: false, lastModified: true }));
 
 server.listen(port);
 console.log(`Server listening on port ${port}`);

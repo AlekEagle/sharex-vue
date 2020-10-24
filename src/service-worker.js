@@ -15,7 +15,7 @@ let urlsToCache = [
 
 self.addEventListener('install', event => {
     self.skipWaiting();
-    caches.delete('cache');
+    caches.delete('sharedimages');
     event.waitUntil(
         caches.open('cache').then(function (cache) {
             return cache.addAll(urlsToCache.map(url => {
@@ -77,6 +77,23 @@ self.addEventListener('fetch', function (event) {
                     );
                 })
         );
+        if (navigator.onLine) {
+            fetch(event.request).then(res => {
+                if (res.headers.get('Last-Modified')) {
+                    caches.open('cache').then(cache => {
+                        cache.match(event.request.url).then(cached => {
+                            if (cached) {
+                                if (cached.headers.get('Last-Modified') !== res.headers.get('Last-Modified')) {
+                                    console.log(`${new URL(event.request.url).pathname} from cache is outdated, updating cache!`)
+                                    cache.delete(event.request.url);
+                                    cache.put(event.request, res);
+                                }
+                            }
+                        })
+                    });
+                }
+            })
+        }
     } else {
         event.respondWith(fetch(event.request).then(res => { return res; }));
     }
