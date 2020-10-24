@@ -65,7 +65,7 @@ export default {
     beforeMount() {
         fetch('/api/user/', {
             headers: {
-                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+                Authorization: `${window.localStorage.getItem('token')}`
             }
         }).then(res => {
             switch (res.status) {

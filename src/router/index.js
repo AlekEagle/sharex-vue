@@ -49,6 +49,21 @@ const routes = [
     component: () => import('../views/Upload.vue')
   },
   {
+    path: "/admin/",
+    name: "Admin Dashboard",
+    component: () => import('../views/AdminDash.vue')
+  },
+  {
+    path: "/admin/users/",
+    name: "User List",
+    component: () => import('../views/UserList.vue')
+  },
+  {
+    path: '/admin/users/:user/',
+    name: 'User Info',
+    component: () => import('../views/UserInfo.vue')
+  },
+  {
     path: "/:pathMatch(.*)*",
     name: "Error",
     component: () => import("../views/NotFound.vue")

@@ -74,7 +74,7 @@ export default {
     beforeCreate() {
         fetch('/api/user/', {
             headers: {
-                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+                Authorization: `${window.localStorage.getItem('token')}`
             }
         }).then(
             res => {

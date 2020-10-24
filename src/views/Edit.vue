@@ -25,6 +25,9 @@
             <br />
             Password: ¯\_(ツ)_/¯
             <br />
+            Domain: {{ user.subdomain }}{{ user.subdomain ? '.' : ''
+            }}{{ user.domain }}
+            <br />
             Staff?: {{ user.staff !== '' ? user.staff : 'No' }}
         </Project>
         <Project
@@ -681,7 +684,7 @@ export default {
     beforeCreate() {
         fetch('/api/user/', {
             headers: {
-                Authorization: `Bearer ${window.localStorage.getItem('token')}`
+                Authorization: `${window.localStorage.getItem('token')}`
             }
         }).then(res => {
             switch (res.status) {

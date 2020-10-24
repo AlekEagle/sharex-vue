@@ -279,8 +279,11 @@ app.get('/api/users/', (req, res) => {
                                 id: user.id,
                                 username: user.username,
                                 displayName: user.displayName,
+                                domain: user.domain,
+                                subdomain: user.subdomain,
                                 staff: user.staff,
                                 createdAt: user.createdAt,
+                                updatedAt: user.updatedAt,
                                 bannedAt: user.bannedAt
                             }
                         })
@@ -323,8 +326,11 @@ app.get('/api/user/:id/', (req, res) => {
                         id: user.id,
                         username: user.username,
                         displayName: user.displayName,
+                        domain: user.domain,
+                        subdomain: user.subdomain,
                         staff: user.staff,
                         createdAt: user.createdAt,
+                        updatedAt: user.updatedAt,
                         bannedAt: user.bannedAt
                     });
                 }, err => {
@@ -419,7 +425,17 @@ app.patch('/api/user/:id/ban/', upload.none(), (req, res) => {
             }
             user.findOne({ where: { id: req.params.id } }).then(usr => {
                 usr.update({ bannedAt: banned ? new Date(Date.now()).toISOString() : null }).then(ur => {
-                    res.status(200).json({ ...ur.toJSON(), password: null });
+                    res.status(200).json({
+                        id: ur.id,
+                        username: ur.username,
+                        displayName: ur.displayName,
+                        domain: ur.domain,
+                        subdomain: ur.subdomain,
+                        staff: ur.staff,
+                        createdAt: ur.createdAt,
+                        updatedAt: ur.updatedAt,
+                        bannedAt: ur.bannedAt
+                    });
                 }, err => {
                     res.status(500).json({ error: 'Internal server error.' });
                     console.error('bruh ', err);
@@ -908,7 +924,7 @@ app.get('/api/files/', (req, res) => {
     authenticate(req).then(u => {
         let count = parseInt(req.query.count) || 50,
             offset = parseInt(req.query.offset) || 0;
-        uploads.findAll({
+        uploads.findAndCountAll({
             offset,
             limit: count,
             order: [
@@ -919,15 +935,10 @@ app.get('/api/files/', (req, res) => {
             }
         }).then(files => {
             if (files !== null || files.length !== 0) {
-                uploads.findAll({
-                    where: {
-                        userid: u.id
-                    }
-                }).then(count => {
-                    res.status(200).json({
-                        count: count.length,
-                        files
-                    });
+
+                res.status(200).json({
+                    count: files.count,
+                    files: files.rows
                 });
             } else {
                 res.status(200).json({ count: 0, files: [] });
@@ -938,6 +949,36 @@ app.get('/api/files/', (req, res) => {
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
+app.get('/api/files/all/', (req, res) => {
+    authenticate(req).then(u => {
+        let count = parseInt(req.query.count) || 50,
+            offset = parseInt(req.query.offset) || 0;
+
+        if (u.staff !== '') {
+            uploads.findAndCountAll({
+                offset,
+                limit: count,
+                order: [
+                    ['updatedAt', 'DESC']
+                ]
+            }).then(files => {
+                if (files.length !== 0 && files !== null) {
+                    res.status(200).json({
+                        count: files.count,
+                        files: files.rows
+                    });
+                } else {
+                    res.status(200).json({ count: 0, files: [] });
+                }
+            })
+        } else {
+            res.status(403).json({ error: "Missing Permissions" });
+        }
+    }, err => {
+        if (err) res.status(500).json({ error: "Internal Server Error" });
+        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
+    });
+})
 app.get('/api/files/:id/', (req, res) => {
     authenticate(req).then(u => {
         let {
@@ -946,7 +987,7 @@ app.get('/api/files/:id/', (req, res) => {
             count = parseInt(req.query.count) || 50,
             offset = parseInt(req.query.offset) || 0;
         if (u.staff !== '') {
-            uploads.findAll({
+            uploads.findAndCountAll({
                 offset,
                 limit: count,
                 order: [
@@ -957,15 +998,10 @@ app.get('/api/files/:id/', (req, res) => {
                 }
             }).then(files => {
                 if (files.length !== 0 && files !== null) {
-                    uploads.findAll({
-                        where: {
-                            userid: id
-                        }
-                    }).then(count => {
-                        res.status(200).json({
-                            count: count.length,
-                            files
-                        });
+
+                    res.status(200).json({
+                        count: files.count,
+                        files: files.rows
                     });
                 } else {
                     res.status(200).json({ count: 0, files: [] });
@@ -1024,36 +1060,6 @@ app.get('/api/file/:file/', (req, res) => {
                 });
                 return;
             }
-        });
-    }, err => {
-        if (err) res.status(500).json({ error: "Internal Server Error" });
-        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
-    });
-});
-app.get('/api/files/count/', (req, res) => {
-    authenticate(req).then(u => {
-        uploads.findAll({
-            where: {
-                userid: u.id
-            }
-        }).then(files => {
-            res.status(200).send(files.length.toString());
-        });
-    }, err => {
-        if (err) res.status(500).json({ error: "Internal Server Error" });
-        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
-    });
-});
-app.get('/api/files/:id/count/', (req, res) => {
-    authenticate(req).then(u => {
-        let { id } = req.params;
-        uploads.findAll({
-            where: {
-                userid: id || u.id
-            }
-        }).then(files => {
-            if (u.staff !== '') res.status(200).send(files.length.toString());
-            else res.status(403).json({ error: "Missing Permissions" });
         });
     }, err => {
         if (err) res.status(500).json({ error: "Internal Server Error" });
