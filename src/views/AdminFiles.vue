@@ -65,13 +65,6 @@ export default {
         }).then(res => {
             switch (res.status) {
                 case 200:
-                    if (json.staff === '') {
-                        this.$parent.$parent.temporaryToast(
-                            "Woah there buddy! You aren't an admin! You aren't supposed to be there!"
-                        );
-                        this.$router.push('/me/');
-                        return;
-                    }
                     fetch(
                         this.$route.params.user
                             ? `/api/files/${this.$route.params.user}/?offset=${this.offset}`
