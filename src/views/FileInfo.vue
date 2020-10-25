@@ -248,6 +248,12 @@ export default {
                                         );
                                     });
                                     break;
+                                case 403:
+                                    this.$parent.$parent.temporaryToast(
+                                        "That's strange, but this file isn't yours."
+                                    );
+                                    this.$router.push('/me/files/');
+                                    break;
                                 case 429:
                                     this.$parent.$parent.temporaryToast(
                                         `Woah, slow down! Please wait ${Math.floor(

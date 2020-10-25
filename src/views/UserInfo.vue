@@ -190,6 +190,13 @@
             account again, and ALL of their files will be deleted. If you're
             absolutely sure you want to do this, press confirm.
         </Modal>
+        <Project
+            title="View their files"
+            :classes="['float', 'auth']"
+            :action="viewUserFiles"
+        >
+            View {{ user.username }}'s files.
+        </Project>
     </div>
     <div v-else class="lds-ellipsis">
         <div></div>
@@ -258,6 +265,12 @@ export default {
                                             this.user = json;
                                         });
                                         break;
+                                    case 403:
+                                        this.$parent.$parent.temporaryToast(
+                                            "Woah, you aren't staff anymore! Get outta here!"
+                                        );
+                                        this.$router.push('/me/');
+                                        break;
                                     case 429:
                                         this.$parent.$parent.temporaryToast(
                                             `Woah, slow down! Please wait ${Math.floor(
@@ -311,6 +324,12 @@ export default {
                                         res.json().then(json => {
                                             this.domains = json;
                                         });
+                                        break;
+                                    case 403:
+                                        this.$parent.$parent.temporaryToast(
+                                            "Woah, you aren't staff anymore! Get outta here!"
+                                        );
+                                        this.$router.push('/me/');
                                         break;
                                     case 429:
                                         this.$parent.$parent.temporaryToast(
@@ -715,6 +734,9 @@ export default {
         },
         showDeleteUserModal() {
             this.$refs.deleteUserModal.showModal();
+        },
+        viewUserFiles() {
+            this.$router.push(`/admin/files/${this.user.id}/`);
         }
     }
 };

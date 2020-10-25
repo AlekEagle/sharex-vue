@@ -64,6 +64,26 @@ const routes = [
     component: () => import('../views/UserInfo.vue')
   },
   {
+    path: '/admin/files/:user/',
+    name: 'Files for User',
+    component: () => import('../views/AdminFiles.vue')
+  },
+  {
+    path: '/admin/files/',
+    name: 'Files',
+    component: () => import('../views/AdminFiles.vue')
+  },
+  {
+    path: '/admin/file/:file/',
+    name: 'Admin File Info',
+    component: () => import('../views/AdminFile.vue')
+  },
+  {
+    path: '/admin/stats/',
+    name: 'ServerStats',
+    component: () => import('../views/ServerStats.vue')
+  },
+  {
     path: "/:pathMatch(.*)*",
     name: "Error",
     component: () => import("../views/NotFound.vue")

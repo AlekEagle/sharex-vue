@@ -76,6 +76,12 @@ export default {
                             this.loading = false;
                         });
                         break;
+                    case 403:
+                        this.$parent.$parent.temporaryToast(
+                            "Woah, you aren't staff anymore! Get outta here!"
+                        );
+                        this.$router.push('/me/');
+                        break;
                     case 429:
                         this.$parent.$parent.temporaryToast(
                             `Woah, slow down! Please wait ${Math.floor(
