@@ -78,20 +78,18 @@ self.addEventListener('fetch', function (event) {
                     );
                 })
         );
-        if (navigator.onLine && !event.request.url.includes('/api/')) {
-            fetch(event.request).then(res => {
-                if (res.headers.get('Last-Modified')) {
-                    caches.open('cache').then(cache => {
-                        cache.match(event.request.url).then(cached => {
-                            if (cached) {
-                                if (cached.headers.get('Last-Modified') !== res.headers.get('Last-Modified')) {
-                                    console.log(`${new URL(event.request.url).pathname} from cache is outdated, updating cache!`)
-                                    cache.delete(event.request.url);
-                                    cache.put(event.request, res);
-                                }
+        caches.open('cache').then(cache => {
+            cache.match(event.request.url).then(cached => {
+                if (navigator.onLine && cached) {
+                    fetch(event.request).then(res => {
+                        if (res.headers.get('Last-Modified')) {
+                            if (cached.headers.get('Last-Modified') !== res.headers.get('Last-Modified')) {
+                                console.log(`${new URL(event.request.url).pathname} from cache is outdated, updating cache!`)
+                                cache.delete(event.request.url);
+                                cache.put(event.request, res);
                             }
-                        })
-                    });
+                        }
+                    })
                 }
             })
         }
