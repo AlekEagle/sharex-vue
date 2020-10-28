@@ -89,10 +89,10 @@ self.addEventListener('fetch', function (event) {
                                 cache.put(event.request, res);
                             }
                         }
-                    })
+                    });
                 }
-            })
-        }
+            });
+        });
     } else {
         event.respondWith(fetch(event.request).then(res => { return res; }));
     }
