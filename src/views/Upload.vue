@@ -289,7 +289,7 @@ export default {
         },
         copyLinkToast() {
             this.$parent.$parent.temporaryToast('Link copied to clipboard!');
-            navigator.clipboard.writeText(link).then(
+            navigator.clipboard.writeText(this.link).then(
                 () => {
                     this.$parent.$parent.temporaryToast(
                         'Link copied to clipboard!'
