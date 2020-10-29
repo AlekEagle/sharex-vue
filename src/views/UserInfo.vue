@@ -185,6 +185,7 @@
                         'Send them off, they won\'t be back (well, not this account)'
                 }
             ]"
+            :cancelable="true"
         >
             By deleting their account, they will NEVER be able to access this
             account again, and ALL of their files will be deleted. If you're
