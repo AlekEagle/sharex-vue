@@ -27,6 +27,7 @@
         "register-service-worker": "^1.7.1",
         "sequelize": "^6.3.5",
         "vue": "^3.0.0-0",
+        "vue-gtag-next": "^1.14.0",
         "vue-router": "^4.0.0-0"
     },
     "devDependencies": {

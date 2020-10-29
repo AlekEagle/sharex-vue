@@ -1,7 +1,8 @@
 <template>
     <Header
         title="Server Stats"
-        subtitle="All of the server's stats in one place. (yes, more stats will be coming in the future)"
+        subtitle="All of the server's stats in one place.
+(yes, more stats will be coming in the future)"
         :buttons="[
             {
                 title: 'Head back to the admin dashboard',
