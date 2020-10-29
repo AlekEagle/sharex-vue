@@ -42,9 +42,8 @@
         <Project
             v-if="link && !uploading"
             title="Success!"
-            @click="copyLinkToast"
-            :data-clipboard-text="link"
-            :classes="['float', 'auth', 'clipboard']"
+            @click="copyLink"
+            :classes="['float', 'auth']"
         >
             Click me to copy the link to your clipboard again!
         </Project>
@@ -219,17 +218,20 @@ export default {
                         case 201:
                             res.text().then(link => {
                                 this.file = undefined;
-                                this.$parent.$parent.temporaryToast(
-                                    'Success, link was automatically copied to your clipboard!'
-                                );
                                 this.link = link;
-                                let cpTxt = document.createElement('input');
-                                cpTxt.value = link;
-                                document.body.appendChild(cpTxt);
-                                cpTxt.select();
-                                cpTxt.setSelectionRange(0, cpTxt.value.length);
-                                document.execCommand('copy');
-                                document.body.removeChild(cpTxt);
+                                navigator.clipboard.writeText(link).then(
+                                    () => {
+                                        this.$parent.$parent.temporaryToast(
+                                            'Upload successful, link was automatically copied to your clipboard!'
+                                        );
+                                    },
+                                    err => {
+                                        this.$parent.$parent.temporaryToast(
+                                            "Upload successful, I wasn't able to copy the link to your clipboard though. Click that button to copy it!"
+                                        );
+                                        console.error(err);
+                                    }
+                                );
                             });
                             break;
                         case 413:
@@ -287,6 +289,19 @@ export default {
         },
         copyLinkToast() {
             this.$parent.$parent.temporaryToast('Link copied to clipboard!');
+            navigator.clipboard.writeText(link).then(
+                () => {
+                    this.$parent.$parent.temporaryToast(
+                        'Link copied to clipboard!'
+                    );
+                },
+                err => {
+                    this.$parent.$parent.temporaryToast(
+                        "I wasn't able to copy the link to your clipboard, if this issue persists contact AlekEagle."
+                    );
+                    console.error(err);
+                }
+            );
         }
     }
 };
