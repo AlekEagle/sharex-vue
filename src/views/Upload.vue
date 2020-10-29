@@ -33,17 +33,20 @@
                     @drop.prevent.stop="drop"
                     for="file"
                 ></label>
-                <button class="button">Beam it up, Scotty</button>
+                <button class="button" v-if="file">Beam it up, Scotty</button>
+                <button class="button" v-else disabled>
+                    Beam it up, Scotty
+                </button>
             </form>
         </Project>
         <Project
-            v-if="link"
+            v-if="link && !uploading"
             title="Success!"
             @click="copyLinkToast"
             :data-clipboard-text="link"
             :classes="['float', 'auth', 'clipboard']"
         >
-            Click me to get the file!
+            Click me to copy the link to your clipboard again!
         </Project>
         <Project
             v-if="uploading"
@@ -108,6 +111,7 @@ export default {
                                         [slime],
                                         res.headers.get('X-Filename')
                                     );
+                                    this.uploadFile();
                                 });
                             });
                         }
@@ -211,13 +215,21 @@ export default {
                 body: data
             }).then(
                 res => {
-                    this.uploading = false;
                     switch (res.status) {
                         case 201:
                             res.text().then(link => {
                                 this.file = undefined;
-                                this.$parent.$parent.temporaryToast('Success!');
+                                this.$parent.$parent.temporaryToast(
+                                    'Success, link was automatically copied to your clipboard!'
+                                );
                                 this.link = link;
+                                let cpTxt = document.createElement('input');
+                                cpTxt.value = link;
+                                document.body.appendChild(cpTxt);
+                                cpTxt.select();
+                                cpTxt.setSelectionRange(0, cpTxt.value.length);
+                                document.execCommand('copy');
+                                document.body.removeChild(cpTxt);
                             });
                             break;
                         case 413:
@@ -261,6 +273,7 @@ export default {
                             );
                             break;
                     }
+                    this.uploading = false;
                 },
                 err => {
                     this.uploading = false;

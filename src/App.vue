@@ -187,11 +187,17 @@ button.button {
     cursor: pointer;
 }
 
-button.button:hover {
+button.button:hover:not(:disabled) {
     background-color: #0094ff;
     color: lightgray;
     font-weight: 400;
     box-shadow: 5px 5px 5px #141414c2;
+}
+
+button.button:disabled {
+    background-color: #101010;
+    color: grey;
+    cursor: not-allowed;
 }
 
 .main {

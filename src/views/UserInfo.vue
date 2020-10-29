@@ -48,7 +48,7 @@
         </Project>
         <Modal
             ref="handleBanModal"
-            :title="user.bannedAt ? 'Unban' : 'Ban' + ' ' + user.username"
+            :title="`${user.bannedAt ? 'Unban' : 'Ban'} ${user.username}`"
             :buttons="[
                 {
                     title: 'Yes, let\'s do it',
