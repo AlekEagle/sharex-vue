@@ -83,7 +83,7 @@ self.addEventListener('fetch', function (event) {
                     fetch(event.request).then(res => {
                         if (res.headers.get('Last-Modified')) {
                             if (cached.headers.get('Last-Modified') !== res.headers.get('Last-Modified')) {
-                                console.log(`${new URL(event.request.url).pathname} from cache is outdated, updating cache!`)
+                                console.log(`${new URL(event.request.url).pathname} from cache is outdated, updating cache!`);
                                 cache.delete(event.request.url);
                                 cache.put(event.request, res);
                             }

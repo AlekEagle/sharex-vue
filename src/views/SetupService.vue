@@ -67,91 +67,108 @@ export default {
             headers: {
                 Authorization: `${window.localStorage.getItem('token')}`
             }
-        }).then(res => {
-            switch (res.status) {
-                case 200:
-                    fetch(`/api/setup/${this.$route.params.name}`, {
-                        headers: {
-                            Authorization: window.localStorage.getItem('token')
-                        }
-                    }).then(ser => {
-                        switch (ser.status) {
-                            case 200:
-                                ser.json().then(json => {
-                                    this.service = { ...json };
-                                });
-                                break;
-                            case 429:
-                                this.$parent.$parent.temporaryToast(
-                                    `Woah, slow down! Please wait ${Math.floor(
-                                        (ser.headers.get('x-ratelimit-reset') *
-                                            1000 -
-                                            Date.now()) /
-                                            1000 /
-                                            60
-                                    )} minutes ${
-                                        Math.floor(
-                                            ((ser.headers.get(
+        }).then(
+            res => {
+                switch (res.status) {
+                    case 200:
+                        fetch(`/api/setup/${this.$route.params.name}`, {
+                            headers: {
+                                Authorization: window.localStorage.getItem(
+                                    'token'
+                                )
+                            }
+                        }).then(ser => {
+                            switch (ser.status) {
+                                case 200:
+                                    ser.json().then(json => {
+                                        this.service = { ...json };
+                                    });
+                                    break;
+                                case 429:
+                                    this.$parent.$parent.temporaryToast(
+                                        `Woah, slow down! Please wait ${Math.floor(
+                                            (ser.headers.get(
                                                 'x-ratelimit-reset'
                                             ) *
                                                 1000 -
                                                 Date.now()) /
-                                                1000) %
+                                                1000 /
                                                 60
-                                        ) !== 0
-                                            ? `and ${Math.floor(
-                                                  ((ser.headers.get(
-                                                      'x-ratelimit-reset'
-                                                  ) *
-                                                      1000 -
-                                                      Date.now()) /
-                                                      1000) %
-                                                      60
-                                              )} seconds`
-                                            : ''
-                                    } before trying again!`
-                                );
-                                break;
-                            default:
-                                this.$parent.$parent.temporaryToast(
-                                    'An unknown error occurred, if this issue persists contact AlekEagle.'
-                                );
-                                break;
-                        }
-                    });
-                    break;
-                case 429:
-                    this.$parent.$parent.temporaryToast(
-                        `Woah, slow down! Please wait ${Math.floor(
-                            (res.headers.get('x-ratelimit-reset') * 1000 -
-                                Date.now()) /
-                                1000 /
-                                60
-                        )} minutes ${
-                            Math.floor(
-                                ((res.headers.get('x-ratelimit-reset') * 1000 -
+                                        )} minutes ${
+                                            Math.floor(
+                                                ((ser.headers.get(
+                                                    'x-ratelimit-reset'
+                                                ) *
+                                                    1000 -
+                                                    Date.now()) /
+                                                    1000) %
+                                                    60
+                                            ) !== 0
+                                                ? `and ${Math.floor(
+                                                      ((ser.headers.get(
+                                                          'x-ratelimit-reset'
+                                                      ) *
+                                                          1000 -
+                                                          Date.now()) /
+                                                          1000) %
+                                                          60
+                                                  )} seconds`
+                                                : ''
+                                        } before trying again!`
+                                    );
+                                    break;
+                                default:
+                                    this.$parent.$parent.temporaryToast(
+                                        'An unknown error occurred, if this issue persists contact AlekEagle.'
+                                    );
+                                    break;
+                            }
+                        });
+                        break;
+                    case 429:
+                        this.$parent.$parent.temporaryToast(
+                            `Woah, slow down! Please wait ${Math.floor(
+                                (res.headers.get('x-ratelimit-reset') * 1000 -
                                     Date.now()) /
-                                    1000) %
+                                    1000 /
                                     60
-                            ) !== 0
-                                ? `and ${Math.floor(
-                                      ((res.headers.get('x-ratelimit-reset') *
-                                          1000 -
-                                          Date.now()) /
-                                          1000) %
-                                          60
-                                  )} seconds`
-                                : ''
-                        } before trying again!`
-                    );
-                    break;
-                default:
-                    this.$router.push(
-                        `/auth/?redirect=${window.location.pathname}`
-                    );
-                    break;
+                            )} minutes ${
+                                Math.floor(
+                                    ((res.headers.get('x-ratelimit-reset') *
+                                        1000 -
+                                        Date.now()) /
+                                        1000) %
+                                        60
+                                ) !== 0
+                                    ? `and ${Math.floor(
+                                          ((res.headers.get(
+                                              'x-ratelimit-reset'
+                                          ) *
+                                              1000 -
+                                              Date.now()) /
+                                              1000) %
+                                              60
+                                      )} seconds`
+                                    : ''
+                            } before trying again!`
+                        );
+                        break;
+                    default:
+                        this.$router.push(
+                            `/auth/?redirect=${window.location.pathname}`
+                        );
+                        break;
+                }
+            },
+            err => {
+                this.uploading = false;
+                this.$parent.$parent.temporaryToast(
+                    'An unknown error occurred, if this issue persists contact AlekEagle.',
+                    10 * 1000
+                );
+                console.error(err);
             }
-        });
+        );
     },
     methods: {
         downloadConfigFile() {
@@ -159,17 +176,27 @@ export default {
                 headers: {
                     Authorization: window.localStorage.getItem('token')
                 }
-            }).then(res => {
-                res.blob().then(slime => {
-                    let url = window.URL.createObjectURL(slime);
-                    let a = document.createElement('a');
-                    a.href = url;
-                    a.download = this.service.filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                });
-            });
+            }).then(
+                res => {
+                    res.blob().then(slime => {
+                        let url = window.URL.createObjectURL(slime);
+                        let a = document.createElement('a');
+                        a.href = url;
+                        a.download = this.service.filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    });
+                },
+                err => {
+                    this.uploading = false;
+                    this.$parent.$parent.temporaryToast(
+                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                        10 * 1000
+                    );
+                    console.error(err);
+                }
+            );
         }
     }
 };

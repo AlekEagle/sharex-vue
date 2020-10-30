@@ -62,69 +62,82 @@ export default {
             headers: {
                 Authorization: `${window.localStorage.getItem('token')}`
             }
-        }).then(res => {
-            switch (res.status) {
-                case 200:
-                    fetch(
-                        this.$route.params.user
-                            ? `/api/files/${this.$route.params.user}/?offset=${this.offset}`
-                            : `/api/files/all/?offset=${this.offset}`,
-                        {
-                            headers: {
-                                Authorization: window.localStorage.getItem(
-                                    'token'
-                                )
+        }).then(
+            res => {
+                switch (res.status) {
+                    case 200:
+                        fetch(
+                            this.$route.params.user
+                                ? `/api/files/${this.$route.params.user}/?offset=${this.offset}`
+                                : `/api/files/all/?offset=${this.offset}`,
+                            {
+                                headers: {
+                                    Authorization: window.localStorage.getItem(
+                                        'token'
+                                    )
+                                }
                             }
-                        }
-                    ).then(uploads => {
-                        if (uploads.status === 200) {
-                            uploads.json().then(json => {
-                                this.$refs.header.sharedState.subtitle =
-                                    this.$refs.header.sharedState.subtitle +
-                                    `\nThere are ${json.count} files.`;
-                                this.offset += json.files.length;
-                                this.files.push(...json.files);
-                                this.loading = false;
-                            });
-                        } else {
-                            this.$parent.$parent.temporaryToast(
-                                'An unknown error occurred, if this issue persists contact AlekEagle.'
-                            );
-                        }
-                    });
-                    break;
-                case 429:
-                    this.$parent.$parent.temporaryToast(
-                        `Woah, slow down! Please wait ${Math.floor(
-                            (res.headers.get('x-ratelimit-reset') * 1000 -
-                                Date.now()) /
-                                1000 /
-                                60
-                        )} minutes ${
-                            Math.floor(
-                                ((res.headers.get('x-ratelimit-reset') * 1000 -
+                        ).then(uploads => {
+                            if (uploads.status === 200) {
+                                uploads.json().then(json => {
+                                    this.$refs.header.sharedState.subtitle =
+                                        this.$refs.header.sharedState.subtitle +
+                                        `\nThere are ${json.count} files.`;
+                                    this.offset += json.files.length;
+                                    this.files.push(...json.files);
+                                    this.loading = false;
+                                });
+                            } else {
+                                this.$parent.$parent.temporaryToast(
+                                    'An unknown error occurred, if this issue persists contact AlekEagle.'
+                                );
+                            }
+                        });
+                        break;
+                    case 429:
+                        this.$parent.$parent.temporaryToast(
+                            `Woah, slow down! Please wait ${Math.floor(
+                                (res.headers.get('x-ratelimit-reset') * 1000 -
                                     Date.now()) /
-                                    1000) %
+                                    1000 /
                                     60
-                            ) !== 0
-                                ? `and ${Math.floor(
-                                      ((res.headers.get('x-ratelimit-reset') *
-                                          1000 -
-                                          Date.now()) /
-                                          1000) %
-                                          60
-                                  )} seconds`
-                                : ''
-                        } before trying again!`
-                    );
-                    break;
-                default:
-                    this.$router.push(
-                        `/auth/?redirect=${window.location.pathname}`
-                    );
-                    break;
+                            )} minutes ${
+                                Math.floor(
+                                    ((res.headers.get('x-ratelimit-reset') *
+                                        1000 -
+                                        Date.now()) /
+                                        1000) %
+                                        60
+                                ) !== 0
+                                    ? `and ${Math.floor(
+                                          ((res.headers.get(
+                                              'x-ratelimit-reset'
+                                          ) *
+                                              1000 -
+                                              Date.now()) /
+                                              1000) %
+                                              60
+                                      )} seconds`
+                                    : ''
+                            } before trying again!`
+                        );
+                        break;
+                    default:
+                        this.$router.push(
+                            `/auth/?redirect=${window.location.pathname}`
+                        );
+                        break;
+                }
+            },
+            err => {
+                this.uploading = false;
+                this.$parent.$parent.temporaryToast(
+                    'An unknown error occurred, if this issue persists contact AlekEagle.',
+                    10 * 1000
+                );
+                console.error(err);
             }
-        });
+        );
     },
     methods: {
         loadMore() {
@@ -138,54 +151,66 @@ export default {
                         Authorization: window.localStorage.getItem('token')
                     }
                 }
-            ).then(uploads => {
-                switch (uploads.status) {
-                    case 200:
-                        uploads.json().then(json => {
-                            this.offset += json.files.length;
-                            if (json.files.length < 1) {
-                                this.hideLoadMore = true;
-                            }
-                            this.files.push(...json.files);
-                            this.loading = false;
-                        });
-                        break;
-                    case 429:
-                        this.$parent.$parent.temporaryToast(
-                            `Woah, slow down! Please wait ${Math.floor(
-                                (uploads.headers.get('x-ratelimit-reset') *
-                                    1000 -
-                                    Date.now()) /
-                                    1000 /
-                                    60
-                            )} minutes ${
-                                Math.floor(
-                                    ((uploads.headers.get('x-ratelimit-reset') *
+            ).then(
+                uploads => {
+                    switch (uploads.status) {
+                        case 200:
+                            uploads.json().then(json => {
+                                this.offset += json.files.length;
+                                if (json.files.length < 1) {
+                                    this.hideLoadMore = true;
+                                }
+                                this.files.push(...json.files);
+                                this.loading = false;
+                            });
+                            break;
+                        case 429:
+                            this.$parent.$parent.temporaryToast(
+                                `Woah, slow down! Please wait ${Math.floor(
+                                    (uploads.headers.get('x-ratelimit-reset') *
                                         1000 -
                                         Date.now()) /
-                                        1000) %
+                                        1000 /
                                         60
-                                ) !== 0
-                                    ? `and ${Math.floor(
-                                          ((uploads.headers.get(
-                                              'x-ratelimit-reset'
-                                          ) *
-                                              1000 -
-                                              Date.now()) /
-                                              1000) %
-                                              60
-                                      )} seconds`
-                                    : ''
-                            } before trying again!`
-                        );
-                        break;
-                    default:
-                        this.$parent.$parent.temporaryToast(
-                            'An unknown error occurred, if this issue persists contact AlekEagle.'
-                        );
-                        break;
+                                )} minutes ${
+                                    Math.floor(
+                                        ((uploads.headers.get(
+                                            'x-ratelimit-reset'
+                                        ) *
+                                            1000 -
+                                            Date.now()) /
+                                            1000) %
+                                            60
+                                    ) !== 0
+                                        ? `and ${Math.floor(
+                                              ((uploads.headers.get(
+                                                  'x-ratelimit-reset'
+                                              ) *
+                                                  1000 -
+                                                  Date.now()) /
+                                                  1000) %
+                                                  60
+                                          )} seconds`
+                                        : ''
+                                } before trying again!`
+                            );
+                            break;
+                        default:
+                            this.$parent.$parent.temporaryToast(
+                                'An unknown error occurred, if this issue persists contact AlekEagle.'
+                            );
+                            break;
+                    }
+                },
+                err => {
+                    this.uploading = false;
+                    this.$parent.$parent.temporaryToast(
+                        'An unknown error occurred, if this issue persists contact AlekEagle.',
+                        10 * 1000
+                    );
+                    console.error(err);
                 }
-            });
+            );
         },
         back() {
             this.$router.push(
