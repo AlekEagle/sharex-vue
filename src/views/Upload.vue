@@ -206,7 +206,7 @@ export default {
             this.link = null;
             let data = new FormData();
             data.append('file', this.file);
-            fetch('/upload/', {
+            fetch('/api/upload/', {
                 headers: {
                     Authorization: window.localStorage.getItem('token')
                 },

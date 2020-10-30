@@ -652,7 +652,7 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
                         res.status(200).json({
                             token: us.apiToken
                         });
-                        actions.crxeate({
+                        actions.create({
                             type: 3,
                             by: us.id,
                             to: us.id
@@ -678,7 +678,7 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-app.patch('/api/user/:id/token', (req, res) => {
+app.patch('/api/user/:id/token/', (req, res) => {
     authenticate(req).then(u => {
         if (req.params.id) {
             if (u.staff === '') {
@@ -1068,14 +1068,6 @@ app.get('/api/files/:id/', (req, res) => {
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-app.get('/api/file/', (req, res) => {
-    authenticate(req).then(u => {
-        res.status(400).json({ error: 'Bad Request', missing: ['file'] });
-    }).catch(() => {
-        if (err) res.status(500).json({ error: "Internal Server Error" });
-        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
-    });
-});
 app.get('/api/file/:file/', (req, res) => {
     authenticate(req).then(u => {
         let {
@@ -1166,14 +1158,6 @@ app.get('/api/setup/save/:name/', (req, res) => {
         else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
     });
 });
-app.delete('/api/file/', (req, res) => {
-    authenticate(req).then(u => {
-        res.status(400).json({ error: 'Bad Request', missing: ['file'] });
-    }).catch(() => {
-        if (err) res.status(500).json({ error: "Internal Server Error" });
-        else res.status(401).json(req.headers.authorization ? { error: 'Invalid Token' } : { error: 'No Token Provided' });
-    });
-})
 app.delete('/api/file/:file/', (req, res) => {
     authenticate(req).then(u => {
         let {
