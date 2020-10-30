@@ -1,5 +1,5 @@
 <template>
-    <router-view />
+    <router-view /> // Toast
     <Toast ref="toast"></Toast>
 </template>
 
