@@ -29,6 +29,7 @@ export default {
 </script>
 
 <style>
+// Toast
 body {
     padding: 0px;
     margin: 0px;
