@@ -1,5 +1,5 @@
 <template>
-    <router-view /> // Toast
+    <router-view />
     <Toast ref="toast"></Toast>
 </template>
 
@@ -29,6 +29,7 @@ export default {
 </script>
 
 <style>
+// Toast
 body {
     padding: 0px;
     margin: 0px;
