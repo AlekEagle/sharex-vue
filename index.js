@@ -746,8 +746,8 @@ app.patch('/api/user/:id/domain/', upload.none(), (req, res) => {
                             }
                         }).then(us => {
                             if (us !== null) {
-                                us.update({ domain, subdomain }).then(() => {
-                                    res.status(200).json({ domain, subdomain });
+                                us.update({ domain, subdomain: subdomain.replace(/[. ]/g, '-') }).then(() => {
+                                    res.status(200).json({ domain, subdomain: subdomain.replace(/[. ]/g, '-') });
                                 }, err => {
                                     res.status(500).json({ error: "Internal Server Error" });
                                     console.error(err);
@@ -758,7 +758,7 @@ app.patch('/api/user/:id/domain/', upload.none(), (req, res) => {
                         res.status(403).json({ error: "Missing Permissions" });
                     }
                 } else {
-                    res.status(400).json({ error: `Domain "${domain}" doesn't support subdomains.` });
+                    res.status(400).json({ error: 'Domain provided does not support subdomains' });
                 }
             } else {
                 res.status(404).json({
@@ -797,15 +797,15 @@ app.patch('/api/user/domain/', upload.none(), (req, res) => {
                 if (d.allowsSubdomains ? true : (subdomain === undefined || subdomain === '')) {
                     u.update({
                         domain,
-                        subdomain
+                        subdomain: subdomain.replace(/[. ]/g, '-')
                     }).then(us => {
                         res.status(200).json({
                             domain,
-                            subdomain
+                            subdomain: subdomain.replace(/[. ]/g, '-')
                         });
                     });
                 } else {
-                    res.status(400).json({ error: `Domain "${domain}" doesn't support subdomains.` });
+                    res.status(400).json({ error: 'Domain provided does not support subdomains' });
                 }
             } else {
                 res.status(404).json({
