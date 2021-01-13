@@ -165,7 +165,7 @@ const corsOptions = {
     optionsSuccessStatus: 200
 }
 let https,
-    app = require('express')();
+    app = express();
 if (process.env.DEBUG) {
     https = require('http');
 } else {
