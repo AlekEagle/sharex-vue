@@ -1,96 +1,84 @@
 <template>
-    <div v-if="sharedState.to" :class="getClasses()">
-        <img
-            v-if="sharedState.icon"
-            class="project_icon"
-            :src="sharedState.icon"
-        />
-        <div class="project_title" v-text="sharedState.title" />
-        <div class="project_description"><slot /></div>
-        <router-link v-if="!sharedState.disabled" :to="sharedState.to">
-            <span class="project_link" />
-        </router-link>
-        <span v-else class="project_link disabled" />
-    </div>
-    <div v-else-if="sharedState.action" :class="getClasses()">
-        <img
-            v-if="sharedState.icon"
-            class="project_icon"
-            :src="sharedState.icon"
-        />
-        <div class="project_title" v-text="sharedState.title" />
-        <div class="project_description"><slot /></div>
-        <span
-            v-if="!sharedState.disabled"
-            class="project_link"
-            @click="handleClick"
-        />
-        <span v-else class="project_link disabled" />
-    </div>
-    <div v-else :class="getClasses()">
-        <img
-            v-if="sharedState.icon"
-            class="project_icon"
-            :src="sharedState.icon"
-        />
-        <div class="project_title" v-text="sharedState.title" />
-        <div class="project_description"><slot /></div>
-        <span
-            v-if="!sharedState.disabled && !sharedState.noSpan"
-            class="project_link"
-        />
-        <span v-else-if="!sharedState.noSpan" class="project_link disabled" />
-    </div>
+  <div v-if="sharedState.to" :class="getClasses()">
+    <img v-if="sharedState.icon" class="project_icon" :src="sharedState.icon" />
+    <div class="project_title" v-text="sharedState.title" />
+    <div class="project_description"><slot /></div>
+    <router-link v-if="!sharedState.disabled" :to="sharedState.to">
+      <span class="project_link" />
+    </router-link>
+    <span v-else class="project_link disabled" />
+  </div>
+  <div v-else-if="sharedState.action" :class="getClasses()">
+    <img v-if="sharedState.icon" class="project_icon" :src="sharedState.icon" />
+    <div class="project_title" v-text="sharedState.title" />
+    <div class="project_description"><slot /></div>
+    <span
+      v-if="!sharedState.disabled"
+      class="project_link"
+      @click="handleClick"
+    />
+    <span v-else class="project_link disabled" />
+  </div>
+  <div v-else :class="getClasses()">
+    <img v-if="sharedState.icon" class="project_icon" :src="sharedState.icon" />
+    <div class="project_title" v-text="sharedState.title" />
+    <div class="project_description"><slot /></div>
+    <span
+      v-if="!sharedState.disabled && !sharedState.noSpan"
+      class="project_link"
+    />
+    <span v-else-if="!sharedState.noSpan" class="project_link disabled" />
+  </div>
 </template>
 <script>
-export default {
+  export default {
     name: 'Project',
     props: {
-        title: String,
-        icon: String,
-        classes: Array,
-        disabled: Boolean,
-        to: [String, Location],
-        action: Function,
-        noSpan: Boolean
+      title: String,
+      icon: String,
+      classes: Array,
+      disabled: Boolean,
+      to: [String, Location],
+      action: Function,
+      noSpan: Boolean
     },
     data() {
-        return {
-            privateState: {},
-            sharedState: {
-                title: '',
-                icon: '',
-                classes: [],
-                disabled: false,
-                to: '',
-                action: null,
-                noSpan: false
-            }
-        };
+      return {
+        privateState: {},
+        sharedState: {
+          title: '',
+          icon: '',
+          classes: [],
+          disabled: false,
+          to: '',
+          action: null,
+          noSpan: false
+        }
+      };
     },
     methods: {
-        handleClick() {
-            this.action(this);
-        },
-        getClasses() {
-            return `project${
-                this.sharedState.disabled ? ' disabled' : ''
-            } ${this.sharedState.classes.join(' ')}`;
-        }
+      handleClick() {
+        this.action(this);
+      },
+      getClasses() {
+        return `project${
+          this.sharedState.disabled ? ' disabled' : ''
+        } ${this.sharedState.classes.join(' ')}`;
+      }
     },
     mounted() {
-        this.sharedState.title = this.title;
-        this.sharedState.icon = this.icon;
-        this.sharedState.classes = this.classes;
-        this.sharedState.disabled = this.disabled;
-        this.sharedState.to = this.to;
-        this.sharedState.action = this.action;
-        this.sharedState.noSpan = !!this.noSpan;
+      this.sharedState.title = this.title;
+      this.sharedState.icon = this.icon;
+      this.sharedState.classes = this.classes;
+      this.sharedState.disabled = this.disabled;
+      this.sharedState.to = this.to;
+      this.sharedState.action = this.action;
+      this.sharedState.noSpan = !!this.noSpan;
     }
-};
+  };
 </script>
 <style>
-.project {
+  .project {
     font-size: 16px;
     margin: 10px;
     padding-right: 10px;
@@ -103,27 +91,27 @@ export default {
     outline: none;
     align-self: stretch;
     position: relative;
-}
+  }
 
-.project * {
+  .project * {
     transition: 0.3s;
-}
+  }
 
-.project:focus:not(.float):not(.sink):not(.disabled) {
+  .project:focus:not(.float):not(.sink):not(.disabled) {
     background: #252525;
     box-shadow: 13px 13px 5px #141414b0;
     border: 1px solid #505050;
     transform: translate(-7px, -7px);
-}
+  }
 
-.project:hover:not(.float):not(.sink):not(.disabled) {
+  .project:hover:not(.float):not(.sink):not(.disabled) {
     background: #252525;
     box-shadow: 13px 13px 5px #141414b0;
     border: 1px solid #505050;
     transform: translate(-7px, -7px);
-}
+  }
 
-.project_link {
+  .project_link {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -137,43 +125,43 @@ export default {
     /* fixes overlap error in IE7/8, 
        make sure you have an empty gif */
     background-image: url('/img/empty.gif');
-}
+  }
 
-.project_icon {
+  .project_icon {
     height: 64px;
     float: left;
     margin: 15px;
-}
+  }
 
-.project_title {
+  .project_title {
     font-size: 1.2em;
     text-align: left;
     margin-bottom: 10px;
     margin-top: 15px;
-}
+  }
 
-.project_description {
+  .project_description {
     font-size: 0.9em;
     color: #9c9c9c;
     text-align: left;
     overflow-x: hidden;
     word-wrap: break-word;
-}
+  }
 
-.error_text {
+  .error_text {
     color: #ec1a1a;
-}
+  }
 
-.uploadfile {
+  .uploadfile {
     width: 0.1px;
     height: 0.1px;
     opacity: 0;
     overflow: hidden;
     position: absolute;
     z-index: -1;
-}
+  }
 
-.uploadfile + label {
+  .uploadfile + label {
     font-size: 25px;
     font-weight: 700;
     color: white;
@@ -186,102 +174,102 @@ export default {
     overflow-x: hidden;
     overflow-wrap: break-word;
     max-width: inherit;
-}
+  }
 
-.uploadfile + label:hover {
+  .uploadfile + label:hover {
     background-color: #1f1f1f;
-}
+  }
 
-@media screen and (max-width: 589px) {
+  @media screen and (max-width: 589px) {
     .project {
-        width: calc((100% - (32px * 1)) / 1);
+      width: calc((100% - (32px * 1)) / 1);
     }
-}
+  }
 
-@media screen and (min-width: 590px) and (max-width: 1152px) {
+  @media screen and (min-width: 590px) and (max-width: 1152px) {
     .project {
-        width: calc((100% - (32px * 2)) / 2);
+      width: calc((100% - (32px * 2)) / 2);
     }
-}
+  }
 
-@media screen and (min-width: 1153px) and (max-width: 1366px) {
+  @media screen and (min-width: 1153px) and (max-width: 1366px) {
     .project {
-        width: calc((100% - (32px * 3)) / 3);
+      width: calc((100% - (32px * 3)) / 3);
     }
-}
+  }
 
-@media screen and (min-width: 1367px) and (max-width: 1699px) {
+  @media screen and (min-width: 1367px) and (max-width: 1699px) {
     .project {
-        width: calc((100% - (32px * 4)) / 4);
+      width: calc((100% - (32px * 4)) / 4);
     }
-}
+  }
 
-@media screen and (min-width: 1700px) and (max-width: 2099px) {
+  @media screen and (min-width: 1700px) and (max-width: 2099px) {
     .project {
-        width: calc((100% - (32px * 5)) / 5);
+      width: calc((100% - (32px * 5)) / 5);
     }
-}
+  }
 
-@media screen and (min-width: 2100px) {
+  @media screen and (min-width: 2100px) {
     .project {
-        width: calc((100% - (32px * 6)) / 6);
+      width: calc((100% - (32px * 6)) / 6);
     }
-}
+  }
 
-.auth .project_title {
+  .auth .project_title {
     margin-left: 7px;
-}
+  }
 
-.auth .project_description {
+  .auth .project_description {
     text-align: center;
-}
+  }
 
-.auth .project_description select {
+  .auth .project_description select {
     width: 100%;
     margin: 5px 0px;
-}
+  }
 
-.auth .project_description .darktextbox {
+  .auth .project_description .darktextbox {
     width: 95%;
     margin: 5px 0px;
-}
+  }
 
-.project.auth {
+  .project.auth {
     padding-right: 0;
-}
+  }
 
-.project.float:hover:not(.disabled) {
+  .project.float:hover:not(.disabled) {
     background: #202020;
     box-shadow: 13px 13px 5px #141414b0;
     border: 1px solid #505050;
     transform: translate(-7px, -7px);
-}
+  }
 
-.project.sink:hover:not(.disabled) {
+  .project.sink:hover:not(.disabled) {
     box-shadow: inset 13px 13px 5px #141414b0;
     border: 1px solid #505050;
-}
+  }
 
-.project.sink:hover:not(.disabled) * {
+  .project.sink:hover:not(.disabled) * {
     transform: translate(7px, 7px);
-}
+  }
 
-.project.float:focus:not(.disabled) {
+  .project.float:focus:not(.disabled) {
     background: #252525;
     box-shadow: 13px 13px 5px #141414b0;
     border: 1px solid #505050;
-}
+  }
 
-.project.project.sink:focus:not(.disabled) * {
+  .project.project.sink:focus:not(.disabled) * {
     transform: translate(7px, 7px);
-}
+  }
 
-.project.sink:focus:not(.disabled) {
+  .project.sink:focus:not(.disabled) {
     box-shadow: inset 13px 13px 5px #141414b0;
     border: 1px solid #505050;
-}
+  }
 
-.project_link.disabled {
+  .project_link.disabled {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -297,5 +285,5 @@ export default {
     /* fixes overlap error in IE7/8, 
          make sure you have an empty gif */
     background-image: url('/img/empty.gif');
-}
+  }
 </style>

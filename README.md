@@ -8,9 +8,9 @@ npm install
 
 ## Requirements
 
--   Latest Version of PostgreSQL
--   Node.JS v14.13.1
--   A machine to host on
+- Latest Version of PostgreSQL
+- Node.JS v14.13.1
+- A machine to host on
 
 ## .env File Configuration
 

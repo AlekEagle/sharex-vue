@@ -1,41 +1,40 @@
 <template>
-    <router-view />
-    <Toast ref="toast"></Toast>
+  <router-view />
+  <Toast ref="toast"></Toast>
 </template>
 
 <script>
-import Toast from '@/components/Toast.vue';
-export default {
+  import Toast from '@/components/Toast.vue';
+  export default {
     name: 'App',
     methods: {
-        temporaryToast(text, duration) {
-            this.$refs.toast.showToast(
-                text,
-                typeof duration === 'number' ? duration : true
-            );
-        },
-        permanentToast(text) {
-            this.$refs.toast.showToast(text);
-        },
-        hideToast() {
-            this.$refs.toast.hideToast();
-        }
+      temporaryToast(text, duration) {
+        this.$refs.toast.showToast(
+          text,
+          typeof duration === 'number' ? duration : true
+        );
+      },
+      permanentToast(text) {
+        this.$refs.toast.showToast(text);
+      },
+      hideToast() {
+        this.$refs.toast.hideToast();
+      }
     },
     mounted() {},
     components: {
-        Toast
+      Toast
     }
-};
+  };
 </script>
 
 <style>
-// Toast
-body {
+  body {
     padding: 0px;
     margin: 0px;
-}
+  }
 
-#title-bar {
+  #title-bar {
     -webkit-app-region: drag;
     -webkit-user-select: none;
     height: 35px;
@@ -49,55 +48,55 @@ body {
     width: 100%;
     z-index: 3;
     box-shadow: 0px 5px 35px rgb(20, 20, 20);
-}
+  }
 
-.title-bar {
+  .title-bar {
     height: 50px;
     background-color: #00000000;
     position: relative;
     top: 0px;
     width: 100%;
-}
+  }
 
-.nopad {
+  .nopad {
     padding-top: 0px;
     padding-bottom: 0px;
     padding-right: 0px;
     padding-left: 0px;
-}
+  }
 
-.nomar {
+  .nomar {
     margin-top: 0px;
     margin-bottom: 0px;
     margin-right: 0px;
     margin-left: 0px;
-}
+  }
 
-#title-img {
+  #title-img {
     position: fixed;
     top: 6px;
     left: 3px;
     z-index: 4;
-}
+  }
 
-#title {
+  #title {
     position: fixed;
     top: 4px;
     left: 30px;
     font-weight: 400;
     font-size: 20px;
     z-index: 4;
-}
+  }
 
-#title-bar-btns {
+  #title-bar-btns {
     -webkit-app-region: no-drag;
     position: fixed;
     top: 0px;
     right: 0px;
     z-index: 4;
-}
+  }
 
-.control-button {
+  .control-button {
     background-color: transparent;
     width: 50px;
     height: 35px;
@@ -111,69 +110,68 @@ body {
     float: right;
     line-height: 0px;
     transition: 0.5s;
-}
+  }
 
-#max-btn:hover {
+  #max-btn:hover {
     background-color: #444444c2;
-}
+  }
 
-#min-btn:hover {
+  #min-btn:hover {
     background-color: #444444c2;
-}
+  }
 
-#close-btn:hover {
+  #close-btn:hover {
     background-color: #960000c2;
-}
+  }
 
-.control-button:focus {
+  .control-button:focus {
     outline: none;
-}
+  }
 
-* {
+  * {
     font-family: K2D, Halvetica, Arial, sans-serif;
     font-weight: bold;
     color: #d6d6d6;
     text-align: center;
     word-spacing: 2px;
-}
+  }
 
-option {
+  option {
     color: #c5c5c5;
     background-color: black;
-}
+  }
 
-option:focus {
+  option:focus {
     outline: none;
-}
+  }
 
-select:focus {
+  select:focus {
     outline: none;
-}
+  }
 
-select {
+  select {
     color: #c5c5c5;
     border: none;
     border-radius: 5px;
     background-color: black;
     outline: none;
     padding: 6px 0;
-}
+  }
 
-a {
+  a {
     color: #888888;
     text-decoration: none !important;
-}
+  }
 
-body {
+  body {
     background-color: #252525;
     color: #1199ff;
     margin-left: 0;
     margin-right: 0;
     margin-top: 0;
-    overflow: hidden overlay;
-}
+  }
 
-button.button {
+  button.button {
     width: fit-content;
     color: white;
     margin: 5px 3px;
@@ -186,28 +184,28 @@ button.button {
     font-weight: 400;
     outline: none;
     cursor: pointer;
-}
+  }
 
-button.button:hover:not(:disabled) {
+  button.button:hover:not(:disabled) {
     background-color: #0094ff;
     color: lightgray;
     font-weight: 400;
     box-shadow: 5px 5px 5px #141414c2;
-}
+  }
 
-button.button:disabled {
+  button.button:disabled {
     background-color: #101010;
     color: grey;
     cursor: not-allowed;
-}
+  }
 
-.main {
+  .main {
     width: 95%;
     margin-left: auto;
     margin-right: auto;
-}
+  }
 
-#bgCanvas {
+  #bgCanvas {
     position: fixed;
     top: 0;
     left: 0;
@@ -215,34 +213,34 @@ button.button:disabled {
     height: 100%;
     z-index: -1;
     overflow: hidden;
-}
+  }
 
-img,
-embed,
-object,
-video {
+  img,
+  embed,
+  object,
+  video {
     max-width: 100%;
     -webkit-user-select: none;
-}
+  }
 
-::-webkit-scrollbar {
+  ::-webkit-scrollbar {
     width: 10px;
-}
+  }
 
-::-webkit-scrollbar-track {
+  ::-webkit-scrollbar-track {
     background-color: transparent;
-}
+  }
 
-::-webkit-scrollbar-thumb {
+  ::-webkit-scrollbar-thumb {
     background: #333333;
     border-radius: 5px;
-}
+  }
 
-::-webkit-scrollbar-thumb:active {
+  ::-webkit-scrollbar-thumb:active {
     background: #292929;
-}
+  }
 
-.container {
+  .container {
     display: block;
     position: relative;
     padding-left: 35px;
@@ -253,17 +251,17 @@ video {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-}
+  }
 
-.container input {
+  .container input {
     position: absolute;
     opacity: 0;
     cursor: pointer;
     height: 0;
     width: 0;
-}
+  }
 
-.checkmark {
+  .checkmark {
     position: absolute;
     top: 0;
     height: 25px;
@@ -271,53 +269,53 @@ video {
     background-color: #292929;
     transition-duration: 0.25s;
     border-radius: 5px;
-}
+  }
 
-.container input:disabled ~ .checkmark {
+  .container input:disabled ~ .checkmark {
     background-color: #141414;
-}
+  }
 
-.checkbox_align {
+  .checkbox_align {
     padding: none;
     margin: none;
     display: inline;
     color: transparent;
-}
+  }
 
-.container:hover input ~ .checkmark {
+  .container:hover input ~ .checkmark {
     background-color: rgb(59, 59, 59);
     box-shadow: 5px 5px 5px #14141485;
-}
+  }
 
-.container:focus input ~ .checkmark {
+  .container:focus input ~ .checkmark {
     box-shadow: 5px 5px 5px #14141485;
-}
+  }
 
-.container:hover input:disabled ~ .checkmark {
+  .container:hover input:disabled ~ .checkmark {
     background-color: #141414;
     box-shadow: none;
-}
+  }
 
-.container:focus input:disabled ~ .checkmark {
+  .container:focus input:disabled ~ .checkmark {
     background-color: #141414;
     box-shadow: none;
-}
+  }
 
-.container input:checked ~ .checkmark {
+  .container input:checked ~ .checkmark {
     background-color: #2196f3;
-}
+  }
 
-.checkmark:after {
+  .checkmark:after {
     content: '';
     position: absolute;
     display: none;
-}
+  }
 
-.container input:checked ~ .checkmark:after {
+  .container input:checked ~ .checkmark:after {
     display: block;
-}
+  }
 
-.container .checkmark:after {
+  .container .checkmark:after {
     left: 9px;
     top: 5px;
     width: 5px;
@@ -327,29 +325,29 @@ video {
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
     transform: rotate(45deg);
-}
+  }
 
-input {
+  input {
     color: black;
-}
+  }
 
-code {
+  code {
     font-family: 'Source Code Pro', monospace;
     background: #1d1d1d;
     border-radius: 3px;
     padding: 5px 3.5px;
-}
+  }
 
-#folderpath {
+  #folderpath {
     cursor: pointer;
     color: #5151ce;
-}
+  }
 
-.logEntry {
+  .logEntry {
     display: inline;
-}
+  }
 
-.slider {
+  .slider {
     -webkit-appearance: none;
     width: 30%;
     height: 15px;
@@ -360,17 +358,17 @@ code {
     -webkit-transition: 0.2s;
     transition: opacity 0.2s;
     cursor: pointer;
-}
+  }
 
-.slider:hover {
+  .slider:hover {
     opacity: 1;
-}
+  }
 
-.slider:focus {
+  .slider:focus {
     opacity: 1;
-}
+  }
 
-.slider::-webkit-slider-thumb {
+  .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 25px;
@@ -378,17 +376,17 @@ code {
     border-radius: 50%;
     background: rgb(62, 168, 187);
     cursor: pointer;
-}
+  }
 
-.slider::-moz-range-thumb {
+  .slider::-moz-range-thumb {
     width: 25px;
     height: 25px;
     border-radius: 50%;
     background: #4caf50;
     cursor: pointer;
-}
+  }
 
-.progressbar {
+  .progressbar {
     position: relative;
     overflow: hidden;
     margin: 0 10px 0 10px;
@@ -397,9 +395,9 @@ code {
     display: inline-block;
     height: 20px;
     border-radius: 10px;
-}
+  }
 
-.activebar {
+  .activebar {
     position: absolute;
     top: 0;
     left: 0;
@@ -407,9 +405,9 @@ code {
     height: 20px;
     transition: width 0.5s ease;
     background-color: #3ea8bb;
-}
+  }
 
-.darktextbox {
+  .darktextbox {
     background-color: #272727;
     color: #d6d6d6;
     border: 0;
@@ -418,105 +416,105 @@ code {
     transition: 0.3s;
     font-size: 20px;
     padding: 6px 0;
-}
+  }
 
-select {
+  select {
     font-size: 20px;
-}
+  }
 
-.darktextbox:hover:not(:disabled) {
+  .darktextbox:hover:not(:disabled) {
     background-color: #2c2c2c;
     box-shadow: 5px 5px 5px #14141485;
-}
+  }
 
-.darktextbox:disabled {
+  .darktextbox:disabled {
     background-color: #141414;
     color: #8b8b8b;
     border: 0;
     outline: none;
     cursor: not-allowed;
-}
+  }
 
-input#subdomain {
+  input#subdomain {
     width: 45%;
-}
+  }
 
-select#domain {
+  select#domain {
     width: 45%;
-}
+  }
 
-p#dotseperator {
+  p#dotseperator {
     display: inline;
     margin: 0;
     padding: 0 5px;
-}
+  }
 
-.darktextbox:focus {
+  .darktextbox:focus {
     background-color: #2c2c2c;
     box-shadow: 5px 5px 5px #14141485;
-}
+  }
 
-.footer_box .loadmore,
-.footer_box .cpyrit {
+  .footer_box .loadmore,
+  .footer_box .cpyrit {
     margin: 0px;
-}
+  }
 
-.loadmore {
+  .loadmore {
     overflow: hidden;
-}
+  }
 
-.projects {
+  .projects {
     width: 100%;
     z-index: 1;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-}
+  }
 
-.titanic {
+  .titanic {
     float: none;
-}
+  }
 
-@keyframes glow {
+  @keyframes glow {
     from {
-        box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #424242;
+      box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #424242;
     }
 
     50% {
-        box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #252525;
+      box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #252525;
     }
 
     to {
-        box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #424242;
+      box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #424242;
     }
-}
+  }
 
-@-webkit-keyframes glow {
+  @-webkit-keyframes glow {
     from {
-        box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #424242;
+      box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #424242;
     }
 
     50% {
-        box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #252525;
+      box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #252525;
     }
 
     to {
-        box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #424242;
+      box-shadow: 13px 13px 5px #141414b0, inset 0px 0px 5px 1px #424242;
     }
-}
+  }
 
-#strangebutton {
+  #strangebutton {
     margin-top: 10px;
-}
+  }
 
-.lds-ellipsis {
+  .lds-ellipsis {
     display: inline-block;
     position: relative;
     width: 64px;
     height: 64px;
-}
+  }
 
-.lds-ellipsis div {
+  .lds-ellipsis div {
     position: absolute;
     top: 27px;
     width: 11px;
@@ -524,55 +522,55 @@ p#dotseperator {
     border-radius: 50%;
     background: #fff;
     animation-timing-function: cubic-bezier(0, 1, 1, 0);
-}
+  }
 
-.lds-ellipsis div:nth-child(1) {
+  .lds-ellipsis div:nth-child(1) {
     left: 6px;
     animation: lds-ellipsis1 0.6s infinite;
-}
+  }
 
-.lds-ellipsis div:nth-child(2) {
+  .lds-ellipsis div:nth-child(2) {
     left: 6px;
     animation: lds-ellipsis2 0.6s infinite;
-}
+  }
 
-.lds-ellipsis div:nth-child(3) {
+  .lds-ellipsis div:nth-child(3) {
     left: 26px;
     animation: lds-ellipsis2 0.6s infinite;
-}
+  }
 
-.lds-ellipsis div:nth-child(4) {
+  .lds-ellipsis div:nth-child(4) {
     left: 45px;
     animation: lds-ellipsis3 0.6s infinite;
-}
+  }
 
-@keyframes lds-ellipsis1 {
+  @keyframes lds-ellipsis1 {
     0% {
-        transform: scale(0);
+      transform: scale(0);
     }
 
     100% {
-        transform: scale(1);
+      transform: scale(1);
     }
-}
+  }
 
-@keyframes lds-ellipsis3 {
+  @keyframes lds-ellipsis3 {
     0% {
-        transform: scale(1);
+      transform: scale(1);
     }
 
     100% {
-        transform: scale(0);
+      transform: scale(0);
     }
-}
+  }
 
-@keyframes lds-ellipsis2 {
+  @keyframes lds-ellipsis2 {
     0% {
-        transform: translate(0, 0);
+      transform: translate(0, 0);
     }
 
     100% {
-        transform: translate(19px, 0);
+      transform: translate(19px, 0);
     }
-}
+  }
 </style>

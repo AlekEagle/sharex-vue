@@ -1,4 +1,4 @@
-let chalk = require("chalk");
+let chalk = require('chalk');
 let _console = { ...require('console') };
 let date = function getNowDateTimeStr() {
   let now = new Date();
@@ -7,29 +7,27 @@ let date = function getNowDateTimeStr() {
     [
       AddZero(now.getDate()),
       AddZero(now.getMonth() + 1),
-      now.getFullYear(),
-    ].join("/"),
+      now.getFullYear()
+    ].join('/'),
     [AddZero(hour), AddZero(now.getMinutes()), AddZero(now.getSeconds())].join(
-      ":"
-    ),
-  ].join(" ");
+      ':'
+    )
+  ].join(' ');
 };
-const logLevels = [
-  'NONE',
-  'ERROR',
-  'WARN',
-  'LOG',
-  'INFO',
-  'DEBUG'
-]
+const logLevels = ['NONE', 'ERROR', 'WARN', 'LOG', 'INFO', 'DEBUG'];
 
 function AddZero(num) {
-  return num >= 0 && num < 10 ? "0" + num : num + "";
+  return num >= 0 && num < 10 ? '0' + num : num + '';
 }
 
 class Logger {
   constructor(logLevel) {
-    this.logLevel = typeof logLevel === 'string' ? logLevels.indexOf(logLevel) !== -1 ? logLevel : 'LOG' : logLevels[logLevel];
+    this.logLevel =
+      typeof logLevel === 'string'
+        ? logLevels.indexOf(logLevel) !== -1
+          ? logLevel
+          : 'LOG'
+        : logLevels[logLevel];
     this.logLevels = [...logLevels];
   }
   log(thing, ...args) {
@@ -38,7 +36,7 @@ class Logger {
       `${chalk.blue.inverse(date())} ${chalk.inverse(`[LOG]`)} ${chalk.white(
         thing
       )}`,
-      !args.length ? "" : args.join(' ')
+      !args.length ? '' : args.join(' ')
     );
   }
   warn(thing, ...args) {
@@ -47,7 +45,7 @@ class Logger {
       `${chalk.blue.inverse(date())} ${chalk
         .rgb(255, 124, 43)
         .inverse(`[WARN]`)} ${chalk.white(thing)}`,
-      !args.length ? "" : args.join(' ')
+      !args.length ? '' : args.join(' ')
     );
   }
   debug(thing, ...args) {
@@ -56,7 +54,7 @@ class Logger {
       `${chalk.blue.inverse(date())} ${chalk.grey.inverse(
         `[DEBUG]`
       )} ${chalk.white(thing)}`,
-      !args.length ? "" : args.join(' ')
+      !args.length ? '' : args.join(' ')
     );
   }
   info(thing, ...args) {
@@ -65,7 +63,7 @@ class Logger {
       `${chalk.blue.inverse(date())} ${chalk
         .rgb(255, 255, 0)
         .inverse(`[INFO]`)} ${chalk.white(thing)}`,
-      !args.length ? "" : args.join(' ')
+      !args.length ? '' : args.join(' ')
     );
   }
   error(thing, ...args) {
@@ -76,8 +74,9 @@ class Logger {
         0,
         0
       )(`[ERROR]`)} ${chalk.white(thing)}`,
-      !args.length ? "" : args.join(' ')
+      !args.length ? '' : args.join(' ')
     );
   }
-} Logger
-module.exports = (logLevel) => global.console = new Logger(logLevel);
+}
+Logger;
+module.exports = logLevel => (global.console = new Logger(logLevel));

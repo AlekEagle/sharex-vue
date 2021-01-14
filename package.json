@@ -1,69 +1,69 @@
 {
-    "name": "sharex-vue",
-    "version": "0.1.0",
-    "private": true,
-    "main": "index.js",
-    "scripts": {
-        "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
-        "lint": "vue-cli-service lint",
-        "serve-with-api": "node . 443",
-        "serve-with-api-dev": "DEBUG=\"true\" node . 3000"
+  "name": "sharex-vue",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "serve-with-api": "node . 443",
+    "serve-with-api-dev": "DEBUG=\"true\" node . 3000"
+  },
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "client-sessions": "^0.8.0",
+    "connect-history-api-fallback": "^1.6.0",
+    "core-js": "^3.6.5",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.1.3",
+    "file-type": "^15.0.1",
+    "multer": "^1.4.2",
+    "mustache-express": "^1.3.0",
+    "pg": "^8.4.1",
+    "pg-hstore": "^2.3.3",
+    "register-service-worker": "^1.7.1",
+    "sequelize": "^6.3.5",
+    "vue": "^3.0.0-0",
+    "vue-gtag-next": "^1.14.0",
+    "vue-router": "^4.0.0-0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-pwa": "~4.5.0",
+    "@vue/cli-plugin-router": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/compiler-sfc": "^3.0.0-0",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-vue": "^7.0.0-0",
+    "prettier": "^1.19.1"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
     },
-    "dependencies": {
-        "bcrypt": "^5.0.0",
-        "client-sessions": "^0.8.0",
-        "connect-history-api-fallback": "^1.6.0",
-        "core-js": "^3.6.5",
-        "cors": "^2.8.5",
-        "dotenv": "^8.2.0",
-        "express": "^4.17.1",
-        "express-rate-limit": "^5.1.3",
-        "file-type": "^15.0.1",
-        "multer": "^1.4.2",
-        "mustache-express": "^1.3.0",
-        "pg": "^8.4.1",
-        "pg-hstore": "^2.3.3",
-        "register-service-worker": "^1.7.1",
-        "sequelize": "^6.3.5",
-        "vue": "^3.0.0-0",
-        "vue-gtag-next": "^1.14.0",
-        "vue-router": "^4.0.0-0"
-    },
-    "devDependencies": {
-        "@vue/cli-plugin-babel": "~4.5.0",
-        "@vue/cli-plugin-eslint": "~4.5.0",
-        "@vue/cli-plugin-pwa": "~4.5.0",
-        "@vue/cli-plugin-router": "~4.5.0",
-        "@vue/cli-service": "~4.5.0",
-        "@vue/compiler-sfc": "^3.0.0-0",
-        "@vue/eslint-config-prettier": "^6.0.0",
-        "babel-eslint": "^10.1.0",
-        "eslint": "^6.7.2",
-        "eslint-plugin-prettier": "^3.1.3",
-        "eslint-plugin-vue": "^7.0.0-0",
-        "prettier": "^1.19.1"
-    },
-    "eslintConfig": {
-        "root": true,
-        "env": {
-            "node": true
-        },
-        "extends": [
-            "plugin:vue/vue3-essential",
-            "eslint:recommended",
-            "@vue/prettier"
-        ],
-        "parserOptions": {
-            "parser": "babel-eslint"
-        },
-        "rules": {}
-    },
-    "browserslist": [
-        "> 1%",
-        "last 2 versions",
-        "not dead"
+    "extends": [
+      "plugin:vue/vue3-essential",
+      "eslint:recommended",
+      "@vue/prettier"
     ],
-    "keywords": [],
-    "description": ""
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "keywords": [],
+  "description": ""
 }
