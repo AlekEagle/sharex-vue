@@ -1589,6 +1589,16 @@ app.post('/upload/', (req, res) => {
   res.redirect(308, '/api/upload/');
 });
 app.post('/api/upload/', upload.single('file'), (req, res) => {
+  if (!req.user) {
+    res
+      .status(401)
+      .json(
+        req.headers.authorization
+          ? { error: 'Invalid Token' }
+          : { error: 'No Token Provided' }
+      );
+    return;
+  }
   if (!req.file) {
     if (!req.body.file) {
       res.status(400).json({ error: 'Bad Request', missing: ['file'] });
