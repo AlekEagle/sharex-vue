@@ -1,4 +1,4 @@
-# AlekEagle ShareX Server
+# Cumulonimbus
 
 ## Project setup
 
