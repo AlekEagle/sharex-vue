@@ -66,6 +66,7 @@
 
   function parseQueryString(qs, sep, eq) {
     let parsed = {};
+    if (!qs) return parsed;
     qs.split(sep || '&').forEach(p => {
       let ps = p.split(eq || '=');
       parsed[unescape(ps[0])] = ps[1] ? unescape(ps[1]) : true;
@@ -178,7 +179,10 @@
       );
     },
     mounted() {
-      if (getOS() === 'Android') {
+      if (
+        getOS() === 'Android' &&
+        !parseQueryString(window.location.href.split('?')[1]).file
+      ) {
         if (
           getPWADisplayMode() === 'twa' ||
           getPWADisplayMode() === 'standalone'
