@@ -13,6 +13,7 @@ const fs = require('fs'),
   bcrypt = require('bcrypt'),
   history = require('connect-history-api-fallback'),
   crypto = require('crypto'),
+  compression = require('compression'),
   map = {
     'image/x-icon': 'ico',
     'text/html': 'html',
@@ -195,16 +196,26 @@ const corsOptions = {
   origin: '*',
   optionsSuccessStatus: 200
 };
-let https,
+let httpServer,
   app = express();
 if (process.env.DEBUG) {
-  https = require('http');
+  httpServer = require('http');
 } else {
-  https = require('https');
+  httpServer = require('spdy');
 }
+const shouldCompress = (req, res) => {
+  // don't compress responses asking explicitly not
+  if (req.headers['x-no-compression']) {
+    return false;
+  }
+
+  // use compression filter function
+  return compression.filter(req, res);
+};
 app.use(cors(corsOptions));
 app.engine('html', require('mustache-express')());
 app.use(express.json());
+app.use(compression({ filter: shouldCompress }));
 app.use(express.urlencoded({ extended: true }));
 app.use(
   history({
@@ -221,9 +232,9 @@ app.use(
 );
 let server;
 if (process.env.DEBUG) {
-  server = https.createServer(app);
+  server = httpServer.createServer(app);
 } else {
-  server = https.createServer(options, app);
+  server = httpServer.createServer(options, app);
 }
 
 function tokenGen(id) {
