@@ -46,7 +46,7 @@
       :classes="['float']"
     >
       Upload files directly from your browser! (or share text or a file from any
-      app to here via the native share menu on mobile!)
+      app to here via the native share menu on Android!)
     </Project>
   </div>
 

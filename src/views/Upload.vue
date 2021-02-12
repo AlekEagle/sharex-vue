@@ -73,6 +73,40 @@
     return parsed;
   }
 
+  function getOS() {
+    let userAgent = window.navigator.userAgent,
+      platform = window.navigator.platform,
+      macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
+      windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'],
+      iosPlatforms = ['iPhone', 'iPad', 'iPod'],
+      os = null;
+
+    if (macosPlatforms.indexOf(platform) !== -1) {
+      os = 'Mac OS';
+    } else if (iosPlatforms.indexOf(platform) !== -1) {
+      os = 'iOS';
+    } else if (windowsPlatforms.indexOf(platform) !== -1) {
+      os = 'Windows';
+    } else if (/Android/.test(userAgent)) {
+      os = 'Android';
+    } else if (!os && /Linux/.test(platform)) {
+      os = 'Linux';
+    }
+
+    return os;
+  }
+
+  function getPWADisplayMode() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)')
+      .matches;
+    if (document.referrer.startsWith('android-app://')) {
+      return 'twa';
+    } else if (navigator.standalone || isStandalone) {
+      return 'standalone';
+    }
+    return 'browser';
+  }
+
   export default {
     name: 'Upload',
     components: {
@@ -142,6 +176,24 @@
           console.error(err);
         }
       );
+    },
+    mounted() {
+      if (getOS() === 'Android') {
+        if (
+          getPWADisplayMode() === 'twa' ||
+          getPWADisplayMode() === 'standalone'
+        ) {
+          this.$parent.$parent.temporaryToast(
+            'Pro Tip: You can use the native share menu from any app to share content to Cumulonimbus!',
+            15000
+          );
+        } else if (getPWADisplayMode() === 'browser') {
+          this.$parent.$parent.temporaryToast(
+            'Pro Tip: If you install Cumulonimbus as an app, you can use the native share menu from any app to share content to Cumulonimbus!',
+            15000
+          );
+        }
+      }
     },
     data() {
       return {
