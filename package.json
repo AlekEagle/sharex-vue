@@ -1,6 +1,6 @@
 {
-  "name": "sharex-vue",
-  "version": "0.1.0",
+  "name": "cumulonimbus",
+  "version": "1.0.0",
   "private": true,
   "main": "index.js",
   "scripts": {

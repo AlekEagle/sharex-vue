@@ -1,7 +1,7 @@
 <template>
   <Header
     ref="header"
-    title="AlekEagle ShareX Server"
+    title="Cumulonimbus"
     subtitle="Welcome back!"
     :buttons="[
       {

@@ -1,7 +1,7 @@
 <template>
   <Header
-    title="AlekEagle ShareX Server"
-    subtitle="A Server that can host your ShareX uploads"
+    title="Cumulonimbus"
+    subtitle="The only file sharing service.*"
     :buttons="[
       {
         title: 'Manage Your Account',
@@ -65,7 +65,9 @@
     </Project>
   </div>
 
-  <Footer />
+  <Footer>
+    <p class="footer_text">*Not the only file sharing service out there.</p>
+  </Footer>
 </template>
 
 <script>
@@ -73,7 +75,7 @@
   import Project from '@/components/Project.vue';
   import Footer from '@/components/Footer.vue';
   export default {
-    title: 'AlekEagle ShareX Dashboard',
+    title: 'Cumulonimbus',
     name: 'Home',
     components: {
       Header,
