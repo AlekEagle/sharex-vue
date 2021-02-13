@@ -16,6 +16,7 @@ const fs = require('fs'),
   compression = require('compression'),
   gm = require('gm'),
   chProc = require('child_process'),
+  Stream = require('stream'),
   map = {
     'image/x-icon': 'ico',
     'text/html': 'html',
@@ -232,6 +233,7 @@ app.use(
     index: '/'
   })
 );
+chProc.exec('rm /tmp/sharex-previews/*', () => {});
 let server;
 if (process.env.DEBUG) {
   server = httpServer.createServer(app);
@@ -313,13 +315,13 @@ app.use(
     res.set({
       'Cache-Control': 'no-store'
     });
-    if (!req.url.includes('/preview/')) {
-      console.log(
-        `${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${
-          req.protocol
-        }://${req.headers.host}${req.url}`
-      );
-    }
+    //if (!req.url.includes('/preview/')) {
+    console.log(
+      `${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${
+        req.protocol
+      }://${req.headers.host}${req.url}`
+    );
+    //}
     if (req.hostname.startsWith('docs.')) {
       res.set({
         'Cache-Control': `public, max-age=604800`
@@ -350,19 +352,36 @@ app.use(
   }
 );
 app.get('/preview/:file/', async (req, res) => {
+  if (!fs.existsSync('/tmp/sharex-previews'))
+    fs.mkdirSync('/tmp/sharex-previews');
   if (fs.existsSync(`uploads/${req.params.file}`)) {
     let ft = await fileType.fromStream(
       fs.createReadStream(`uploads/${req.params.file}`)
     );
-    if (ft && ft.mime.startsWith('image/')) {
-      gm(`uploads/${req.params.file}`)
-        .resize('256', '256', '^')
-        .gravity('Center')
-        .crop('200', '200')
-        .stream()
-        .pipe(res);
+    if (!fs.existsSync(`/tmp/sharex-previews/${req.params.file}`)) {
+      if (ft && ft.mime.startsWith('image/')) {
+        let cacheFileStream = fs.createWriteStream(
+          `/tmp/sharex-previews/${req.params.file}`
+        );
+        let fileStream = new Stream.PassThrough(),
+          resultStream = new Stream.PassThrough();
+
+        let previewStream = gm(`uploads/${req.params.file}`)
+          .resize('256', '256', '^')
+          .gravity('Center')
+          .crop('200', '200')
+          .stream();
+        previewStream.pipe(fileStream);
+        previewStream.pipe(resultStream);
+        fileStream.pipe(cacheFileStream);
+        resultStream.pipe(res.status(201));
+      } else {
+        fs.createReadStream('public/img/nopv.png').pipe(res.status(415));
+      }
     } else {
-      fs.createReadStream('public/img/nopv.png').pipe(res.status(415));
+      fs.createReadStream(`/tmp/sharex-previews/${req.params.file}`).pipe(
+        res.status(200)
+      );
     }
   } else {
     res.status(404).json({ error: 'Not found' });
