@@ -15,7 +15,7 @@ const fs = require('fs'),
   crypto = require('crypto'),
   compression = require('compression'),
   gm = require('gm'),
-  ADMZip = require('adm-zip'),
+  chProc = require('child_process'),
   map = {
     'image/x-icon': 'ico',
     'text/html': 'html',
@@ -1392,17 +1392,24 @@ app.get(
       return;
     }
     let files = await uploads.findAll({
-        where: {
-          userid: req.user.id
-        }
-      }),
-      zipFile = new ADMZip();
-
-    files.forEach(file => {
-      zipFile.addLocalFile(`uploads/${file.filename}`);
+      where: {
+        userid: req.user.id
+      }
     });
 
-    res.status(201).send(zipFile.toBuffer());
+    let zip = chProc.spawn('/usr/bin/zip', [
+      `/tmp/${req.user.id}.zip`,
+      ...files.map(file => `uploads/${file.filename}`)
+    ]);
+
+    zip.on('close', (code, signal) => {
+      if (code === 0) {
+        fs.createReadStream(`/tmp/${req.user.id}.zip`).pipe(res.status(201));
+      } else {
+        res.status(500).json({ error: 'Internal Server Error' });
+        console.error(code, signal);
+      }
+    });
   }
 );
 app.get('/api/files/:id/', (req, res) => {

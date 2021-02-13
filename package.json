@@ -11,7 +11,6 @@
     "serve-with-api-dev": "DEBUG=\"true\" node . 3000"
   },
   "dependencies": {
-    "adm-zip": "^0.5.2",
     "bcrypt": "^5.0.0",
     "client-sessions": "^0.8.0",
     "compression": "^1.7.4",
