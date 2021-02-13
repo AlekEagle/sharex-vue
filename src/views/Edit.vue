@@ -249,6 +249,7 @@
       title="Download all files"
       :classes="['auth', 'float']"
       :action="showDownloadZipModal"
+      :disabled="true"
       >Download everything you've uploaded in a zip file.</Project
     >
     <Modal
@@ -685,7 +686,11 @@
         );
       },
       showDownloadZipModal() {
-        this.$refs.downloadZipModal.showModal();
+        this.$parent.$parent.temporaryToast(
+          'This feature has been disabled until properly implemented, sorry!',
+          10 * 1000
+        );
+        //this.$refs.downloadZipModal.showModal();
       },
       downloadZip() {
         this.$refs.downloadZipModal.hideModal();
