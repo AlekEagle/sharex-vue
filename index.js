@@ -351,42 +351,6 @@ app.use(
     }
   }
 );
-app.get('/preview/:file/', async (req, res) => {
-  if (!fs.existsSync('/tmp/sharex-previews'))
-    fs.mkdirSync('/tmp/sharex-previews');
-  if (fs.existsSync(`uploads/${req.params.file}`)) {
-    let ft = await fileType.fromStream(
-      fs.createReadStream(`uploads/${req.params.file}`)
-    );
-    if (!fs.existsSync(`/tmp/sharex-previews/${req.params.file}`)) {
-      if (ft && ft.mime.startsWith('image/')) {
-        let cacheFileStream = fs.createWriteStream(
-          `/tmp/sharex-previews/${req.params.file}`
-        );
-        let fileStream = new Stream.PassThrough(),
-          resultStream = new Stream.PassThrough();
-
-        let previewStream = gm(`uploads/${req.params.file}`)
-          .resize('256', '256', '^')
-          .gravity('Center')
-          .crop('200', '200')
-          .stream();
-        previewStream.pipe(fileStream);
-        previewStream.pipe(resultStream);
-        fileStream.pipe(cacheFileStream);
-        resultStream.pipe(res.status(201));
-      } else {
-        fs.createReadStream('public/img/nopv.png').pipe(res.status(415));
-      }
-    } else {
-      fs.createReadStream(`/tmp/sharex-previews/${req.params.file}`).pipe(
-        res.status(200)
-      );
-    }
-  } else {
-    res.status(404).json({ error: 'Not found' });
-  }
-});
 app.all('/api/', (req, res) => {
   res.status(200).json({
     hello: 'world',
@@ -1792,7 +1756,44 @@ app.use((req, res, next) => {
     'Cache-Control': `public, max-age=604800`
   });
   next();
-}, express.static('./dist', { acceptRanges: false, lastModified: true }));
+});
+app.get('/preview/:file/', async (req, res) => {
+  if (!fs.existsSync('/tmp/sharex-previews'))
+    fs.mkdirSync('/tmp/sharex-previews');
+  if (fs.existsSync(`uploads/${req.params.file}`)) {
+    let ft = await fileType.fromStream(
+      fs.createReadStream(`uploads/${req.params.file}`)
+    );
+    if (!fs.existsSync(`/tmp/sharex-previews/${req.params.file}`)) {
+      if (ft && ft.mime.startsWith('image/')) {
+        let cacheFileStream = fs.createWriteStream(
+          `/tmp/sharex-previews/${req.params.file}`
+        );
+        let fileStream = new Stream.PassThrough(),
+          resultStream = new Stream.PassThrough();
+
+        let previewStream = gm(`uploads/${req.params.file}`)
+          .resize('256', '256', '^')
+          .gravity('Center')
+          .crop('200', '200')
+          .stream();
+        previewStream.pipe(fileStream);
+        previewStream.pipe(resultStream);
+        fileStream.pipe(cacheFileStream);
+        resultStream.pipe(res.status(201));
+      } else {
+        fs.createReadStream('public/img/nopv.png').pipe(res.status(415));
+      }
+    } else {
+      fs.createReadStream(`/tmp/sharex-previews/${req.params.file}`).pipe(
+        res.status(200)
+      );
+    }
+  } else {
+    res.status(404).json({ error: 'Not found' });
+  }
+});
+app.use(express.static('./dist', { acceptRanges: false, lastModified: true }));
 
 server.listen(port);
 console.log(`Server listening on port ${port}`);
