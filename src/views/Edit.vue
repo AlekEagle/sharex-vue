@@ -245,6 +245,45 @@
         />
       </form>
     </Modal>
+    <Project
+      title="Download all files"
+      :classes="['auth', 'float']"
+      :action="showDownloadZipModal"
+      >Download everything you've uploaded in a zip file.</Project
+    >
+    <Modal
+      ref="downloadZipModal"
+      title="Download all files"
+      :buttons="[
+        {
+          title: 'Haha, download button go bRRRRRRRRRRRRRRRRRRR',
+          text: 'Give me it!',
+          action: downloadZip
+        }
+      ]"
+      :cancelable="true"
+    >
+      <p>
+        This will download <b>EVERYTHING</b> you have uploaded to Cumulonimbus
+        in a zip file. Depending on how much you've uploaded and how big
+        everything is, this could take a very long time. You can only do this
+        once every week. Are you sure you want to do this?
+      </p>
+    </Modal>
+    <Modal
+      ref="progressModal"
+      title="Downloading, please wait..."
+      :cancelable="false"
+    >
+      This might take a while, please be patient and don't close the tab!
+      <br />
+      <div class="lds-ellipsis">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </Modal>
   </div>
   <div v-else class="lds-ellipsis">
     <div></div>
@@ -644,6 +683,41 @@
             console.error(err);
           }
         );
+      },
+      showDownloadZipModal() {
+        this.$refs.downloadZipModal.showModal();
+      },
+      downloadZip() {
+        this.$refs.downloadZipModal.hideModal();
+        this.$refs.progressModal.showModal();
+        fetch('/api/files/zip/', {
+          headers: {
+            Authorization: `${window.localStorage.getItem('token')}`
+          }
+        }).then(res => {
+          if (res.status === 201) {
+            res.blob().then(slime => {
+              let url = window.URL.createObjectURL(slime);
+              let a = document.createElement('a');
+              a.href = url;
+              a.download = 'all uploads.zip';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            });
+          } else if (res.status === 429) {
+            this.$parent.$parent.temporaryToast(
+              "Looks like you've already downloaded your zip for the week, sorry!",
+              10 * 1000
+            );
+          } else {
+            this.$parent.$parent.temporaryToast(
+              'An unknown error occurred, if this issue persists contact AlekEagle.',
+              10 * 1000
+            );
+          }
+          this.$refs.progressModal.hideModal();
+        });
       }
     },
     beforeCreate() {

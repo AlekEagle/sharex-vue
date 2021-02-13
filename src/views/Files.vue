@@ -15,7 +15,8 @@
     <Project
       v-for="file in files"
       :key="file.filename"
-      :classes="['auth', 'float']"
+      :classes="['float']"
+      :icon="'/preview/' + file.filename"
       :to="`/me/file/${file.filename}/`"
       :title="file.filename"
     >

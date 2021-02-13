@@ -14,6 +14,8 @@ const fs = require('fs'),
   history = require('connect-history-api-fallback'),
   crypto = require('crypto'),
   compression = require('compression'),
+  gm = require('gm'),
+  ADMZip = require('adm-zip'),
   map = {
     'image/x-icon': 'ico',
     'text/html': 'html',
@@ -311,11 +313,13 @@ app.use(
     res.set({
       'Cache-Control': 'no-store'
     });
-    console.log(
-      `${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${
-        req.protocol
-      }://${req.headers.host}${req.url}`
-    );
+    if (!req.url.includes('/preview/')) {
+      console.log(
+        `${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${
+          req.protocol
+        }://${req.headers.host}${req.url}`
+      );
+    }
     if (req.hostname.startsWith('docs.')) {
       res.set({
         'Cache-Control': `public, max-age=604800`
@@ -345,6 +349,25 @@ app.use(
     }
   }
 );
+app.get('/preview/:file/', async (req, res) => {
+  if (fs.existsSync(`uploads/${req.params.file}`)) {
+    let ft = await fileType.fromStream(
+      fs.createReadStream(`uploads/${req.params.file}`)
+    );
+    if (ft && ft.mime.startsWith('image/')) {
+      gm(`uploads/${req.params.file}`)
+        .resize('256', '256', '^')
+        .gravity('Center')
+        .crop('200', '200')
+        .stream()
+        .pipe(res);
+    } else {
+      fs.createReadStream('public/img/nopv.png').pipe(res.status(415));
+    }
+  } else {
+    res.status(404).json({ error: 'Not found' });
+  }
+});
 app.all('/api/', (req, res) => {
   res.status(200).json({
     hello: 'world',
@@ -1348,6 +1371,40 @@ app.get('/api/files/all/', (req, res) => {
     res.status(403).json({ error: 'Missing Permissions' });
   }
 });
+app.get(
+  '/api/files/zip/',
+  ratelimit({
+    windowMs: ms('1week'),
+    max: 1,
+    keyGenerator: (req, res) => {
+      return req.user ? req.user.id : req.headers['x-forwarded-for'] || req.ip;
+    }
+  }),
+  async (req, res) => {
+    if (!req.user) {
+      res
+        .status(401)
+        .json(
+          req.headers.authorization
+            ? { error: 'Invalid Token' }
+            : { error: 'No Token Provided' }
+        );
+      return;
+    }
+    let files = await uploads.findAll({
+        where: {
+          userid: req.user.id
+        }
+      }),
+      zipFile = new ADMZip();
+
+    files.forEach(file => {
+      zipFile.addLocalFile(`uploads/${file.filename}`);
+    });
+
+    res.status(201).send(zipFile.toBuffer());
+  }
+);
 app.get('/api/files/:id/', (req, res) => {
   if (!req.user) {
     res
