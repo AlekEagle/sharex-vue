@@ -1,6 +1,11 @@
 <template>
   <div v-if="sharedState.to" :class="getClasses()">
-    <img v-if="sharedState.icon" class="project_icon" :src="sharedState.icon" />
+    <img
+      v-if="sharedState.icon"
+      class="project_icon"
+      :src="sharedState.icon"
+      loading="lazy"
+    />
     <div class="project_title" v-text="sharedState.title" />
     <div class="project_description"><slot /></div>
     <router-link v-if="!sharedState.disabled" :to="sharedState.to">
@@ -9,7 +14,12 @@
     <span v-else class="project_link disabled" />
   </div>
   <div v-else-if="sharedState.action" :class="getClasses()">
-    <img v-if="sharedState.icon" class="project_icon" :src="sharedState.icon" />
+    <img
+      v-if="sharedState.icon"
+      class="project_icon"
+      :src="sharedState.icon"
+      loading="lazy"
+    />
     <div class="project_title" v-text="sharedState.title" />
     <div class="project_description"><slot /></div>
     <span
@@ -20,7 +30,12 @@
     <span v-else class="project_link disabled" />
   </div>
   <div v-else :class="getClasses()">
-    <img v-if="sharedState.icon" class="project_icon" :src="sharedState.icon" />
+    <img
+      v-if="sharedState.icon"
+      class="project_icon"
+      :src="sharedState.icon"
+      loading="lazy"
+    />
     <div class="project_title" v-text="sharedState.title" />
     <div class="project_description"><slot /></div>
     <span
