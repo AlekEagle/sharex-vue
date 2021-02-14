@@ -322,7 +322,7 @@ app.use(
       }://${req.headers.host}${req.url}`
     );
     //}
-    if (req.hostname.startsWith('docs.')) {
+    if (req.hostname.includes('docs.alekeagle.me')) {
       res.set({
         'Cache-Control': `public, max-age=604800`
       });
