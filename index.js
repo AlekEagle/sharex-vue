@@ -17,6 +17,7 @@ const fs = require('fs'),
   gm = require('gm'),
   chProc = require('child_process'),
   Stream = require('stream'),
+  worker = require('worker'),
   map = {
     'image/x-icon': 'ico',
     'text/html': 'html',
