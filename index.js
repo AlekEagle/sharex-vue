@@ -1758,40 +1758,29 @@ app.use((req, res, next) => {
   next();
 });
 app.get('/preview/:file/', async (req, res) => {
-  if (!fs.existsSync('/tmp/sharex-previews'))
-    fs.mkdirSync('/tmp/sharex-previews');
-  if (fs.existsSync(`uploads/${req.params.file}`)) {
-    let ft = await fileType.fromStream(
-      fs.createReadStream(`uploads/${req.params.file}`)
-    );
-    if (!fs.existsSync(`/tmp/sharex-previews/${req.params.file}`)) {
-      if (ft && ft.mime.startsWith('image/')) {
-        let cacheFileStream = fs.createWriteStream(
-          `/tmp/sharex-previews/${req.params.file}`
-        );
-        let fileStream = new Stream.PassThrough(),
-          resultStream = new Stream.PassThrough();
-
-        let previewStream = gm(`uploads/${req.params.file}`)
-          .resize('256', '256', '^')
-          .gravity('Center')
-          .crop('200', '200')
-          .stream();
-        previewStream.pipe(fileStream);
-        previewStream.pipe(resultStream);
-        fileStream.pipe(cacheFileStream);
-        resultStream.pipe(res.status(201));
-      } else {
-        fs.createReadStream('public/img/nopv.png').pipe(res.status(415));
-      }
-    } else {
-      fs.createReadStream(`/tmp/sharex-previews/${req.params.file}`).pipe(
-        res.status(200)
-      );
+  let thumbWorker = new worker.Worker('./thumbnailGenerator.js', {
+    workerData: {
+      file: req.params.file
     }
-  } else {
-    res.status(404).json({ error: 'Not found' });
-  }
+  });
+  thumbWorker.on('online', () => {
+    console.debug('Generating...');
+  });
+  thumbWorker.on('exit', () => {
+    console.debug('Done');
+  });
+  thumbWorker.on('message', data => {
+    if (data.status === 404) res.status(404).json({ error: 'Not found' });
+    else if (data.status === 500)
+      res.status(500).json({ error: 'Internal Server Error' });
+    else {
+      let stream = new Stream.Readable();
+      stream._read = () => {};
+      stream.push(Buffer.from(data.file));
+      stream.push(null);
+      stream.pipe(res.status(data.status));
+    }
+  });
 });
 app.use(express.static('./dist', { acceptRanges: false, lastModified: true }));
 
