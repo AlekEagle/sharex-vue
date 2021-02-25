@@ -1,18 +1,18 @@
-let manifestJSON = require('./public/manifest.json');
+let manifestJSON = require("./public/manifest.json");
 
 module.exports = {
   configureWebpack: {
-    devtool: 'source-map'
+    devtool: "source-map"
   },
   pwa: {
-    workboxPluginMode: 'InjectManifest',
+    workboxPluginMode: "InjectManifest",
     workboxOptions: {
-      swSrc: 'src/service-worker.js'
+      swSrc: "src/service-worker.js"
     },
     themeColor: manifestJSON.themeColor,
     name: manifestJSON.short_name,
     msTileColor: manifestJSON.background_color,
-    appleMobileWebAppCapable: 'yes',
-    appleMobileWebAppStatusBarStyle: 'black'
+    appleMobileWebAppCapable: "yes",
+    appleMobileWebAppStatusBarStyle: "black"
   }
 };

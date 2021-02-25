@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-unused-vars, prettier/prettier */
 require("./logger")("INFO");
 const fs = require("fs"),
   dotenv = require("dotenv"),
@@ -10,7 +10,9 @@ const fs = require("fs"),
   upload = multer(),
   Op = Sequelize.Op,
   ms = require("ms"),
-  bcrypt = require("bcrypt"),
+  // bcrypt = require("bcrypt"),
+  bcrypt = require("argon2"),
+  RD = require("reallydangerous"),
   history = require("connect-history-api-fallback"),
   crypto = require("crypto"),
   compression = require("compression"),
@@ -39,6 +41,10 @@ const fs = require("fs"),
   },
   port = parseInt(`800${instance}`);
 
+// Backwards compat, i don't want to fuck with search and replace <3
+bcrypt.compare = bcrypt.verify
+
+// Bad idea to extend prototypes but ok.
 Array.prototype.equals = function(array) {
   // if the other array is a falsy value, return
   if (!array) return false;
@@ -65,34 +71,99 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+// class Token {
+//   constructor(str) {
+//     if (!str) throw new Error("str is required.");
+//     if (str.split(".").length === 3) {
+//       let token = str.split(".");
+//       this.id = Buffer.from(token[0], "base64").toString("utf8");
+//       this.time = Buffer.from(token[1], "base64").toString("utf8");
+//       this.bytes = Buffer.from(token[2], "base64");
+//     } else {
+//       this.id = str;
+//       this.time = Date.now().toString();
+//       this.time = this.time.substr(this.time.length - 3, this.time.length);
+//       this.bytes = crypto.randomBytes(24);
+//     }
+//   }
+
+//   toString() {
+//     return `${Buffer.from(this.id)
+//       .toString("base64")
+//       .replace(/\+/g, "-")
+//       .replace(/\//g, "_")
+//       .replace(/=/g, "")}.${Buffer.from(this.time).toString(
+//       "base64"
+//     )}.${this.bytes
+//       .toString("base64")
+//       .replace(/\+/g, "-")
+//       .replace(/\//g, "_")
+//       .replace(/=/g, "")}`;
+//   }
+// }
+
 class Token {
-  constructor(str) {
-    if (!str) throw new Error("str is required.");
-    if (str.split(".").length === 3) {
-      let token = str.split(".");
-      this.id = Buffer.from(token[0], "base64").toString("utf8");
-      this.time = Buffer.from(token[1], "base64").toString("utf8");
-      this.bytes = Buffer.from(token[2], "base64");
-    } else {
-      this.id = str;
-      this.time = Date.now().toString();
-      this.time = this.time.substr(this.time.length - 3, this.time.length);
-      this.bytes = crypto.randomBytes(24);
+  constructor(signer, token) {
+    this._signer = signer
+    this._token = token
+  }
+
+  static async init(tokenstr) {
+    if(!tokenstr || typeof tokenstr !== "string") throw new Error("token is required and must be a string");
+    if(tokenstr.split(".").length !== 3) throw new Error("invalid token");
+    const id = Buffer.from(tokenstr.split(".")[0], "base64").toString("utf-8");
+    const usr = await user.findOne({
+      where: {
+        id
+      }
+    });
+
+    // assuming this is a hash...
+    let signer = new RD.TimestampSigner(usr.password);
+    // resign the token just in case
+    let token = signer.sign(id);
+
+    return new Token(signer, token)
+  }
+
+  static async initWithHash(id, hash) {
+    if(!id || typeof id !== "string") throw new Error("id is required");
+    if(!hash || typeof hash !== "string") throw new Error("hash is required");
+    let signer = new RD.TimestampSigner(hash);
+    return new Token(
+      signer,
+      signer.sign(id)
+    );
+  }
+
+  get id() {
+    return Buffer.from(this.token.split(".")[0], "base64").toString("utf-8");
+  }
+
+  resignToken(id) {
+    this.token = this._signer.sign(id);
+    return this.token;
+  }
+
+  verifyToken(token) {
+    try {
+      this._signer.unsign(token);
+      return true;
+    } catch(e) {
+      return false;
+    }
+  }
+
+  data(token) {
+    try {
+      return this._signer.unsign(token);
+    } catch(e) {
+      return null;
     }
   }
 
   toString() {
-    return `${Buffer.from(this.id)
-      .toString("base64")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=/g, "")}.${Buffer.from(this.time).toString(
-      "base64"
-    )}.${this.bytes
-      .toString("base64")
-      .replace(/\+/g, "-")
-      .replace(/\//g, "_")
-      .replace(/=/g, "")}`;
+    return this.token;
   }
 }
 
@@ -265,7 +336,7 @@ let server = httpServer.createServer(app);
 //function to authenticate authorization header. returns the user if successfully authenticated.
 async function authenticate(req) {
   if (!req.headers.authorization) throw null;
-  let tokenData = new Token(req.headers.authorization);
+  let tokenData = await Token.init(req.headers.authorization);
   let usr = await user.findOne({
     where: {
       id: tokenData.id
@@ -273,17 +344,21 @@ async function authenticate(req) {
   });
   if (!usr) throw null;
   if (usr.bannedAt !== null) throw null;
-  if (
-    !usr.sessions ||
-    (!usr.sessions.some(
-      session =>
-        tokenData.bytes.toJSON().data.equals(session.token.bytes.data) &&
-        tokenData.time === session.token.time &&
-        tokenData.id === session.token.id
-    ) &&
-      req.headers.authorization !== usr.apiToken)
-  )
-    throw null;
+  if(
+    !usr.sessions
+    || !usr.sessions.some(session => tokenData.verifyToken(session.token))
+  ) throw null;
+  // if (
+  //   !usr.sessions ||
+  //   (!usr.sessions.some(
+  //     session =>
+  //       tokenData.bytes.toJSON().data.equals(session.token.bytes.data) &&
+  //       tokenData.time === session.token.time &&
+  //       tokenData.id === session.token.id
+  //   ) &&
+  //     req.headers.authorization !== usr.apiToken)
+  // )
+  //   throw null;
   return usr;
 }
 //use authenticate function and append user to Request Object
@@ -301,9 +376,11 @@ app.use(async (req, res, next) => {
     user = null;
   }
   req.user = user;
-  if (errored) {
+  if (errored && error.message !== "invalid token") {
     res.status(500).json({ error: "Internal Server Error" });
     console.error(error);
+  } else if(errored && error.message === "invalid token") {
+    res.status(401).json({ error: "Invalid Token" })
   } else {
     next();
   }
@@ -508,13 +585,13 @@ app.post("/api/user/", upload.none(), (req, res) => {
           let now = new Date(Date.now());
           if (u === null) {
             bcrypt.hash(password, Math.floor(Math.random() * 10)).then(
-              hashedPass => {
+              async hashedPass => {
                 let time = now.getTime();
                 let newSession = {
                   ...new UAParser(req.headers["user-agent"]).getResult(),
                   sessionID: Date.now().toString(),
                   ip: req.headers["x-forwarded-for"] || req.ip,
-                  token: new Token(time.toString())
+                  token: await Token.initWithHash(time.toString(), hashedPass)
                 };
                 user
                   .create({
@@ -781,14 +858,14 @@ app.post("/api/login/", upload.none(), (req, res) => {
           if (user !== null) {
             if (user.bannedAt === null) {
               bcrypt.compare(password, user.password).then(
-                match => {
+                async match => {
                   if (match) {
                     console.log("User login");
                     let newSession = {
                       ...new UAParser(req.headers["user-agent"]).getResult(),
                       sessionID: Date.now().toString(),
                       ip: req.headers["x-forwarded-for"] || req.ip,
-                      token: new Token(user.id)
+                      token: await Token.initWithHash(user.id, user.password)
                     };
                     user
                       .update({
@@ -858,12 +935,17 @@ app.patch("/api/user/token/", upload.none(), (req, res) => {
   let { password } = req.body;
   if (password) {
     bcrypt.compare(password, req.user.password).then(
-      match => {
+      async match => {
         if (match) {
+          let usr = user.findOne({
+            where: {
+              id: req.user.id
+            }
+          })
           let newSession = {
             sessionID: Date.now().toString(),
             ip: req.headers["x-forwarded-for"] || req.ip,
-            token: new Token(req.user.id),
+            token: await Token.initWithHash(req.user.id, usr.password),
             os: {},
             ua: "API Authorization",
             cpu: {},
@@ -919,12 +1001,12 @@ app.patch("/api/user/:id/token/", (req, res) => {
             id: req.params.id
           }
         })
-        .then(us => {
+        .then(async us => {
           if (us) {
             let newSession = {
               sessionID: Date.now().toString(),
               ip: req.headers["x-forwarded-for"] || req.ip,
-              token: new Token(us.id),
+              token: await Token.initWithHash(us.id, us.password),
               os: {},
               ua: "API Authorization",
               cpu: {},
