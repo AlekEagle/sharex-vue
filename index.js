@@ -1,40 +1,41 @@
-require('./logger')('INFO');
-const fs = require('fs'),
-  dotenv = require('dotenv'),
-  express = require('express'),
-  multer = require('multer'),
-  Sequelize = require('sequelize'),
-  ratelimit = require('express-rate-limit'),
-  fileType = require('file-type'),
+/* eslint-disable no-unused-vars */
+require("./logger")("INFO");
+const fs = require("fs"),
+  dotenv = require("dotenv"),
+  express = require("express"),
+  multer = require("multer"),
+  Sequelize = require("sequelize"),
+  ratelimit = require("express-rate-limit"),
+  fileType = require("file-type"),
   upload = multer(),
   Op = Sequelize.Op,
-  ms = require('ms'),
-  bcrypt = require('bcrypt'),
-  history = require('connect-history-api-fallback'),
-  crypto = require('crypto'),
-  compression = require('compression'),
-  chProc = require('child_process'),
-  UAParser = require('ua-parser-js'),
+  ms = require("ms"),
+  bcrypt = require("bcrypt"),
+  history = require("connect-history-api-fallback"),
+  crypto = require("crypto"),
+  compression = require("compression"),
+  chProc = require("child_process"),
+  UAParser = require("ua-parser-js"),
   instance = process.env.NODE_APP_INSTANCE || 0,
   map = {
-    'image/x-icon': 'ico',
-    'text/html': 'html',
-    'text/javascript': 'js',
-    'application/json': 'json',
-    'text/css': 'css',
-    'image/png': 'png',
-    'image/jpg': 'jpeg',
-    'audio/wav': 'wav',
-    'audio/mpeg': 'mp3',
-    'image/svg+xml': 'svg',
-    'application/pdf': 'pdf',
-    'application/msword': 'doc',
-    'image/gif': 'gif',
-    'application/octet-stream': 'exe',
-    'text/xml': 'xml',
-    'video/mp4': 'mp4',
-    'application/zip': 'zip',
-    'text/plain': 'txt'
+    "image/x-icon": "ico",
+    "text/html": "html",
+    "text/javascript": "js",
+    "application/json": "json",
+    "text/css": "css",
+    "image/png": "png",
+    "image/jpg": "jpeg",
+    "audio/wav": "wav",
+    "audio/mpeg": "mp3",
+    "image/svg+xml": "svg",
+    "application/pdf": "pdf",
+    "application/msword": "doc",
+    "image/gif": "gif",
+    "application/octet-stream": "exe",
+    "text/xml": "xml",
+    "video/mp4": "mp4",
+    "application/zip": "zip",
+    "text/plain": "txt"
   },
   port = parseInt(`800${instance}`);
 
@@ -58,7 +59,7 @@ Array.prototype.equals = function(array) {
   return true;
 };
 // Hide method from for-in loops
-Object.defineProperty(Array.prototype, 'equals', { enumerable: false });
+Object.defineProperty(Array.prototype, "equals", { enumerable: false });
 
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -66,12 +67,12 @@ function random(min, max) {
 
 class Token {
   constructor(str) {
-    if (!str) throw new Error('str is required.');
-    if (str.split('.').length === 3) {
-      let token = str.split('.');
-      this.id = Buffer.from(token[0], 'base64').toString('utf8');
-      this.time = Buffer.from(token[1], 'base64').toString('utf8');
-      this.bytes = Buffer.from(token[2], 'base64');
+    if (!str) throw new Error("str is required.");
+    if (str.split(".").length === 3) {
+      let token = str.split(".");
+      this.id = Buffer.from(token[0], "base64").toString("utf8");
+      this.time = Buffer.from(token[1], "base64").toString("utf8");
+      this.bytes = Buffer.from(token[2], "base64");
     } else {
       this.id = str;
       this.time = Date.now().toString();
@@ -82,16 +83,16 @@ class Token {
 
   toString() {
     return `${Buffer.from(this.id)
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '')}.${Buffer.from(this.time).toString(
-      'base64'
+      .toString("base64")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "")}.${Buffer.from(this.time).toString(
+      "base64"
     )}.${this.bytes
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '')}`;
+      .toString("base64")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "")}`;
   }
 }
 
@@ -104,7 +105,7 @@ const sequelize = new Sequelize({
   password: process.env.SERVERPASSWORD,
   host: process.env.SERVERIP,
   port: 5432,
-  dialect: 'postgres',
+  dialect: "postgres",
   logging: false
 });
 //Initialize tables
@@ -134,10 +135,10 @@ user
     force: false
   })
   .then(() => {
-    console.log('Users synced to database successfully!');
+    console.log("Users synced to database successfully!");
   })
   .catch(err => {
-    console.error('an error occurred while performing this operation', err);
+    console.error("an error occurred while performing this operation", err);
   });
 
 class uploads extends Sequelize.Model {}
@@ -159,10 +160,10 @@ uploads
     force: false
   })
   .then(() => {
-    console.log('Uploads synced to database successfully!');
+    console.log("Uploads synced to database successfully!");
   })
   .catch(err => {
-    console.error('an error occurred while performing this operation', err);
+    console.error("an error occurred while performing this operation", err);
   });
 
 class domains extends Sequelize.Model {}
@@ -183,10 +184,10 @@ domains
     force: false
   })
   .then(() => {
-    console.log('Domains synced to database successfully!');
+    console.log("Domains synced to database successfully!");
   })
   .catch(err => {
-    console.error('an error occurred while performing this operation', err);
+    console.error("an error occurred while performing this operation", err);
   });
 
 class instructions extends Sequelize.Model {}
@@ -211,29 +212,29 @@ instructions
     force: false
   })
   .then(() => {
-    console.log('Instructions synced to database successfully!');
+    console.log("Instructions synced to database successfully!");
   })
   .catch(err => {
-    console.error('an error occurred while performing this operation', err);
+    console.error("an error occurred while performing this operation", err);
   });
 
 //function for filename generation
 function newString(length) {
-  var text = '';
+  var text = "";
   var possible =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-";
 
   for (var i = 0; i < length; i++)
     text += possible.charAt(Math.floor(crypto.randomInt(possible.length)));
 
   return text;
 }
-let httpServer = require('http'),
+let httpServer = require("http"),
   app = express();
 
 const shouldCompress = (req, res) => {
-  // don't compress responses asking explicitly not
-  if (req.headers['x-no-compression']) {
+  // don"t compress responses asking explicitly not
+  if (req.headers["x-no-compression"]) {
     return false;
   }
 
@@ -257,7 +258,7 @@ app.use(
         }
       }
     ],
-    index: '/'
+    index: "/"
   })
 );
 let server = httpServer.createServer(app);
@@ -301,7 +302,7 @@ app.use(async (req, res, next) => {
   }
   req.user = user;
   if (errored) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
     console.error(error);
   } else {
     next();
@@ -309,12 +310,12 @@ app.use(async (req, res, next) => {
 });
 //Enable default ratelimits
 app.use(
-  '/api/',
+  "/api/",
   ratelimit({
-    windowMs: ms('5mins'),
+    windowMs: ms("5mins"),
     max: 100,
-    keyGenerator: (req, res) => {
-      return req.user ? req.user.id : req.headers['x-forwarded-for'] || req.ip;
+    keyGenerator: (req, _res) => {
+      return req.user ? req.user.id : req.headers["x-forwarded-for"] || req.ip;
     }
   })
 );
@@ -322,18 +323,18 @@ app.use(
 app.use(
   (req, res, next) => {
     res.set({
-      'Cache-Control': 'no-store'
+      "Cache-Control": "no-store"
     });
     console.log(
-      `${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${
+      `${req.headers["x-forwarded-for"] || req.ip}: ${req.method} => ${
         req.protocol
       }://${req.headers.host}${req.url}`
     );
-    if (req.headers.host === 'docs.alekeagle.me') {
+    if (req.headers.host === "docs.alekeagle.me") {
       res.set({
-        'Cache-Control': `public, max-age=604800`
+        "Cache-Control": `public, max-age=604800`
       });
-      express.static('./docs/dist', {
+      express.static("./docs/dist", {
         acceptRanges: false,
         lastModified: true
       })(req, res, next);
@@ -341,30 +342,30 @@ app.use(
     }
     next();
   },
-  express.static('uploads', { acceptRanges: false, lastModified: true }),
+  express.static("uploads", { acceptRanges: false, lastModified: true }),
   (req, res, next) => {
     if (
-      req.headers.host !== 'alekeagle.me' &&
-      !req.headers.host.includes('localhost') &&
-      !req.headers.host.includes('192.168.') &&
-      !req.headers.host.includes('127.0.0.1') &&
-      !req.headers.host.includes('::1') &&
-      !req.headers.host.includes('.local')
+      req.headers.host !== "alekeagle.me" &&
+      !req.headers.host.includes("localhost") &&
+      !req.headers.host.includes("192.168.") &&
+      !req.headers.host.includes("127.0.0.1") &&
+      !req.headers.host.includes("::1") &&
+      !req.headers.host.includes(".local")
     ) {
-      res.redirect(301, 'https://alekeagle.me' + req.path);
+      res.redirect(301, "https://alekeagle.me" + req.path);
       return;
     } else {
       next();
     }
   }
 );
-app.all('/api/', (req, res) => {
+app.all("/api/", (req, res) => {
   res.status(200).json({
-    hello: 'world',
-    version: '1.0.0'
+    hello: "world",
+    version: "1.0.0"
   });
 });
-app.get('/api/users/', (req, res) => {
+app.get("/api/users/", (req, res) => {
   let count = parseInt(req.query.count) || 50,
     offset = parseInt(req.query.offset) || 0;
   if (!req.user) {
@@ -372,18 +373,18 @@ app.get('/api/users/', (req, res) => {
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
 
-  if (req.user.staff !== '') {
+  if (req.user.staff !== "") {
     user
       .findAndCountAll({
         offset,
         limit: count,
-        order: [['createdAt', 'DESC']]
+        order: [["createdAt", "DESC"]]
       })
       .then(users => {
         if (users !== null) {
@@ -408,40 +409,40 @@ app.get('/api/users/', (req, res) => {
         }
       })
       .catch(err => {
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
         console.error(err);
       });
   } else {
-    res.status(403).json({ error: 'Missing Permissions' });
+    res.status(403).json({ error: "Missing Permissions" });
   }
 });
-app.get('/api/brew-coffee/', (req, res) => {
+app.get("/api/brew-coffee/", (req, res) => {
   let ran = random(10000, 30000);
   setTimeout(() => {
     res.status(418).json({
       error: "I'm a teapot.",
-      body: 'The requested entity body is short and stout.',
-      addInfo: 'Tip me over and pour me out.'
+      body: "The requested entity body is short and stout.",
+      addInfo: "Tip me over and pour me out."
     });
   }, ran);
 });
-app.get('/api/user/:id/', (req, res) => {
+app.get("/api/user/:id/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   if (!req.params.id)
-    res.status(400).json({ error: 'Bad Request', missing: ['id'] });
+    res.status(400).json({ error: "Bad Request", missing: ["id"] });
   else {
     if (
-      (req.user.staff === '' && req.user.id === req.params.id) ||
-      req.user.staff !== ''
+      (req.user.staff === "" && req.user.id === req.params.id) ||
+      req.user.staff !== ""
     ) {
       user
         .findOne({
@@ -453,7 +454,7 @@ app.get('/api/user/:id/', (req, res) => {
           user => {
             if (user === null)
               res.status(404).json({
-                error: 'Not Found'
+                error: "Not Found"
               });
             else
               res.status(200).json({
@@ -469,23 +470,23 @@ app.get('/api/user/:id/', (req, res) => {
               });
           },
           err => {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: "Internal Server Error" });
             console.error(err);
           }
         );
     } else {
-      res.status(403).json({ error: 'Missing Permissions' });
+      res.status(403).json({ error: "Missing Permissions" });
     }
   }
 });
-app.post('/api/user/', upload.none(), (req, res) => {
+app.post("/api/user/", upload.none(), (req, res) => {
   let { name, email, password } = req.body;
   let vars = { name, email, password };
   let undefinedVars = Object.keys(vars)
     .map(e => (vars[e] !== undefined ? null : e))
     .filter(e => e !== null);
   if (undefinedVars.length < 0) {
-    res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
+    res.status(400).json({ error: "Bad Request", missing: undefinedVars });
     return;
   } else {
     let username = name.toLowerCase();
@@ -510,23 +511,23 @@ app.post('/api/user/', upload.none(), (req, res) => {
               hashedPass => {
                 let time = now.getTime();
                 let newSession = {
-                  ...new UAParser(req.headers['user-agent']).getResult(),
+                  ...new UAParser(req.headers["user-agent"]).getResult(),
                   sessionID: Date.now().toString(),
-                  ip: req.headers['x-forwarded-for'] || req.ip,
+                  ip: req.headers["x-forwarded-for"] || req.ip,
                   token: new Token(time.toString())
                 };
                 user
                   .create({
                     id: time,
                     username,
-                    domain: 'alekeagle.me',
-                    subdomain: '',
+                    domain: "alekeagle.me",
+                    subdomain: "",
                     displayName: name,
                     email,
                     createdAt: now,
                     updatedAt: now,
                     password: hashedPass,
-                    staff: '',
+                    staff: "",
                     sessions: [newSession]
                   })
                   .then(
@@ -535,16 +536,16 @@ app.post('/api/user/', upload.none(), (req, res) => {
                         ...newSession,
                         token: newSession.token.toString()
                       });
-                      console.log('New user created');
+                      console.log("New user created");
                     },
                     err => {
-                      res.status(500).json({ error: 'Internal Server Error' });
+                      res.status(500).json({ error: "Internal Server Error" });
                       console.error(err);
                     }
                   );
               },
               err => {
-                res.status(500).json({ error: 'Internal Server Error' });
+                res.status(500).json({ error: "Internal Server Error" });
                 console.error(err);
               }
             );
@@ -552,37 +553,37 @@ app.post('/api/user/', upload.none(), (req, res) => {
             let lolData = { name, email };
             let alreadyExists = Object.keys(lolData)
               .map(e =>
-                u[e === 'name' ? 'username' : e] === lolData[e] ? e : null
+                u[e === "name" ? "username" : e] === lolData[e] ? e : null
               )
               .filter(e => e !== null);
             res
               .status(401)
-              .json({ error: 'User already exists', with: alreadyExists });
+              .json({ error: "User already exists", with: alreadyExists });
             return;
           }
         },
         err => {
-          res.status(500).json({ error: 'Internal Server Error' });
+          res.status(500).json({ error: "Internal Server Error" });
           console.error(err);
         }
       );
   }
 });
-app.patch('/api/user/:id/ban/', upload.none(), (req, res) => {
+app.patch("/api/user/:id/ban/", upload.none(), (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
-  if (req.user.staff !== '') {
+  if (req.user.staff !== "") {
     let { banned } = req.body;
     if (!req.params.id) {
-      res.status(400).json({ error: 'Bad Request', missing: ['id'] });
+      res.status(400).json({ error: "Bad Request", missing: ["id"] });
       return;
     }
     user.findOne({ where: { id: req.params.id } }).then(usr => {
@@ -605,21 +606,21 @@ app.patch('/api/user/:id/ban/', upload.none(), (req, res) => {
             });
           },
           err => {
-            res.status(500).json({ error: 'Internal server error.' });
-            console.error('bruh ', err);
+            res.status(500).json({ error: "Internal server error." });
+            console.error("bruh ", err);
           }
         );
     });
-  } else res.status(403).json({ error: 'Missing Permissions' });
+  } else res.status(403).json({ error: "Missing Permissions" });
 });
-app.delete('/api/user/', upload.none(), (req, res) => {
+app.delete("/api/user/", upload.none(), (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -639,14 +640,14 @@ app.delete('/api/user/', upload.none(), (req, res) => {
               if (errored) break;
               fs.unlink(`uploads/${files[i].filename}`, err => {
                 if (err) {
-                  res.status(500).json({ error: 'Internal Server Error' });
+                  res.status(500).json({ error: "Internal Server Error" });
                   errored = true;
                 } else {
                   files[i]
                     .destroy()
                     .then(() => {})
                     .catch(() => {
-                      res.status(500).json({ error: 'Internal Server Error' });
+                      res.status(500).json({ error: "Internal Server Error" });
                       errored = true;
                     });
                 }
@@ -655,43 +656,43 @@ app.delete('/api/user/', upload.none(), (req, res) => {
             if (!errored) {
               req.user.destroy().then(
                 () => {
-                  console.log('User Deleted');
+                  console.log("User Deleted");
                   res.status(200).json({ success: true });
                 },
                 err => {
-                  res.status(500).json({ error: 'Internal server error.' });
+                  res.status(500).json({ error: "Internal server error." });
                   console.error(err);
                 }
               );
             }
           });
       } else {
-        res.status(401).json({ error: 'Invalid password.' });
+        res.status(401).json({ error: "Invalid password." });
         return;
       }
     }),
       err => {
-        res.status(500).json({ error: 'Internal server error.' });
+        res.status(500).json({ error: "Internal server error." });
         console.error(err);
       };
   } else {
-    res.status(400).json({ error: 'Bad Request', missing: ['password'] });
+    res.status(400).json({ error: "Bad Request", missing: ["password"] });
   }
 });
-app.delete('/api/user/:id/', upload.none(), (req, res) => {
+app.delete("/api/user/:id/", upload.none(), (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   let { id } = req.params;
   if (id) {
-    if (req.user.staff !== '') {
+    if (req.user.staff !== "") {
       user
         .findOne({
           where: {
@@ -712,7 +713,7 @@ app.delete('/api/user/:id/', upload.none(), (req, res) => {
                   if (errored) break;
                   fs.unlink(`uploads/${files[i].filename}`, err => {
                     if (err) {
-                      res.status(500).json({ error: 'Internal Server Error' });
+                      res.status(500).json({ error: "Internal Server Error" });
                       errored = true;
                     } else {
                       files[i]
@@ -721,7 +722,7 @@ app.delete('/api/user/:id/', upload.none(), (req, res) => {
                         .catch(() => {
                           res
                             .status(500)
-                            .json({ error: 'Internal Server Error' });
+                            .json({ error: "Internal Server Error" });
                           errored = true;
                         });
                     }
@@ -730,35 +731,35 @@ app.delete('/api/user/:id/', upload.none(), (req, res) => {
                 if (!errored) {
                   us.destroy().then(
                     () => {
-                      console.log('User Deleted');
+                      console.log("User Deleted");
                       res.status(200).json({ success: true });
                     },
                     err => {
-                      res.status(500).json({ error: 'Internal server error.' });
+                      res.status(500).json({ error: "Internal server error." });
                       console.error(err);
                     }
                   );
                 }
               });
           } else {
-            res.status(404).json({ error: 'No account.' });
+            res.status(404).json({ error: "No account." });
           }
         });
     } else {
-      res.status(403).json({ error: 'Missing Permissions' });
+      res.status(403).json({ error: "Missing Permissions" });
     }
   } else {
-    res.status(400).json({ error: 'Bad Request', missing: ['id'] });
+    res.status(400).json({ error: "Bad Request", missing: ["id"] });
   }
 });
-app.post('/api/login/', upload.none(), (req, res) => {
+app.post("/api/login/", upload.none(), (req, res) => {
   let { name, password } = req.body;
   let vars = { name, password };
   let undefinedVars = Object.keys(vars)
     .map(e => (vars[e] !== undefined ? null : e))
     .filter(e => e !== null);
   if (undefinedVars.length < 0) {
-    res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
+    res.status(400).json({ error: "Bad Request", missing: undefinedVars });
     return;
   } else {
     name = name.toLowerCase();
@@ -782,11 +783,11 @@ app.post('/api/login/', upload.none(), (req, res) => {
               bcrypt.compare(password, user.password).then(
                 match => {
                   if (match) {
-                    console.log('User login');
+                    console.log("User login");
                     let newSession = {
-                      ...new UAParser(req.headers['user-agent']).getResult(),
+                      ...new UAParser(req.headers["user-agent"]).getResult(),
                       sessionID: Date.now().toString(),
-                      ip: req.headers['x-forwarded-for'] || req.ip,
+                      ip: req.headers["x-forwarded-for"] || req.ip,
                       token: new Token(user.id)
                     };
                     user
@@ -803,38 +804,38 @@ app.post('/api/login/', upload.none(), (req, res) => {
                         });
                       });
                   } else {
-                    res.status(401).json({ error: 'Invalid password.' });
+                    res.status(401).json({ error: "Invalid password." });
                   }
                 },
                 err => {
-                  res.status(500).json({ error: 'Internal server error.' });
+                  res.status(500).json({ error: "Internal server error." });
                   console.error(err);
                 }
               );
             } else {
-              res.status(401).json({ error: 'Banned.' });
+              res.status(401).json({ error: "Banned." });
               return;
             }
           } else {
-            res.status(404).json({ error: 'No account.' });
+            res.status(404).json({ error: "No account." });
             return;
           }
         },
         err => {
-          res.status(500).json({ error: 'Internal server error.' });
+          res.status(500).json({ error: "Internal server error." });
           console.error(err);
         }
       );
   }
 });
-app.get('/api/user/', (req, res) => {
+app.get("/api/user/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -843,14 +844,14 @@ app.get('/api/user/', (req, res) => {
   delete us.sessions;
   res.status(200).json(us);
 });
-app.patch('/api/user/token/', upload.none(), (req, res) => {
+app.patch("/api/user/token/", upload.none(), (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -861,10 +862,10 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
         if (match) {
           let newSession = {
             sessionID: Date.now().toString(),
-            ip: req.headers['x-forwarded-for'] || req.ip,
+            ip: req.headers["x-forwarded-for"] || req.ip,
             token: new Token(req.user.id),
             os: {},
-            ua: 'API Authorization',
+            ua: "API Authorization",
             cpu: {},
             engine: {},
             browser: {}
@@ -873,7 +874,7 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
             .update({
               sessions: [
                 ...req.user.sessions.filter(s => {
-                  return s.ua !== 'API Authorization';
+                  return s.ua !== "API Authorization";
                 }),
                 newSession
               ]
@@ -885,32 +886,32 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
               });
             });
         } else {
-          res.status(401).json({ error: 'Invalid password.' });
+          res.status(401).json({ error: "Invalid password." });
         }
       },
       err => {
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
         console.error(err);
       }
     );
   } else {
-    res.status(400).json({ error: 'Bad Request', missing: ['password'] });
+    res.status(400).json({ error: "Bad Request", missing: ["password"] });
   }
 });
-app.patch('/api/user/:id/token/', (req, res) => {
+app.patch("/api/user/:id/token/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   if (req.params.id) {
-    if (req.user.staff === '') {
-      res.status(403).json({ error: 'Missing Permissions' });
+    if (req.user.staff === "") {
+      res.status(403).json({ error: "Missing Permissions" });
     } else {
       user
         .findOne({
@@ -922,10 +923,10 @@ app.patch('/api/user/:id/token/', (req, res) => {
           if (us) {
             let newSession = {
               sessionID: Date.now().toString(),
-              ip: req.headers['x-forwarded-for'] || req.ip,
+              ip: req.headers["x-forwarded-for"] || req.ip,
               token: new Token(us.id),
               os: {},
-              ua: 'API Authorization',
+              ua: "API Authorization",
               cpu: {},
               engine: {},
               browser: {}
@@ -933,7 +934,7 @@ app.patch('/api/user/:id/token/', (req, res) => {
             us.update({
               sessions: [
                 us.sessions.filter(s => {
-                  return s.ua !== 'API Authorization';
+                  return s.ua !== "API Authorization";
                 }),
                 newSession
               ]
@@ -945,7 +946,7 @@ app.patch('/api/user/:id/token/', (req, res) => {
                 });
               },
               err => {
-                res.status(500).json({ error: 'Internal Server Error' });
+                res.status(500).json({ error: "Internal Server Error" });
                 console.error(err);
               }
             );
@@ -953,17 +954,17 @@ app.patch('/api/user/:id/token/', (req, res) => {
         });
     }
   } else {
-    res.status(400).json({ error: 'Bad Request', missing: ['id'] });
+    res.status(400).json({ error: "Bad Request", missing: ["id"] });
   }
 });
-app.get('/api/domains/', (req, res) => {
+app.get("/api/domains/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -971,26 +972,26 @@ app.get('/api/domains/', (req, res) => {
     res.status(200).json(d);
   });
 });
-app.patch('/api/user/:id/domain/', upload.none(), (req, res) => {
+app.patch("/api/user/:id/domain/", upload.none(), (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   let { domain, subdomain } = req.body;
   let id = req.params.id;
-  subdomain = subdomain !== undefined ? subdomain.replace(/ /g, '-') : '';
-  if (domain === 'alekeagle.com' && req.user.staff === '') {
-    res.status(403).json({ error: 'Missing Permissions' });
+  subdomain = subdomain !== undefined ? subdomain.replace(/ /g, "-") : "";
+  if (domain === "alekeagle.com" && req.user.staff === "") {
+    res.status(403).json({ error: "Missing Permissions" });
     return;
   }
   if (!domain) {
-    res.status(400).json({ error: 'Bad Request', missing: ['domain'] });
+    res.status(400).json({ error: "Bad Request", missing: ["domain"] });
   }
   domains
     .findOne({
@@ -1003,9 +1004,9 @@ app.patch('/api/user/:id/domain/', upload.none(), (req, res) => {
         if (
           d.allowsSubdomains
             ? true
-            : subdomain === undefined || subdomain === ''
+            : subdomain === undefined || subdomain === ""
         ) {
-          if (req.user.staff !== '') {
+          if (req.user.staff !== "") {
             user
               .findOne({
                 where: {
@@ -1016,59 +1017,59 @@ app.patch('/api/user/:id/domain/', upload.none(), (req, res) => {
                 if (us !== null) {
                   us.update({
                     domain,
-                    subdomain: subdomain.replace(/[. ]/g, '-')
+                    subdomain: subdomain.replace(/[. ]/g, "-")
                   }).then(
                     () => {
                       res.status(200).json({
                         domain,
-                        subdomain: subdomain.replace(/[. ]/g, '-')
+                        subdomain: subdomain.replace(/[. ]/g, "-")
                       });
                     },
                     err => {
-                      res.status(500).json({ error: 'Internal Server Error' });
+                      res.status(500).json({ error: "Internal Server Error" });
                       console.error(err);
                     }
                   );
                 }
               });
           } else {
-            res.status(403).json({ error: 'Missing Permissions' });
+            res.status(403).json({ error: "Missing Permissions" });
           }
         } else {
           res
             .status(400)
-            .json({ error: 'Domain provided does not support subdomains' });
+            .json({ error: "Domain provided does not support subdomains" });
         }
       } else {
         res.status(404).json({
-          error: 'Not Found'
+          error: "Not Found"
         });
       }
     })
     .catch(err => {
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({ error: "Internal Server Error" });
       console.error(err);
     });
 });
-app.patch('/api/user/domain/', upload.none(), (req, res) => {
+app.patch("/api/user/domain/", upload.none(), (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   let { domain, subdomain } = req.body;
-  subdomain = subdomain !== undefined ? subdomain.replace(/ /g, '-') : '';
-  if (domain === 'alekeagle.com' && req.user.staff === '') {
-    res.status(403).json({ error: 'Missing Permissions' });
+  subdomain = subdomain !== undefined ? subdomain.replace(/ /g, "-") : "";
+  if (domain === "alekeagle.com" && req.user.staff === "") {
+    res.status(403).json({ error: "Missing Permissions" });
     return;
   }
   if (!domain) {
-    res.status(400).json({ error: 'Bad Request', missing: ['domain'] });
+    res.status(400).json({ error: "Bad Request", missing: ["domain"] });
   }
   domains
     .findOne({
@@ -1081,43 +1082,43 @@ app.patch('/api/user/domain/', upload.none(), (req, res) => {
         if (
           d.allowsSubdomains
             ? true
-            : subdomain === undefined || subdomain === ''
+            : subdomain === undefined || subdomain === ""
         ) {
           req.user
             .update({
               domain,
-              subdomain: subdomain.replace(/[. ]/g, '-')
+              subdomain: subdomain.replace(/[. ]/g, "-")
             })
             .then(us => {
               res.status(200).json({
                 domain,
-                subdomain: subdomain.replace(/[. ]/g, '-')
+                subdomain: subdomain.replace(/[. ]/g, "-")
               });
             });
         } else {
           res
             .status(400)
-            .json({ error: 'Domain provided does not support subdomains' });
+            .json({ error: "Domain provided does not support subdomains" });
         }
       } else {
         res.status(404).json({
-          error: 'Not Found'
+          error: "Not Found"
         });
       }
     })
     .catch(err => {
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({ error: "Internal Server Error" });
       console.error(err);
     });
 });
-app.patch('/api/user/:id/', upload.none(), (req, res) => {
+app.patch("/api/user/:id/", upload.none(), (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -1127,16 +1128,16 @@ app.patch('/api/user/:id/', upload.none(), (req, res) => {
     .map(e => (vars[e] !== undefined ? null : e))
     .filter(e => e !== null);
   if (undefinedVars.length < 0 || !req.params.id) {
-    res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
+    res.status(400).json({ error: "Bad Request", missing: undefinedVars });
     return;
   }
-  if (req.user.staff === '') {
+  if (req.user.staff === "") {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   } else {
@@ -1151,7 +1152,7 @@ app.patch('/api/user/:id/', upload.none(), (req, res) => {
         us => {
           if (us === null) {
             res.status(404).json({
-              error: 'Not Found'
+              error: "Not Found"
             });
             return;
           } else {
@@ -1167,7 +1168,7 @@ app.patch('/api/user/:id/', upload.none(), (req, res) => {
                     password: hashedPass
                   }).then(
                     updatedUser => {
-                      console.log('User updated');
+                      console.log("User updated");
                       let noPass = {
                         ...updatedUser.toJSON(),
                         password: null
@@ -1175,13 +1176,13 @@ app.patch('/api/user/:id/', upload.none(), (req, res) => {
                       res.status(200).json(noPass);
                     },
                     err => {
-                      res.status(500).json({ error: 'Internal Server Error' });
+                      res.status(500).json({ error: "Internal Server Error" });
                       console.error(err);
                     }
                   );
                 },
                 err => {
-                  res.status(500).json({ error: 'Internal Server Error' });
+                  res.status(500).json({ error: "Internal Server Error" });
                   console.error(err);
                 }
               );
@@ -1193,7 +1194,7 @@ app.patch('/api/user/:id/', upload.none(), (req, res) => {
                 updatedAt: now
               }).then(
                 updatedUser => {
-                  console.log('User updated');
+                  console.log("User updated");
                   let noPass = {
                     ...updatedUser.toJSON()
                   };
@@ -1203,7 +1204,7 @@ app.patch('/api/user/:id/', upload.none(), (req, res) => {
                   res.status(200).json(noPass);
                 },
                 err => {
-                  res.status(500).json({ error: 'Internal Server Error' });
+                  res.status(500).json({ error: "Internal Server Error" });
                   console.error(err);
                 }
               );
@@ -1211,20 +1212,20 @@ app.patch('/api/user/:id/', upload.none(), (req, res) => {
           }
         },
         err => {
-          res.status(500).json({ error: 'Internal Server Error' });
+          res.status(500).json({ error: "Internal Server Error" });
           console.error(err);
         }
       );
   }
 });
-app.patch('/api/user/', upload.none(), (req, res) => {
+app.patch("/api/user/", upload.none(), (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -1234,12 +1235,12 @@ app.patch('/api/user/', upload.none(), (req, res) => {
     .map(e => (vars[e] !== undefined ? null : e))
     .filter(e => e !== null);
   if (undefinedVars.length < 0) {
-    res.status(400).json({ error: 'Bad Request', missing: undefinedVars });
+    res.status(400).json({ error: "Bad Request", missing: undefinedVars });
     return;
   } else {
     let username = name ? name.toLowerCase() : null;
     if (!password) {
-      res.status(400).json({ error: 'Bad Request', missing: ['password'] });
+      res.status(400).json({ error: "Bad Request", missing: ["password"] });
       return;
     }
     let now = new Date(Date.now());
@@ -1263,7 +1264,7 @@ app.patch('/api/user/', upload.none(), (req, res) => {
                   })
                   .then(
                     updatedUser => {
-                      console.log('User updated');
+                      console.log("User updated");
                       let noPass = {
                         ...updatedUser.toJSON()
                       };
@@ -1272,35 +1273,35 @@ app.patch('/api/user/', upload.none(), (req, res) => {
                       res.status(200).json(noPass);
                     },
                     err => {
-                      res.status(500).json({ error: 'Internal Server Error' });
+                      res.status(500).json({ error: "Internal Server Error" });
                       console.error(err);
                     }
                   );
               },
               err => {
-                res.status(500).json({ error: 'Internal Server Error' });
+                res.status(500).json({ error: "Internal Server Error" });
                 console.error(err);
               }
             );
         } else {
-          res.status(401).json({ error: 'Invalid password.' });
+          res.status(401).json({ error: "Invalid password." });
         }
       },
       err => {
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
         console.error(err);
       }
     );
   }
 });
-app.get('/api/files/', (req, res) => {
+app.get("/api/files/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -1310,7 +1311,7 @@ app.get('/api/files/', (req, res) => {
     .findAndCountAll({
       offset,
       limit: count,
-      order: [['updatedAt', 'DESC']],
+      order: [["updatedAt", "DESC"]],
       where: {
         userid: req.user.id
       }
@@ -1326,26 +1327,26 @@ app.get('/api/files/', (req, res) => {
       }
     });
 });
-app.get('/api/files/all/', (req, res) => {
+app.get("/api/files/all/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   let count = parseInt(req.query.count) || 50,
     offset = parseInt(req.query.offset) || 0;
 
-  if (req.user.staff !== '') {
+  if (req.user.staff !== "") {
     uploads
       .findAndCountAll({
         offset,
         limit: count,
-        order: [['updatedAt', 'DESC']]
+        order: [["updatedAt", "DESC"]]
       })
       .then(files => {
         if (files.length !== 0 && files !== null) {
@@ -1358,74 +1359,77 @@ app.get('/api/files/all/', (req, res) => {
         }
       });
   } else {
-    res.status(403).json({ error: 'Missing Permissions' });
+    res.status(403).json({ error: "Missing Permissions" });
   }
 });
 app.get(
-  '/api/files/zip/',
+  "/api/files/zip/",
   ratelimit({
-    windowMs: ms('1week'),
+    windowMs: ms("1week"),
     max: 1,
     keyGenerator: (req, res) => {
-      return req.user ? req.user.id : req.headers['x-forwarded-for'] || req.ip;
+      return req.user ? req.user.id : req.headers["x-forwarded-for"] || req.ip;
     }
   }),
   async (req, res) => {
     res
       .status(503)
-      .json({ error: 'Temporarily disabled until further notice' });
+      .json({ error: "Temporarily disabled until further notice" });
     return;
-    if (!req.user) {
-      res
-        .status(401)
-        .json(
-          req.headers.authorization
-            ? { error: 'Invalid Token' }
-            : { error: 'No Token Provided' }
-        );
-      return;
-    }
-    let files = await uploads.findAll({
-      where: {
-        userid: req.user.id
-      }
-    });
 
-    let zip = chProc.spawn('/usr/bin/zip', [
-      `/tmp/${req.user.id}.zip`,
-      ...files.map(file => `uploads/${file.filename}`)
-    ]);
+    // commented this out so eslint doesn't shit itself
 
-    zip.on('close', (code, signal) => {
-      if (code === 0) {
-        fs.createReadStream(`/tmp/${req.user.id}.zip`).pipe(res.status(201));
-      } else {
-        res.status(500).json({ error: 'Internal Server Error' });
-        console.error(code, signal);
-      }
-    });
+    // if (!req.user) {
+    //   res
+    //     .status(401)
+    //     .json(
+    //       req.headers.authorization
+    //         ? { error: "Invalid Token" }
+    //         : { error: "No Token Provided" }
+    //     );
+    //   return;
+    // }
+    // let files = await uploads.findAll({
+    //   where: {
+    //     userid: req.user.id
+    //   }
+    // });
+
+    // let zip = chProc.spawn("/usr/bin/zip", [
+    //   `/tmp/${req.user.id}.zip`,
+    //   ...files.map(file => `uploads/${file.filename}`)
+    // ]);
+
+    // zip.on("close", (code, signal) => {
+    //   if (code === 0) {
+    //     fs.createReadStream(`/tmp/${req.user.id}.zip`).pipe(res.status(201));
+    //   } else {
+    //     res.status(500).json({ error: "Internal Server Error" });
+    //     console.error(code, signal);
+    //   }
+    // });
   }
 );
-app.get('/api/files/:id/', (req, res) => {
+app.get("/api/files/:id/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   let { id } = req.params,
     count = parseInt(req.query.count) || 50,
     offset = parseInt(req.query.offset) || 0;
-  if (req.user.staff !== '') {
+  if (req.user.staff !== "") {
     uploads
       .findAndCountAll({
         offset,
         limit: count,
-        order: [['updatedAt', 'DESC']],
+        order: [["updatedAt", "DESC"]],
         where: {
           userid: id
         }
@@ -1441,27 +1445,27 @@ app.get('/api/files/:id/', (req, res) => {
         }
       })
       .catch(err => {
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
         console.error(err);
       });
   } else {
-    res.status(403).json({ error: 'Missing Permissions' });
+    res.status(403).json({ error: "Missing Permissions" });
   }
 });
-app.get('/api/file/:file/', (req, res) => {
+app.get("/api/file/:file/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   let { file } = req.params;
   if (!file) {
-    res.status(400).json({ error: 'Bad Request', missing: ['file'] });
+    res.status(400).json({ error: "Bad Request", missing: ["file"] });
     return;
   }
   uploads
@@ -1479,29 +1483,29 @@ app.get('/api/file/:file/', (req, res) => {
         if (file.userid === req.user.id) {
           res.status(200).json(file);
         } else {
-          if (req.user.staff !== '') {
+          if (req.user.staff !== "") {
             res.status(200).json(file);
           } else {
-            res.status(403).json({ error: 'Missing Permissions' });
+            res.status(403).json({ error: "Missing Permissions" });
             return;
           }
         }
       } else {
         res.status(404).json({
-          error: 'Not Found'
+          error: "Not Found"
         });
         return;
       }
     });
 });
-app.get('/api/setup/', (req, res) => {
+app.get("/api/setup/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -1509,14 +1513,14 @@ app.get('/api/setup/', (req, res) => {
     res.status(200).json(ins);
   });
 });
-app.get('/api/setup/:name/', (req, res) => {
+app.get("/api/setup/:name/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -1531,19 +1535,19 @@ app.get('/api/setup/:name/', (req, res) => {
         res.status(200).json(ins.toJSON());
       } else {
         res.status(404).json({
-          error: 'Not Found'
+          error: "Not Found"
         });
       }
     });
 });
-app.get('/api/setup/save/:name/', (req, res) => {
+app.get("/api/setup/save/:name/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -1556,7 +1560,7 @@ app.get('/api/setup/save/:name/', (req, res) => {
     .then(ins => {
       if (ins !== null) {
         res.set(
-          'Content-Disposition',
+          "Content-Disposition",
           `attachment; filename="${ins.filename}"`
         );
         res
@@ -1569,25 +1573,25 @@ app.get('/api/setup/save/:name/', (req, res) => {
           );
       } else {
         res.status(404).json({
-          error: 'Not Found'
+          error: "Not Found"
         });
       }
     });
 });
-app.delete('/api/file/:file/', (req, res) => {
+app.delete("/api/file/:file/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   let { file } = req.params;
   if (!file) {
-    res.status(400).json({ error: 'Bad Request', missing: ['file'] });
+    res.status(400).json({ error: "Bad Request", missing: ["file"] });
     return;
   }
   uploads
@@ -1605,7 +1609,7 @@ app.delete('/api/file/:file/', (req, res) => {
         if (file.userid === req.user.id) {
           fs.unlink(`uploads/${file.filename}`, err => {
             if (err) {
-              res.status(500).json({ error: 'Internal Server Error' });
+              res.status(500).json({ error: "Internal Server Error" });
               return;
             } else {
               file
@@ -1615,15 +1619,15 @@ app.delete('/api/file/:file/', (req, res) => {
                   return;
                 })
                 .catch(() => {
-                  res.status(500).json({ error: 'Internal Server Error' });
+                  res.status(500).json({ error: "Internal Server Error" });
                   return;
                 });
             }
           });
-        } else if (req.user.staff !== '') {
+        } else if (req.user.staff !== "") {
           fs.unlink(`uploads/${file.filename}`, err => {
             if (err) {
-              res.status(500).json({ error: 'Internal Server Error' });
+              res.status(500).json({ error: "Internal Server Error" });
               return;
             } else {
               file
@@ -1633,44 +1637,44 @@ app.delete('/api/file/:file/', (req, res) => {
                   return;
                 })
                 .catch(() => {
-                  res.status(500).json({ error: 'Internal Server Error' });
+                  res.status(500).json({ error: "Internal Server Error" });
                   return;
                 });
             }
           });
         } else {
-          res.status(403).json({ error: 'Missing Permissions' });
+          res.status(403).json({ error: "Missing Permissions" });
           return;
         }
       } else {
         res.status(404).json({
-          error: 'Not Found'
+          error: "Not Found"
         });
         return;
       }
     })
     .catch(err => {
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({ error: "Internal Server Error" });
       console.error(err);
     });
 });
-app.post('/upload/', (req, res) => {
-  res.redirect(308, '/api/upload/');
+app.post("/upload/", (req, res) => {
+  res.redirect(308, "/api/upload/");
 });
-app.post('/api/upload/', upload.single('file'), (req, res) => {
+app.post("/api/upload/", upload.single("file"), (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
   if (!req.file) {
     if (!req.body.file) {
-      res.status(400).json({ error: 'Bad Request', missing: ['file'] });
+      res.status(400).json({ error: "Bad Request", missing: ["file"] });
       return;
     }
     let filename = newString(10),
@@ -1679,7 +1683,7 @@ app.post('/api/upload/', upload.single('file'), (req, res) => {
       );
     writeStream.write(new Buffer.from(req.body.file), error => {
       if (error) {
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
         return;
       } else {
         uploads
@@ -1692,7 +1696,7 @@ app.post('/api/upload/', upload.single('file'), (req, res) => {
             res
               .status(201)
               .end(
-                `https://${req.user.subdomain ? `${req.user.subdomain}.` : ''}${
+                `https://${req.user.subdomain ? `${req.user.subdomain}.` : ""}${
                   req.user.domain
                 }/${filename}.txt`
               );
@@ -1712,12 +1716,12 @@ app.post('/api/upload/', upload.single('file'), (req, res) => {
                 ? ft.ext
                 : map[req.file.mimetype] !== undefined
                 ? map[req.file.mimetype]
-                : 'txt'
+                : "txt"
             }`
           );
         writeStream.write(req.file.buffer, error => {
           if (error) {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(500).json({ error: "Internal Server Error" });
             return;
           } else {
             uploads
@@ -1727,7 +1731,7 @@ app.post('/api/upload/', upload.single('file'), (req, res) => {
                     ? ft.ext
                     : map[req.file.mimetype] !== undefined
                     ? map[req.file.mimetype]
-                    : 'txt'
+                    : "txt"
                 }`,
                 userid: req.user.id,
                 size: req.file.size
@@ -1737,13 +1741,13 @@ app.post('/api/upload/', upload.single('file'), (req, res) => {
                   .status(201)
                   .end(
                     `https://${
-                      req.user.subdomain ? `${req.user.subdomain}.` : ''
+                      req.user.subdomain ? `${req.user.subdomain}.` : ""
                     }${req.user.domain}/${filename}.${
                       ft
                         ? ft.ext
                         : map[req.file.mimetype] !== undefined
                         ? map[req.file.mimetype]
-                        : 'txt'
+                        : "txt"
                     }`
                   );
               });
@@ -1755,14 +1759,14 @@ app.post('/api/upload/', upload.single('file'), (req, res) => {
   }
 });
 
-app.get('/api/sessions/', (req, res) => {
+app.get("/api/sessions/", (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
@@ -1775,19 +1779,19 @@ app.get('/api/sessions/', (req, res) => {
   );
 });
 
-app.get('/api/sessions/:id/', async (req, res) => {
+app.get("/api/sessions/:id/", async (req, res) => {
   if (!req.user) {
     res
       .status(401)
       .json(
         req.headers.authorization
-          ? { error: 'Invalid Token' }
-          : { error: 'No Token Provided' }
+          ? { error: "Invalid Token" }
+          : { error: "No Token Provided" }
       );
     return;
   }
-  if (req.user.staff === '') {
-    res.status(403).json({ error: 'Missing Permissions' });
+  if (req.user.staff === "") {
+    res.status(403).json({ error: "Missing Permissions" });
     return;
   }
   try {
@@ -1805,28 +1809,28 @@ app.get('/api/sessions/:id/', async (req, res) => {
           return b;
         })
       );
-    } else res.status(404).json({ error: 'Not found' });
+    } else res.status(404).json({ error: "Not found" });
   } catch (err) {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: "Internal server error" });
     console.log(err);
   }
 });
 
 app.use((req, res, next) => {
   if (
-    req.path.includes('manifest.json') ||
-    req.path.includes('service-worker.js')
+    req.path.includes("manifest.json") ||
+    req.path.includes("service-worker.js")
   ) {
     next();
     return;
   }
   res.set({
-    'Cache-Control': `public, max-age=604800`
+    "Cache-Control": `public, max-age=604800`
   });
   next();
 });
 
-app.use(express.static('./dist', { acceptRanges: false, lastModified: true }));
+app.use(express.static("./dist", { acceptRanges: false, lastModified: true }));
 
 server.listen(port);
 console.log(`Server listening on port ${port}`);

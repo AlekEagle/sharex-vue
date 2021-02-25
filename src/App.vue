@@ -4,14 +4,14 @@
 </template>
 
 <script>
-  import Toast from '@/components/Toast.vue';
+  import Toast from "@/components/Toast.vue";
   export default {
-    name: 'App',
+    name: "App",
     methods: {
       temporaryToast(text, duration) {
         this.$refs.toast.showToast(
           text,
-          typeof duration === 'number' ? duration : true
+          typeof duration === "number" ? duration : true
         );
       },
       permanentToast(text) {
@@ -306,7 +306,7 @@
   }
 
   .checkmark:after {
-    content: '';
+    content: "";
     position: absolute;
     display: none;
   }
@@ -332,7 +332,7 @@
   }
 
   code {
-    font-family: 'Source Code Pro', monospace;
+    font-family: "Source Code Pro", monospace;
     background: #1d1d1d;
     border-radius: 3px;
     padding: 5px 3.5px;
