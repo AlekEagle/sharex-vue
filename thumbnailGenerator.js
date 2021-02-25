@@ -16,6 +16,7 @@ if (worker.isMainThread) throw new Error("can't be ran as main thread");
         `/tmp/sharex-previews/${worker.workerData.file.split('.')[0]}.png`
       )
     ) {
+      console.log('file already exists, serving existing file');
       worker.parentPort.postMessage({
         status: 200,
         file: fs
@@ -100,38 +101,3 @@ if (worker.isMainThread) throw new Error("can't be ran as main thread");
     process.exit(0);
   }
 })();
-
-/* if (!fs.existsSync('/tmp/sharex-previews'))
-    fs.mkdirSync('/tmp/sharex-previews');
-  if (fs.existsSync(`uploads/${req.params.file}`)) {
-    let ft = await fileType.fromStream(
-      fs.createReadStream(`uploads/${req.params.file}`)
-    );
-    if (!fs.existsSync(`/tmp/sharex-previews/${req.params.file}`)) {
-      if (ft && ft.mime.startsWith('image/')) {
-        let cacheFileStream = fs.createWriteStream(
-          `/tmp/sharex-previews/${req.params.file}`
-        );
-        let fileStream = new Stream.PassThrough(),
-          resultStream = new Stream.PassThrough();
-
-        let previewStream = gm(`uploads/${req.params.file}`)
-          .resize('256', '256', '^')
-          .gravity('Center')
-          .crop('200', '200')
-          .stream();
-        previewStream.pipe(fileStream);
-        previewStream.pipe(resultStream);
-        fileStream.pipe(cacheFileStream);
-        resultStream.pipe(res.status(201));
-      } else {
-        fs.createReadStream('public/img/nopv.png').pipe(res.status(415));
-      }
-    } else {
-      fs.createReadStream(`/tmp/sharex-previews/${req.params.file}`).pipe(
-        res.status(200)
-      );
-    }
-  } else {
-    res.status(404).json({ error: 'Not found' });
-  } */

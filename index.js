@@ -2,7 +2,6 @@ require('./logger')('INFO');
 const fs = require('fs'),
   dotenv = require('dotenv'),
   express = require('express'),
-  cors = require('cors'),
   multer = require('multer'),
   Sequelize = require('sequelize'),
   ratelimit = require('express-rate-limit'),
@@ -14,10 +13,9 @@ const fs = require('fs'),
   history = require('connect-history-api-fallback'),
   crypto = require('crypto'),
   compression = require('compression'),
-  gm = require('gm'),
   chProc = require('child_process'),
-  Stream = require('stream'),
-  worker = require('worker_threads'),
+  UAParser = require('ua-parser-js'),
+  instance = process.env.NODE_APP_INSTANCE || 0,
   map = {
     'image/x-icon': 'ico',
     'text/html': 'html',
@@ -38,13 +36,68 @@ const fs = require('fs'),
     'application/zip': 'zip',
     'text/plain': 'txt'
   },
-  port = process.argv[2] || 3000;
+  port = parseInt(`800${instance}`);
+
+Array.prototype.equals = function(array) {
+  // if the other array is a falsy value, return
+  if (!array) return false;
+
+  // compare lengths - can save a lot of time
+  if (this.length != array.length) return false;
+
+  for (var i = 0, l = this.length; i < l; i++) {
+    // Check if we have nested arrays
+    if (this[i] instanceof Array && array[i] instanceof Array) {
+      // recurse into the nested arrays
+      if (!this[i].equals(array[i])) return false;
+    } else if (this[i] != array[i]) {
+      // Warning - two different object instances will never be equal: {x:20} != {x:20}
+      return false;
+    }
+  }
+  return true;
+};
+// Hide method from for-in loops
+Object.defineProperty(Array.prototype, 'equals', { enumerable: false });
 
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+class Token {
+  constructor(str) {
+    if (!str) throw new Error('str is required.');
+    if (str.split('.').length === 3) {
+      let token = str.split('.');
+      this.id = Buffer.from(token[0], 'base64').toString('utf8');
+      this.time = Buffer.from(token[1], 'base64').toString('utf8');
+      this.bytes = Buffer.from(token[2], 'base64');
+    } else {
+      this.id = str;
+      this.time = Date.now().toString();
+      this.time = this.time.substr(this.time.length - 3, this.time.length);
+      this.bytes = crypto.randomBytes(24);
+    }
+  }
+
+  toString() {
+    return `${Buffer.from(this.id)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '')}.${Buffer.from(this.time).toString(
+      'base64'
+    )}.${this.bytes
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '')}`;
+  }
+}
+
+//Initialize the .env file
 dotenv.config();
+//Initialize sequelize connection
 const sequelize = new Sequelize({
   database: process.env.SERVERDB,
   username: process.env.SERVERUSERNAME,
@@ -54,6 +107,7 @@ const sequelize = new Sequelize({
   dialect: 'postgres',
   logging: false
 });
+//Initialize tables
 class user extends Sequelize.Model {}
 user.init(
   {
@@ -66,10 +120,10 @@ user.init(
     email: Sequelize.STRING(60),
     staff: Sequelize.STRING,
     password: Sequelize.STRING(2000),
-    apiToken: Sequelize.STRING,
     domain: Sequelize.STRING,
     subdomain: Sequelize.STRING,
-    bannedAt: Sequelize.DATE
+    bannedAt: Sequelize.DATE,
+    sessions: Sequelize.ARRAY(Sequelize.JSONB)
   },
   {
     sequelize
@@ -85,6 +139,7 @@ user
   .catch(err => {
     console.error('an error occurred while performing this operation', err);
   });
+
 class uploads extends Sequelize.Model {}
 uploads.init(
   {
@@ -109,28 +164,7 @@ uploads
   .catch(err => {
     console.error('an error occurred while performing this operation', err);
   });
-class actions extends Sequelize.Model {}
-actions.init(
-  {
-    type: Sequelize.INTEGER,
-    by: Sequelize.STRING,
-    to: Sequelize.STRING,
-    addInfo: Sequelize.STRING(2000)
-  },
-  {
-    sequelize
-  }
-);
-actions
-  .sync({
-    force: false
-  })
-  .then(() => {
-    console.log('Actions synced to database successfully!');
-  })
-  .catch(err => {
-    console.error('an error occurred while performing this operation', err);
-  });
+
 class domains extends Sequelize.Model {}
 domains.init(
   {
@@ -154,6 +188,7 @@ domains
   .catch(err => {
     console.error('an error occurred while performing this operation', err);
   });
+
 class instructions extends Sequelize.Model {}
 instructions.init(
   {
@@ -182,6 +217,7 @@ instructions
     console.error('an error occurred while performing this operation', err);
   });
 
+//function for filename generation
 function newString(length) {
   var text = '';
   var possible =
@@ -192,21 +228,9 @@ function newString(length) {
 
   return text;
 }
-const options = {
-  key: fs.readFileSync('./alekeagle.com.key'),
-  cert: fs.readFileSync('./alekeagle.com.pem')
-};
-const corsOptions = {
-  origin: '*',
-  optionsSuccessStatus: 200
-};
-let httpServer,
+let httpServer = require('http'),
   app = express();
-if (process.env.DEBUG) {
-  httpServer = require('http');
-} else {
-  httpServer = require('spdy');
-}
+
 const shouldCompress = (req, res) => {
   // don't compress responses asking explicitly not
   if (req.headers['x-no-compression']) {
@@ -216,11 +240,13 @@ const shouldCompress = (req, res) => {
   // use compression filter function
   return compression.filter(req, res);
 };
-app.use(cors(corsOptions));
-app.engine('html', require('mustache-express')());
+//enable automatic json parsing of request body
 app.use(express.json());
+//enable compression
 app.use(compression({ filter: shouldCompress }));
+//enable automatic urlencoded parsing of request body
 app.use(express.urlencoded({ extended: true }));
+//enable proper PWA serving
 app.use(
   history({
     rewrites: [
@@ -234,53 +260,32 @@ app.use(
     index: '/'
   })
 );
-chProc.exec('rm /tmp/sharex-previews/*', () => {});
-let server;
-if (process.env.DEBUG) {
-  server = httpServer.createServer(app);
-} else {
-  server = httpServer.createServer(options, app);
-}
-
-function tokenGen(id) {
-  let now = Date.now().toString();
-  return `${Buffer.from(id)
-    .toString('base64')
-    .replace(/==/g, '')}.${Buffer.from(
-    now
-      .split('')
-      .slice(now.length - 3, now.length)
-      .join('')
-  ).toString('base64')}.${Buffer.from(newString(24)).toString('base64')}`;
-}
-function authenticate(req) {
-  return new Promise((resolve, reject) => {
-    if (!req.headers.authorization) {
-      reject();
-    } else {
-      user
-        .findOne({
-          where: {
-            apiToken: req.headers.authorization.replace('Bearer ', '')
-          }
-        })
-        .then(user => {
-          if (!user) {
-            reject();
-          } else {
-            if (user.bannedAt !== null) {
-              reject();
-            } else {
-              resolve(user);
-            }
-          }
-        })
-        .catch(err => {
-          reject(err);
-        });
+let server = httpServer.createServer(app);
+//function to authenticate authorization header. returns the user if successfully authenticated.
+async function authenticate(req) {
+  if (!req.headers.authorization) throw null;
+  let tokenData = new Token(req.headers.authorization);
+  let usr = await user.findOne({
+    where: {
+      id: tokenData.id
     }
   });
+  if (!usr) throw null;
+  if (usr.bannedAt !== null) throw null;
+  if (
+    !usr.sessions ||
+    (!usr.sessions.some(
+      session =>
+        tokenData.bytes.toJSON().data.equals(session.token.bytes.data) &&
+        tokenData.time === session.token.time &&
+        tokenData.id === session.token.id
+    ) &&
+      req.headers.authorization !== usr.apiToken)
+  )
+    throw null;
+  return usr;
 }
+//use authenticate function and append user to Request Object
 app.use(async (req, res, next) => {
   let user,
     errored = false,
@@ -297,10 +302,12 @@ app.use(async (req, res, next) => {
   req.user = user;
   if (errored) {
     res.status(500).json({ error: 'Internal Server Error' });
+    console.error(error);
   } else {
     next();
   }
 });
+//Enable default ratelimits
 app.use(
   '/api/',
   ratelimit({
@@ -311,19 +318,18 @@ app.use(
     }
   })
 );
+//log requests, serve API documentation if domain starts with docs.
 app.use(
   (req, res, next) => {
     res.set({
       'Cache-Control': 'no-store'
     });
-    //if (!req.url.includes('/preview/')) {
     console.log(
       `${req.headers['x-forwarded-for'] || req.ip}: ${req.method} => ${
         req.protocol
       }://${req.headers.host}${req.url}`
     );
-    //}
-    if (req.hostname.includes('docs.alekeagle.me')) {
+    if (req.headers.host === 'docs.alekeagle.me') {
       res.set({
         'Cache-Control': `public, max-age=604800`
       });
@@ -502,9 +508,16 @@ app.post('/api/user/', upload.none(), (req, res) => {
           if (u === null) {
             bcrypt.hash(password, Math.floor(Math.random() * 10)).then(
               hashedPass => {
+                let time = now.getTime();
+                let newSession = {
+                  ...new UAParser(req.headers['user-agent']).getResult(),
+                  sessionID: Date.now().toString(),
+                  ip: req.headers['x-forwarded-for'] || req.ip,
+                  token: new Token(time.toString())
+                };
                 user
                   .create({
-                    id: now.getTime(),
+                    id: time,
                     username,
                     domain: 'alekeagle.me',
                     subdomain: '',
@@ -514,20 +527,15 @@ app.post('/api/user/', upload.none(), (req, res) => {
                     updatedAt: now,
                     password: hashedPass,
                     staff: '',
-                    apiToken: tokenGen(now.getTime().toString())
+                    sessions: [newSession]
                   })
                   .then(
                     newUser => {
-                      res.status(201).json(newUser);
-                      actions
-                        .create({
-                          type: 1,
-                          by: newUser.id,
-                          to: newUser.id
-                        })
-                        .then(() => {
-                          console.log('New user created');
-                        });
+                      res.status(201).json({
+                        ...newSession,
+                        token: newSession.token.toString()
+                      });
+                      console.log('New user created');
                     },
                     err => {
                       res.status(500).json({ error: 'Internal Server Error' });
@@ -647,15 +655,7 @@ app.delete('/api/user/', upload.none(), (req, res) => {
             if (!errored) {
               req.user.destroy().then(
                 () => {
-                  actions
-                    .create({
-                      type: 4,
-                      by: req.user.id,
-                      to: req.user.id
-                    })
-                    .then(() => {
-                      console.log('User Deleted');
-                    });
+                  console.log('User Deleted');
                   res.status(200).json({ success: true });
                 },
                 err => {
@@ -730,15 +730,7 @@ app.delete('/api/user/:id/', upload.none(), (req, res) => {
                 if (!errored) {
                   us.destroy().then(
                     () => {
-                      actions
-                        .create({
-                          type: 4,
-                          by: req.user.id,
-                          to: us.id
-                        })
-                        .then(() => {
-                          console.log('User Deleted');
-                        });
+                      console.log('User Deleted');
                       res.status(200).json({ success: true });
                     },
                     err => {
@@ -790,17 +782,26 @@ app.post('/api/login/', upload.none(), (req, res) => {
               bcrypt.compare(password, user.password).then(
                 match => {
                   if (match) {
-                    actions
-                      .create({
-                        type: 5,
-                        by: user.id,
-                        to: user.id
+                    console.log('User login');
+                    let newSession = {
+                      ...new UAParser(req.headers['user-agent']).getResult(),
+                      sessionID: Date.now().toString(),
+                      ip: req.headers['x-forwarded-for'] || req.ip,
+                      token: new Token(user.id)
+                    };
+                    user
+                      .update({
+                        sessions: [
+                          ...(user.sessions ? user.sessions : []),
+                          newSession
+                        ]
                       })
-                      .then(() => {
-                        console.log('User login');
+                      .then(user => {
+                        res.status(200).json({
+                          ...newSession,
+                          token: newSession.token.toString()
+                        });
                       });
-                    let noPass = { ...user.toJSON(), password: null };
-                    res.status(200).json(noPass);
                   } else {
                     res.status(401).json({ error: 'Invalid password.' });
                   }
@@ -839,6 +840,7 @@ app.get('/api/user/', (req, res) => {
   }
   let us = { ...req.user.toJSON() };
   delete us.password;
+  delete us.sessions;
   res.status(200).json(us);
 });
 app.patch('/api/user/token/', upload.none(), (req, res) => {
@@ -857,30 +859,31 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
     bcrypt.compare(password, req.user.password).then(
       match => {
         if (match) {
+          let newSession = {
+            sessionID: Date.now().toString(),
+            ip: req.headers['x-forwarded-for'] || req.ip,
+            token: new Token(req.user.id),
+            os: {},
+            ua: 'API Authorization',
+            cpu: {},
+            engine: {},
+            browser: {}
+          };
           req.user
             .update({
-              apiToken: tokenGen(req.user.id)
+              sessions: [
+                ...req.user.sessions.filter(s => {
+                  return s.ua !== 'API Authorization';
+                }),
+                newSession
+              ]
             })
-            .then(
-              us => {
-                res.status(200).json({
-                  token: us.apiToken
-                });
-                actions
-                  .create({
-                    type: 3,
-                    by: us.id,
-                    to: us.id
-                  })
-                  .then(() => {
-                    console.log('API Token refreshed');
-                  });
-              },
-              err => {
-                res.status(500).json({ error: 'Internal Server Error' });
-                console.error(err);
-              }
-            );
+            .then(() => {
+              res.status(201).json({
+                ...newSession,
+                token: newSession.token.toString()
+              });
+            });
         } else {
           res.status(401).json({ error: 'Invalid password.' });
         }
@@ -891,6 +894,7 @@ app.patch('/api/user/token/', upload.none(), (req, res) => {
       }
     );
   } else {
+    res.status(400).json({ error: 'Bad Request', missing: ['password'] });
   }
 });
 app.patch('/api/user/:id/token/', (req, res) => {
@@ -916,9 +920,29 @@ app.patch('/api/user/:id/token/', (req, res) => {
         })
         .then(us => {
           if (us) {
-            us.update({ apiToken: tokenGen(us.id) }).then(
+            let newSession = {
+              sessionID: Date.now().toString(),
+              ip: req.headers['x-forwarded-for'] || req.ip,
+              token: new Token(us.id),
+              os: {},
+              ua: 'API Authorization',
+              cpu: {},
+              engine: {},
+              browser: {}
+            };
+            us.update({
+              sessions: [
+                us.sessions.filter(s => {
+                  return s.ua !== 'API Authorization';
+                }),
+                newSession
+              ]
+            }).then(
               updatedUser => {
-                res.status(200).json({ token: updatedUser.apiToken });
+                res.status(201).json({
+                  ...newSession,
+                  token: newSession.token.toString()
+                });
               },
               err => {
                 res.status(500).json({ error: 'Internal Server Error' });
@@ -1143,15 +1167,7 @@ app.patch('/api/user/:id/', upload.none(), (req, res) => {
                     password: hashedPass
                   }).then(
                     updatedUser => {
-                      actions
-                        .create({
-                          type: 2,
-                          by: req.user.id,
-                          to: req.params.id
-                        })
-                        .then(() => {
-                          console.log('User updated');
-                        });
+                      console.log('User updated');
                       let noPass = {
                         ...updatedUser.toJSON(),
                         password: null
@@ -1177,16 +1193,13 @@ app.patch('/api/user/:id/', upload.none(), (req, res) => {
                 updatedAt: now
               }).then(
                 updatedUser => {
-                  actions
-                    .create({
-                      type: 2,
-                      by: req.user.id,
-                      to: req.params.id
-                    })
-                    .then(() => {
-                      console.log('User updated');
-                    });
-                  let noPass = { ...updatedUser.toJSON(), password: null };
+                  console.log('User updated');
+                  let noPass = {
+                    ...updatedUser.toJSON()
+                  };
+                  delete noPass.password;
+                  delete noPass.sessions;
+                  res.status(200).json(noPass);
                   res.status(200).json(noPass);
                 },
                 err => {
@@ -1250,19 +1263,12 @@ app.patch('/api/user/', upload.none(), (req, res) => {
                   })
                   .then(
                     updatedUser => {
-                      actions
-                        .create({
-                          type: 2,
-                          by: updatedUser.id,
-                          to: updatedUser.id
-                        })
-                        .then(() => {
-                          console.log('User updated');
-                        });
+                      console.log('User updated');
                       let noPass = {
-                        ...updatedUser.toJSON(),
-                        password: null
+                        ...updatedUser.toJSON()
                       };
+                      delete noPass.password;
+                      delete noPass.sessions;
                       res.status(200).json(noPass);
                     },
                     err => {
@@ -1365,6 +1371,10 @@ app.get(
     }
   }),
   async (req, res) => {
+    res
+      .status(503)
+      .json({ error: 'Temporarily disabled until further notice' });
+    return;
     if (!req.user) {
       res
         .status(401)
@@ -1554,7 +1564,7 @@ app.get('/api/setup/save/:name/', (req, res) => {
           .send(
             ins.fileContent.replace(
               /(\{\{apiToken\}\})/g,
-              `${req.user.apiToken}`
+              `${req.headers.authorization}`
             )
           );
       } else {
@@ -1745,6 +1755,63 @@ app.post('/api/upload/', upload.single('file'), (req, res) => {
   }
 });
 
+app.get('/api/sessions/', (req, res) => {
+  if (!req.user) {
+    res
+      .status(401)
+      .json(
+        req.headers.authorization
+          ? { error: 'Invalid Token' }
+          : { error: 'No Token Provided' }
+      );
+    return;
+  }
+  res.status(200).json(
+    req.user.sessions.map(a => {
+      let b = { ...a };
+      delete b.token;
+      return b;
+    })
+  );
+});
+
+app.get('/api/sessions/:id/', async (req, res) => {
+  if (!req.user) {
+    res
+      .status(401)
+      .json(
+        req.headers.authorization
+          ? { error: 'Invalid Token' }
+          : { error: 'No Token Provided' }
+      );
+    return;
+  }
+  if (req.user.staff === '') {
+    res.status(403).json({ error: 'Missing Permissions' });
+    return;
+  }
+  try {
+    let usr = await user.findOne({
+      where: {
+        id: req.params.id
+      }
+    });
+
+    if (usr) {
+      res.status(200).json(
+        usr.sessions.map(a => {
+          let b = { ...a };
+          delete b.token;
+          return b;
+        })
+      );
+    } else res.status(404).json({ error: 'Not found' });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+    console.log(err);
+  }
+});
+
 app.use((req, res, next) => {
   if (
     req.path.includes('manifest.json') ||
@@ -1758,31 +1825,7 @@ app.use((req, res, next) => {
   });
   next();
 });
-app.get('/preview/:file/', async (req, res) => {
-  let thumbWorker = new worker.Worker('./thumbnailGenerator.js', {
-    workerData: {
-      file: req.params.file
-    }
-  });
-  thumbWorker.on('online', () => {
-    console.debug('Generating...');
-  });
-  thumbWorker.on('exit', () => {
-    console.debug('Done');
-  });
-  thumbWorker.on('message', data => {
-    if (data.status === 404) res.status(404).json({ error: 'Not found' });
-    else if (data.status === 500)
-      res.status(500).json({ error: 'Internal Server Error' });
-    else {
-      let stream = new Stream.Readable();
-      stream._read = () => {};
-      stream.push(Buffer.from(data.file));
-      stream.push(null);
-      stream.pipe(res.status(data.status));
-    }
-  });
-});
+
 app.use(express.static('./dist', { acceptRanges: false, lastModified: true }));
 
 server.listen(port);

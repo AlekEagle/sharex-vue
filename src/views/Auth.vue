@@ -139,7 +139,7 @@
             switch (res.status) {
               case 200:
                 res.json().then(json => {
-                  window.localStorage.setItem('token', json.apiToken);
+                  window.localStorage.setItem('token', json.token);
                   this.$router.push(
                     window.location.href.split('?').length > 1
                       ? parseQueryString(window.location.href.split('?')[1])

@@ -183,21 +183,14 @@
       ]"
       :cancelable="true"
     >
-      Alright, here's your token, this is PRIVATE INFORMATION, AKA, people can
-      do bad stuff with it if you give it to someone else!
+      Alright, here's your API token, this is PRIVATE INFORMATION, AKA, people
+      can do bad stuff with it if you give it to someone else!
       <br />
       <br />
       <code>{{ user.apiToken }}</code>
       <br />
       <br />
     </Modal>
-    <Project
-      title="Show your token"
-      :classes="['auth', 'float']"
-      :action="showShowTokenModal"
-    >
-      Click here to see your token.
-    </Project>
     <Project
       title="Delete your account"
       :classes="['auth', 'float']"
@@ -219,10 +212,11 @@
       :cancelable="true"
     >
       <p>
-        Deleting your account is a very serious and irreversible process, so we
-        want a little bit of extra confirmation that you want to delete your
-        account. So not only do you need to confirm your password, but you also
-        need to enter your username
+        Deleting your account is a very serious and irreversible process as all
+        of your files will be PERMANENTLY deleted, so we want a little bit of
+        extra confirmation that you want to delete your account. So not only do
+        you need to confirm your password, but you also need to enter your
+        username
         <code>{{ user.username }}</code> in the username box.
       </p>
       <form @submit.prevent="deleteAccount">
@@ -561,10 +555,9 @@
                 e.value = '';
               });
             switch (res.status) {
-              case 200:
+              case 201:
                 res.json().then(json => {
                   this.user.apiToken = json.token;
-                  window.localStorage.setItem('token', json.token);
                   this.$refs.regenTokenModal.hideModal();
                   this.$refs.showTokenModal.showModal();
                 });
