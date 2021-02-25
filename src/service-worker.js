@@ -69,7 +69,6 @@ self.addEventListener('fetch', function(event) {
             response.status !== 200 ||
             response.type === 'opaque' ||
             response.url.includes('/api/') ||
-            response.headers.get('Cache-Control').includes('no') ||
             response.url.includes('manifest.json') ||
             response.url.includes('service-worker.js')
           ) {
