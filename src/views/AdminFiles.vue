@@ -15,7 +15,12 @@
     <Project
       v-for="file in files"
       :key="file.filename"
-      :icon="'/preview/' + file.filename"
+      :icon="
+        'https://previews.' +
+          $el.ownerDocument.location.host +
+          '/' +
+          file.filename
+      "
       :classes="['auth', 'float']"
       :to="`/admin/file/${file.filename}/`"
       :title="file.filename"
