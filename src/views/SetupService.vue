@@ -154,7 +154,7 @@
     },
     methods: {
       downloadConfigFile() {
-        fetch(`/api/setup/save/${this.service.name}`, {
+        fetch(`/api/setup/${this.service.name}/save/`, {
           headers: {
             Authorization: window.localStorage.getItem('token')
           }

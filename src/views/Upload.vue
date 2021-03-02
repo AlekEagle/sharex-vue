@@ -12,7 +12,7 @@
   />
   <div class="projects">
     <Project title="File to Upload" :noSpan="true" :classes="['float', 'auth']">
-      <form @submit.prevent="uploadFile">
+      <form @submit.prevent="uploadFile" ref="form">
         <input
           type="file"
           name="file"
@@ -259,6 +259,7 @@
                 res.text().then(link => {
                   this.file = undefined;
                   this.link = link;
+                  this.$refs.form.reset();
                   navigator.clipboard.writeText(link).then(
                     () => {
                       this.$parent.$parent.temporaryToast(

@@ -386,7 +386,7 @@
                 }).then(
                   domains => {
                     domains.json().then(json => {
-                      this.domains = json;
+                      this.domains = json.domains;
                     });
                   },
                   err => {
@@ -632,7 +632,7 @@
                 e.value = '';
               });
             switch (res.status) {
-              case 200:
+              case 204:
                 this.$refs.deleteAccountModal.hideModal();
                 this.$parent.$parent.temporaryToast(
                   "It's been done, your account has been deleted, you will be redirected to the homepage momentarily."
@@ -735,7 +735,7 @@
               }
             }).then(domains => {
               domains.json().then(json => {
-                this.domains = json;
+                this.domains = json.domains;
               });
             });
             break;

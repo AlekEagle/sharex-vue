@@ -109,7 +109,7 @@
           method: 'DELETE'
         }).then(res => {
           switch (res.status) {
-            case 200:
+            case 204:
               this.$refs.modal.hideModal();
               this.$router.go(-1);
               break;

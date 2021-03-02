@@ -299,7 +299,7 @@
                   switch (res.status) {
                     case 200:
                       res.json().then(json => {
-                        this.domains = json;
+                        this.domains = json.domains;
                       });
                       break;
                     case 403:

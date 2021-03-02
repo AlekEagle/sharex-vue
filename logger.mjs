@@ -1,5 +1,6 @@
-let chalk = require('chalk');
-let _console = { ...require('console') };
+import chalk from 'chalk';
+import * as _console from 'console';
+import util from 'util';
 let date = function getNowDateTimeStr() {
   let now = new Date();
   let hour = now.getHours();
@@ -34,9 +35,11 @@ class Logger {
     if (logLevels.indexOf(this.logLevel) < logLevels.indexOf('LOG')) return;
     _console.log(
       `${chalk.blue.inverse(date())} ${chalk.inverse(`[LOG]`)} ${chalk.white(
-        thing
+        typeof thing !== 'string' ? util.inspect(thing) : thing
       )}`,
-      !args.length ? '' : args.join(' ')
+      !args.length
+        ? ''
+        : args.map(a => (typeof a !== 'string' ? util.inspect(a) : a)).join(' ')
     );
   }
   warn(thing, ...args) {
@@ -44,8 +47,12 @@ class Logger {
     _console.log(
       `${chalk.blue.inverse(date())} ${chalk
         .rgb(255, 124, 43)
-        .inverse(`[WARN]`)} ${chalk.white(thing)}`,
-      !args.length ? '' : args.join(' ')
+        .inverse(`[WARN]`)} ${chalk.white(
+        typeof thing !== 'string' ? util.inspect(thing) : thing
+      )}`,
+      !args.length
+        ? ''
+        : args.map(a => (typeof a !== 'string' ? util.inspect(a) : a)).join(' ')
     );
   }
   debug(thing, ...args) {
@@ -53,8 +60,12 @@ class Logger {
     _console.log(
       `${chalk.blue.inverse(date())} ${chalk.grey.inverse(
         `[DEBUG]`
-      )} ${chalk.white(thing)}`,
-      !args.length ? '' : args.join(' ')
+      )} ${chalk.white(
+        typeof thing !== 'string' ? util.inspect(thing) : thing
+      )}`,
+      !args.length
+        ? ''
+        : args.map(a => (typeof a !== 'string' ? util.inspect(a) : a)).join(' ')
     );
   }
   info(thing, ...args) {
@@ -62,8 +73,12 @@ class Logger {
     _console.log(
       `${chalk.blue.inverse(date())} ${chalk
         .rgb(255, 255, 0)
-        .inverse(`[INFO]`)} ${chalk.white(thing)}`,
-      !args.length ? '' : args.join(' ')
+        .inverse(`[INFO]`)} ${chalk.white(
+        typeof thing !== 'string' ? util.inspect(thing) : thing
+      )}`,
+      !args.length
+        ? ''
+        : args.map(a => (typeof a !== 'string' ? util.inspect(a) : a)).join(' ')
     );
   }
   error(thing, ...args) {
@@ -73,10 +88,24 @@ class Logger {
         255,
         0,
         0
-      )(`[ERROR]`)} ${chalk.white(thing)}`,
-      !args.length ? '' : args.join(' ')
+      )(`[ERROR]`)} ${chalk.white(
+        typeof thing !== 'string' ? util.inspect(thing) : thing
+      )}`,
+      !args.length
+        ? ''
+        : args.map(a => (typeof a !== 'string' ? util.inspect(a) : a)).join(' ')
+    );
+  }
+  trace(thing, ...args) {
+    _console.trace(
+      `${chalk.blue.inverse(date())} ${chalk.inverse(`[TRACE]`)} ${chalk.white(
+        typeof thing !== 'string' ? util.inspect(thing) : thing
+      )}`,
+      !args.length
+        ? ''
+        : args.map(a => (typeof a !== 'string' ? util.inspect(a) : a)).join(' ')
     );
   }
 }
 Logger;
-module.exports = logLevel => (global.console = new Logger(logLevel));
+export default logLevel => (global.console = new Logger(logLevel));

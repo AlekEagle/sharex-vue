@@ -13,7 +13,7 @@ if (worker.isMainThread) throw new Error("can't be ran as main thread");
   if (fs.existsSync(`uploads/${worker.workerData.file}`)) {
     if (
       fs.existsSync(
-        `/tmp/sharex-previews/${worker.workerData.file.split('.')[0]}.png`
+        `/tmp/sharex-previews/${worker.workerData.file.split('.')[0]}.webp`
       )
     ) {
       console.log('file already exists, serving existing file');
@@ -21,7 +21,7 @@ if (worker.isMainThread) throw new Error("can't be ran as main thread");
         status: 200,
         file: fs
           .readFileSync(
-            `/tmp/sharex-previews/${worker.workerData.file.split('.')[0]}.png`
+            `/tmp/sharex-previews/${worker.workerData.file.split('.')[0]}.webp`
           )
           .toJSON().data
       });
@@ -37,7 +37,7 @@ if (worker.isMainThread) throw new Error("can't be ran as main thread");
         });
       } else if (ft.mime.includes('image/')) {
         let cacheFileStream = fs.createWriteStream(
-          `/tmp/sharex-previews/${worker.workerData.file.split('.')[0]}.png`
+          `/tmp/sharex-previews/${worker.workerData.file.split('.')[0]}.webp`
         );
         let fileStream = new Stream.PassThrough(),
           resultStream = new Stream.PassThrough(),
@@ -48,7 +48,7 @@ if (worker.isMainThread) throw new Error("can't be ran as main thread");
           .resize('256', '256', '^')
           .gravity('Center')
           .crop('200', '200')
-          .setFormat('png')
+          .setFormat('webp')
           .stream();
         previewStream.pipe(fileStream);
         previewStream.pipe(resultStream);
@@ -67,7 +67,7 @@ if (worker.isMainThread) throw new Error("can't be ran as main thread");
             worker.workerData.file
           } -vf "crop=w='min(iw\,ih)':h='min(iw\,ih)',scale=256:256,setsar=1" -vframes 1 /tmp/sharex-previews/${
             worker.workerData.file.split('.')[0]
-          }.png`,
+          }.webp`,
           (err, stdout, stderr) => {
             if (err) {
               worker.parentPort.postMessage({
@@ -83,7 +83,7 @@ if (worker.isMainThread) throw new Error("can't be ran as main thread");
                   .readFileSync(
                     `/tmp/sharex-previews/${
                       worker.workerData.file.split('.')[0]
-                    }.png`
+                    }.webp`
                   )
                   .toJSON().data
               });
