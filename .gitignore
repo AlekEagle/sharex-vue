@@ -27,5 +27,4 @@ pnpm-debug.log*
 *.sw?
 
 # Security keys
-alekeagle.com.key
-alekeagle.com.pem
+*.pem
