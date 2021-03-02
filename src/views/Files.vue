@@ -16,7 +16,12 @@
       v-for="file in files"
       :key="file.filename"
       :classes="['float']"
-      :icon="'/preview/' + file.filename"
+      :icon="
+        'https://previews.' +
+          $el.ownerDocument.location.host +
+          '/' +
+          file.filename
+      "
       :to="`/me/file/${file.filename}/`"
       :title="file.filename"
     >

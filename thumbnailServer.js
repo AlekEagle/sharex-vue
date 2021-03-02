@@ -5,7 +5,7 @@ const Stream = require('stream'),
   instance = process.env.NODE_APP_INSTANCE || 0,
   port = parseInt(`810${instance}`);
 
-app.get('/preview/:file/', async (req, res) => {
+app.get('/:file/', async (req, res) => {
   let thumbWorker = new worker.Worker('./thumbnailGenerator.js', {
     workerData: {
       file: req.params.file

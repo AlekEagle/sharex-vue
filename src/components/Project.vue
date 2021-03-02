@@ -146,6 +146,8 @@
     height: 64px;
     float: left;
     margin: 15px;
+    max-width: 64px;
+    max-height: 64px;
   }
 
   .project_title {
