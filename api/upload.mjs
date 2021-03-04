@@ -10,7 +10,27 @@ import { randomInt } from 'crypto';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = dirname(fileURLToPath(import.meta.url)),
+map = {
+  'image/x-icon': 'ico',
+  'text/html': 'html',
+  'text/javascript': 'js',
+  'application/json': 'json',
+  'text/css': 'css',
+  'image/png': 'png',
+  'image/jpg': 'jpeg',
+  'audio/wav': 'wav',
+  'audio/mpeg': 'mp3',
+  'image/svg+xml': 'svg',
+  'application/pdf': 'pdf',
+  'application/msword': 'doc',
+  'image/gif': 'gif',
+  'application/octet-stream': 'exe',
+  'text/xml': 'xml',
+  'video/mp4': 'mp4',
+  'application/zip': 'zip',
+  'text/plain': 'txt'
+};
 
 function newString(length) {
   var text = '';

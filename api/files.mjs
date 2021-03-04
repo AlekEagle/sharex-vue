@@ -166,7 +166,7 @@ export default [
         res.status(404).json({ error: 'Not Found' });
         return;
       }
-      if (file.ownerid !== req.user.id && req.user.staff === '') {
+      if (file.userid !== req.user.id && req.user.staff === '') {
         res.status(403).json({ error: 'Missing Permissions' });
         return;
       }
