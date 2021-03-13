@@ -173,7 +173,7 @@ export default [
         res.status(404).json({ error: 'Not Found' });
         return;
       }
-      if ((usr.bannedAt && banned) || !usr.bannedAt || !banned) {
+      if ((usr.bannedAt && banned) || (!usr.bannedAt && !banned)) {
         res.status(304).json({
           id: usr.id,
           username: usr.username,
