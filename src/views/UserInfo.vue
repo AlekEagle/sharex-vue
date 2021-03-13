@@ -376,7 +376,7 @@
         this.$refs.handleBanModal.showModal();
       },
       handleBan() {
-        fetch(`/api/user/ban/${this.user.id}/`, {
+        fetch(`/api/user/${this.user.id}/ban/`, {
           headers: {
             'Authorization': `${window.localStorage.getItem('token')}`,
             'Content-Type': 'application/json'
