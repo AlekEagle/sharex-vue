@@ -41,7 +41,12 @@ export default [
       }
       let { domain, subdomain } = req.body;
       subdomain =
-        subdomain !== undefined ? subdomain.split(/\W+/g).join('-') : '';
+        subdomain !== undefined
+          ? subdomain
+              .trim()
+              .split(/\W+/g)
+              .join('-')
+          : '';
       if (!domain) {
         res.status(400).json({ error: 'Bad Request', missing: ['domain'] });
       }
@@ -90,7 +95,12 @@ export default [
       let { domain, subdomain } = req.body,
         { id } = req.params;
       subdomain =
-        subdomain !== undefined ? subdomain.split(/\W+/g).join('-') : '';
+        subdomain !== undefined
+          ? subdomain
+              .trim()
+              .split(/\W+/g)
+              .join('-')
+          : '';
       if (req.user.staff === '') {
         res.status(403).json({ error: 'Missing Permissions' });
         return;

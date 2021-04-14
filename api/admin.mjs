@@ -5,6 +5,8 @@ import multer from 'multer';
 const upload = multer();
 import bcrypt from 'bcrypt';
 import { unlink } from 'fs/promises';
+import { genSalt } from 'bcrypt';
+import { randomInt } from 'crypto';
 
 export default [
   {

@@ -11,7 +11,7 @@
     ]"
   />
   <div class="projects" v-if="user.id !== undefined">
-    <Project title="File Info" :classes="['float', 'auth']" :action="openFile">
+    <Project title="File Info" :classes="['float', 'auth']" :noSpan="true">
       Filename: {{ file.filename }}
       <br />
       File size: {{ memory(file.size) }}
@@ -21,6 +21,9 @@
       Uploaded by:
       {{ user.displayName !== undefined ? user.displayName : 'Loading...' }}
       <br />
+      <a :href="`/${file.filename}`" target="_blank">
+        <span class="project_link" />
+      </a>
       Click on me to view the file!
     </Project>
     <Project
@@ -94,9 +97,6 @@
             .toString()
             .slice(0, (mem / 1024).toString().indexOf('.') + 3)}KB`;
         else return `${mem}B`;
-      },
-      openFile() {
-        window.open(`/${this.file.filename}`, '_blank');
       },
       deleteFile() {
         this.$refs.modal.showModal();
