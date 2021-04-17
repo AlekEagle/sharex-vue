@@ -169,6 +169,7 @@
     margin-left: 0;
     margin-right: 0;
     margin-top: 0;
+    overflow-y: overlay;
   }
 
   button.button {
