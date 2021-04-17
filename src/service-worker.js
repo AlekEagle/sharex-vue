@@ -1,16 +1,34 @@
 let urlsToCache = [
-  'https://fonts.googleapis.com/css?family=K2D',
-  'https://fonts.gstatic.com/s/k2d/v3/J7aTnpF2V0EjZKUsrLc.woff2',
-  'https://fonts.gstatic.com/s/k2d/v3/J7aTnpF2V0EjcKUs.woff2',
-  '/me/',
-  '/me/upload/',
-  '/me/files/',
-  '/me/files/info/',
-  '/img/circle.png',
-  '/img/me_irl.webp',
-  '/img/empty.gif',
-  '/brew-coffee/'
-];
+    'https://fonts.googleapis.com/css?family=K2D',
+    'https://fonts.gstatic.com/s/k2d/v3/J7aTnpF2V0EjZKUsrLc.woff2',
+    'https://fonts.gstatic.com/s/k2d/v3/J7aTnpF2V0EjcKUs.woff2',
+    '/me/',
+    '/me/upload/',
+    '/me/files/',
+    '/me/files/info/',
+    '/img/circle.png',
+    '/img/me_irl.webp',
+    '/img/empty.gif',
+    '/brew-coffee/'
+  ],
+  timeout;
+
+function nagTimeout() {
+  clients.matchAll().then(clnts => {
+    clnts.forEach(client => {
+      client.postMessage({ type: 'updateStatus', updated: true });
+    });
+  });
+  timeout = null;
+}
+
+function manageTimeout() {
+  if (timeout != null) {
+    clearTimeout(timeout);
+    timeout = null;
+  }
+  timeout = setTimeout(nagTimeout, 5000);
+}
 
 self.addEventListener('install', event => {
   self.skipWaiting();
@@ -117,6 +135,7 @@ self.addEventListener('fetch', function(event) {
                   } from cache is outdated, updating cache!`
                 );
                 cache.delete(event.request.url);
+                manageTimeout();
                 cache.put(event.request, res);
               }
             }
