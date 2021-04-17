@@ -21,7 +21,17 @@
         this.$refs.toast.hideToast();
       }
     },
-    mounted() {},
+    mounted() {
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data.type === 'updateStatus' && event.data.updated)
+          this.temporaryToast(
+            'The page has just updated, please refresh to apply update.',
+            15000
+          );
+      });
+      if (navigator.serviceWorker.controller !== null)
+        navigator.serviceWorker.controller.postMessage('checkForUpdate');
+    },
     components: {
       Toast
     }

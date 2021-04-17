@@ -28,6 +28,16 @@ self.addEventListener('install', event => {
   );
 });
 
+self.addEventListener('activate', () => {
+  clients.claim().then(() => {
+    clients.matchAll().then(clnts => {
+      clnts.forEach(client => {
+        client.postMessage({ type: 'updateStatus', updated: true });
+      });
+    });
+  });
+});
+
 self.addEventListener('fetch', function(event) {
   if (
     event.request.method === 'POST' &&
@@ -121,4 +131,15 @@ self.addEventListener('fetch', function(event) {
       })
     );
   }
+});
+
+self.addEventListener('message', event => {
+  caches.match('/updated/').then(cached => {
+    if (cached) {
+      caches.open('cache').then(cache => {
+        cache.delete('/updated/');
+        event.source.postMessage({ type: 'updateStatus', updated: true });
+      });
+    } else event.source.postMessage({ type: 'updateStatus', updated: false });
+  });
 });
