@@ -129,7 +129,7 @@ self.addEventListener('fetch', function(event) {
               new Date(res.headers.get('Last-Modified')).getTime()
             ) {
               if (
-                new Date(cached.headers.get('Last-Modified')).getTime() <=
+                new Date(cached.headers.get('Last-Modified')).getTime() <
                 new Date(res.headers.get('Last-Modified')).getTime()
               ) {
                 console.log(
