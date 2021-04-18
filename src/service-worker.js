@@ -124,10 +124,13 @@ self.addEventListener('fetch', function(event) {
       cache.match(event.request.url).then(cached => {
         if (navigator.onLine && cached) {
           fetch(event.request).then(res => {
-            if (res.headers.get('Last-Modified')) {
+            if (
+              res.headers.get('Last-Modified') &&
+              new Date(res.headers.get('Last-Modified')).getTime()
+            ) {
               if (
-                cached.headers.get('Last-Modified') !==
-                res.headers.get('Last-Modified')
+                new Date(cached.headers.get('Last-Modified')).getTime() <=
+                new Date(res.headers.get('Last-Modified')).getTime()
               ) {
                 console.log(
                   `${
