@@ -97,19 +97,25 @@ export default [
           userid: usr.id
         }
       });
-      files.forEach(async (file, index, self) => {
-        try {
-          await unlink(`uploads/${file.filename}`);
-          await file.destroy();
-        } catch (err) {
-          console.error(err);
-        }
-        if (index === self.length - 1) {
-          await usr.destroy();
-          res.status(204).send();
-          console.log('User Deleted');
-        }
-      });
+      if (files.length > 0) {
+        files.forEach(async (file, index, self) => {
+          try {
+            await unlink(`uploads/${file.filename}`);
+            await file.destroy();
+          } catch (err) {
+            console.error(err);
+          }
+          if (index === self.length - 1) {
+            await usr.destroy();
+            res.status(204).send();
+            console.log('User Deleted');
+          }
+        });
+      }else {
+        await usr.destroy();
+        res.status(204).send();
+        console.log('User Deleted');
+      }
     }
   },
   {
