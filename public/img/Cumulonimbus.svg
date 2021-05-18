@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg viewBox="0 0 1024 1024" style="" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
-  <rect width="1024" height="1024" style="fill: url(#gradient-2);"/>
+<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
   <defs>
-    <linearGradient gradientUnits="userSpaceOnUse" x1="512" y1="250" x2="512" y2="774.001" id="gradient-0">
-      <stop offset="0" style="stop-color: rgb(79, 79, 79);"/>
-      <stop offset="1" style="stop-color: rgba(0, 0, 0, 1)"/>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="512" y1="250" x2="512" y2="774.001" id="gradient-0" gradientTransform="matrix(1, 0, 0, 1, 0, -0.000488)">
+      <stop offset="0" style="stop-color: rgb(255, 255, 255);"/>
+      <stop offset="1" style="stop-color: rgb(158, 158, 158);"/>
     </linearGradient>
     <linearGradient gradientUnits="userSpaceOnUse" x1="512" y1="0" x2="512" y2="1024" id="gradient-2">
-      <stop offset="0" style="stop-color: rgb(0, 8, 166);"/>
-      <stop offset="1" style="stop-color: rgb(122, 137, 255);"/>
+      <stop offset="0" style="stop-color: rgb(112, 132, 230);"/>
+      <stop offset="1" style="stop-color: rgb(0, 250, 255);"/>
     </linearGradient>
-    <linearGradient gradientUnits="userSpaceOnUse" x1="512" y1="250" x2="512" y2="774.001" id="gradient-1">
-      <stop offset="0" style="stop-color: rgba(43, 43, 43, 1)"/>
-      <stop offset="1" style="stop-color: rgb(79, 79, 79);"/>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="512" y1="250" x2="512" y2="774.001" id="gradient-1" gradientTransform="matrix(1, 0, 0, 1, 0, -0.000488)">
+      <stop offset="0" style="stop-color: rgb(158, 158, 158);"/>
+      <stop offset="1" style="stop-color: rgb(255, 255, 255);"/>
+    </linearGradient>
+    <linearGradient id="bg-bright" bx:pinned="true">
+      <title>bg-bright</title>
+      <stop style="stop-color: rgb(0, 250, 255);"/>
+    </linearGradient>
+    <linearGradient id="bg-dark" bx:pinned="true">
+      <stop style="stop-color: rgb(112, 132, 230);"/>
     </linearGradient>
   </defs>
-  <path style="fill: rgba(0, 0, 0, 0.44); filter: none; mix-blend-mode: multiply;" transform="matrix(0.707107, 0.707107, -0.707107, 0.707107, 709.138672, -10.955709)" d="M 215.219 250.75 H 1027.59 V 888.18 H 150.219 V 315.75 A 65 65 0 0 1 215.219 250.75 Z" bx:shape="rect 150.219 250.75 877.371 637.43 65 0 0 0 1@acb25190"/>
+  <rect width="1024" height="1024" style="fill: url(#gradient-2);" transform=""/>
+  <path style="fill: rgba(0, 0, 0, 0.44); filter: none; mix-blend-mode: multiply;" transform="matrix(0.707107, 0.707107, -0.707107, 0.707107, 711.609253, -6.719423)" d="M 215.219 250.75 H 1027.59 V 888.18 H 150.219 V 315.75 A 65 65 0 0 1 215.219 250.75 Z" bx:shape="rect 150.219 250.75 877.371 637.43 65 0 0 0 1@acb25190"/>
   <path d="M 752.712 447.81 C 730.441 334.821 631.21 250 512 250 C 417.352 250 335.15 303.71 294.211 382.31 C 195.636 392.79 119 476.301 119 577.5 C 119 685.902 207.099 774.001 315.5 774.001 L 741.25 774.001 C 831.64 774.001 905 700.64 905 610.25 C 905 523.79 837.862 453.703 752.712 447.81 Z" style="stroke-width: 5px; stroke-linecap: round; fill: url(#gradient-0); stroke: url(#gradient-1);" bx:origin="0.480835 0.447772"/>
 </svg>
