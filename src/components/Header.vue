@@ -5,7 +5,7 @@
         <img
           v-if="!sharedState.icon"
           class="header__logo"
-          src="/img/me_irl.webp"
+          src="/img/Cumulonimbus.webp"
           alt="Header Logo"
           width="90"
         />
@@ -22,7 +22,7 @@
         <img
           v-if="!sharedState.icon"
           class="header__logo"
-          src="/img/me_irl.webp"
+          src="/img/Cumulonimbus.webp"
           alt="Header Logo"
           width="90"
         />
@@ -40,7 +40,7 @@
       <img
         v-if="!sharedState.icon"
         class="header__logo"
-        src="/img/me_irl.webp"
+        src="/img/Cumulonimbus.webp"
         alt="Header Logo"
         width="90"
       />
