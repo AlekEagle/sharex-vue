@@ -1,48 +1,26 @@
 <template>
-  <div v-if="sharedState.to" :class="getClasses()">
-    <img
-      v-if="sharedState.icon"
-      class="project_icon"
-      :src="sharedState.icon"
-      loading="lazy"
-    />
-    <div class="project_title" v-text="sharedState.title" />
+  <div v-if="to" :class="getClasses()">
+    <img v-if="icon" class="project_icon" :src="icon" loading="lazy" />
+    <div class="project_title" v-text="title" />
     <div class="project_description"><slot /></div>
-    <router-link v-if="!sharedState.disabled" :to="sharedState.to">
+    <router-link v-if="!disabled" :to="to">
       <span class="project_link" />
     </router-link>
     <span v-else class="project_link disabled" />
   </div>
-  <div v-else-if="sharedState.action" :class="getClasses()">
-    <img
-      v-if="sharedState.icon"
-      class="project_icon"
-      :src="sharedState.icon"
-      loading="lazy"
-    />
-    <div class="project_title" v-text="sharedState.title" />
+  <div v-else-if="action" :class="getClasses()">
+    <img v-if="icon" class="project_icon" :src="icon" loading="lazy" />
+    <div class="project_title" v-text="title" />
     <div class="project_description"><slot /></div>
-    <span
-      v-if="!sharedState.disabled"
-      class="project_link"
-      @click="handleClick"
-    />
+    <span v-if="!disabled" class="project_link" @click="handleClick" />
     <span v-else class="project_link disabled" />
   </div>
   <div v-else :class="getClasses()">
-    <img
-      v-if="sharedState.icon"
-      class="project_icon"
-      :src="sharedState.icon"
-      loading="lazy"
-    />
-    <div class="project_title" v-text="sharedState.title" />
+    <img v-if="icon" class="project_icon" :src="icon" loading="lazy" />
+    <div class="project_title" v-text="title" />
     <div class="project_description"><slot /></div>
-    <span
-      v-if="!sharedState.disabled && !sharedState.noSpan"
-      class="project_link"
-    />
-    <span v-else-if="!sharedState.noSpan" class="project_link disabled" />
+    <span v-if="!disabled && !noSpan" class="project_link" />
+    <span v-else-if="!noSpan" class="project_link disabled" />
   </div>
 </template>
 <script>
@@ -57,38 +35,15 @@
       action: Function,
       noSpan: Boolean
     },
-    data() {
-      return {
-        privateState: {},
-        sharedState: {
-          title: '',
-          icon: '',
-          classes: [],
-          disabled: false,
-          to: '',
-          action: null,
-          noSpan: false
-        }
-      };
-    },
     methods: {
       handleClick() {
         this.action(this);
       },
       getClasses() {
-        return `project${
-          this.sharedState.disabled ? ' disabled' : ''
-        } ${this.sharedState.classes.join(' ')}`;
+        return `project${this.disabled ? ' disabled' : ''} ${this.classes.join(
+          ' '
+        )}`;
       }
-    },
-    mounted() {
-      this.sharedState.title = this.title;
-      this.sharedState.icon = this.icon;
-      this.sharedState.classes = this.classes;
-      this.sharedState.disabled = this.disabled;
-      this.sharedState.to = this.to;
-      this.sharedState.action = this.action;
-      this.sharedState.noSpan = !!this.noSpan;
     }
   };
 </script>

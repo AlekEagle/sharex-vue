@@ -83,6 +83,11 @@ const routes = [
     component: () => import('../views/ServerStats.vue')
   },
   {
+    path: '/me/coffee-center',
+    name: 'Coffee',
+    component: () => import('../views/Coffee.vue')
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'Error',
     component: () => import('../views/NotFound.vue')
