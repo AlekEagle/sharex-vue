@@ -31,10 +31,10 @@ fi
 echo "postgresql installed."
 
 echo "Checking for pm2..."
-which pm2
+which pm2 &> /dev/null
 if [[ $? != 0 ]]; then
   echo "pm2 is not installed, installing..."
-  npm i -g pm2 &> /npm/null
+  npm i -g pm2 &> /dev/null
 fi
 
 echo "pm2 installed."
