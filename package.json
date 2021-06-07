@@ -7,8 +7,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "serve-with-api": "node . 443",
-    "serve-with-api-dev": "DEBUG=\"true\" node . 3000"
+    "serve-with-api": "node .",
+    "thumb-server": "node thumbnailServer.js"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",
