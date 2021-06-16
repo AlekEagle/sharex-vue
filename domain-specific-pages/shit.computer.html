@@ -5,6 +5,7 @@
     <meta property="og:title" content="Shit Computers here!" />
     <meta property="og:description" content="VERY SHIT COMPUTERS AHEAD!!!!" />
     <meta property="og:video" content="https://shit.computer/q6FmoPAhBI.mp4" />
+    <meta property="og:video:type" content="video/mp4" />
     <style>
       body {
         overflow: hidden;
@@ -14,10 +15,15 @@
         align-content: center;
         justify-content: center;
         text-align: center;
+        flex-wrap: wrap;
         width: fit-content;
         height: 100vh;
-        flex-direction: column;
+        flex-direction: row;
         margin: auto;
+      }
+
+      video {
+        width: 100px;
       }
 
       .wrongplacetext {
@@ -31,16 +37,71 @@
         text-decoration: none;
         color: #0078a7;
       }
+
+      @-moz-keyframes scroll-left {
+        0% {
+          -moz-transform: translateX(100%);
+        }
+        100% {
+          -moz-transform: translateX(-100%);
+        }
+      }
+
+      @-webkit-keyframes scroll-left {
+        0% {
+          -webkit-transform: translateX(100%);
+        }
+        100% {
+          -webkit-transform: translateX(-100%);
+        }
+      }
+
+      @keyframes scroll-left {
+        0% {
+          -moz-transform: translateX(100%);
+          -webkit-transform: translateX(100%);
+          transform: translateX(100%);
+        }
+        100% {
+          -moz-transform: translateX(-100%);
+          -webkit-transform: translateX(-100%);
+          transform: translateX(-100%);
+        }
+      }
+
+      .marquee {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        line-height: 50px;
+        text-align: center;
+        -moz-transform: translateX(100%);
+        -webkit-transform: translateX(100%);
+        transform: translateX(100%);
+        -moz-animation: scroll-left 2s linear infinite;
+        -webkit-animation: scroll-left 2s linear infinite;
+        animation: scroll-left 20s linear infinite;
+      }
     </style>
-    <script>
-      document.addEventListener('click', () => {
-        document.querySelector('video').play();
-      });
-    </script>
   </head>
   <body>
-    <div class="content">
-      <video autoplay loop src="https://shit.computer/q6FmoPAhBI.mp4" />
-    </div>
+    <div class="content"></div>
+
+    <script defer>
+      let count = 1;
+      let div = document.querySelector('.content');
+      function hell() {
+        let vid = document.createElement('video');
+        vid.autoplay = true;
+        vid.loop = true;
+        vid.src = 'https://shit.computer/q6FmoPAhBI.mp4';
+        div.appendChild(vid);
+        vid.addEventListener('play', hell);
+      }
+      document.addEventListener('mousedown', hell);
+      document.addEventListener('keydown', hell);
+      document.addEventListener('load', hell);
+    </script>
   </body>
 </html>
