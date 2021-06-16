@@ -86,13 +86,18 @@
     </style>
   </head>
   <body>
-    <div class="content"></div>
+    <div class="content"
+      ><video loop muted src="https://shit.computer/q6FmoPAhBI.mp4"></video
+    ></div>
 
     <script defer>
       let count = 1;
       let div = document.querySelector('.content');
+      let adf = document.querySelector('video');
+
       function hell() {
-        let vid = document.createElement('video');
+        if (adf.paused) adf.play();
+        let vid = document.createElement('audio');
         vid.autoplay = true;
         vid.loop = true;
         vid.src = 'https://shit.computer/q6FmoPAhBI.mp4';
@@ -101,7 +106,7 @@
       }
       document.addEventListener('mousedown', hell);
       document.addEventListener('keydown', hell);
-      document.addEventListener('load', hell);
+      document.addEventListener('ready', hell);
     </script>
   </body>
 </html>
