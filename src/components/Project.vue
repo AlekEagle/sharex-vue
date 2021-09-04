@@ -74,7 +74,7 @@
       loadIcon() {
         fetch(this.icon).then(
           res => {
-            if (res.ok && res.status !== 415) {
+            if (res.ok || res.status !== 415) {
               res.blob().then(blob => {
                 this.iconBlobURL = URL.createObjectURL(blob);
                 this.imageLoaded = true;
