@@ -1,6 +1,12 @@
 <template>
   <div v-if="to" :class="getClasses()">
-    <img v-if="icon" class="project_icon" :src="icon" loading="lazy" />
+    <img v-if="icon && imageLoaded" class="project_icon" :src="iconBlobURL" />
+    <div v-else-if="icon && !imageLoaded" class="lds-ellipsis project_icon">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
     <div class="project_title" v-text="title" />
     <div class="project_description"><slot /></div>
     <router-link v-if="!disabled" :to="to">
@@ -9,14 +15,26 @@
     <span v-else class="project_link disabled" />
   </div>
   <div v-else-if="action" :class="getClasses()">
-    <img v-if="icon" class="project_icon" :src="icon" loading="lazy" />
+    <img v-if="icon && imageLoaded" class="project_icon" :src="iconBlobURL" />
+    <div v-else-if="icon && !imageLoaded" class="lds-ellipsis project_icon">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
     <div class="project_title" v-text="title" />
     <div class="project_description"><slot /></div>
     <span v-if="!disabled" class="project_link" @click="handleClick" />
     <span v-else class="project_link disabled" />
   </div>
   <div v-else :class="getClasses()">
-    <img v-if="icon" class="project_icon" :src="icon" loading="lazy" />
+    <img v-if="icon && imageLoaded" class="project_icon" :src="iconBlobURL" />
+    <div v-else-if="icon && !imageLoaded" class="lds-ellipsis project_icon">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
     <div class="project_title" v-text="title" />
     <div class="project_description"><slot /></div>
     <span v-if="!disabled && !noSpan" class="project_link" />
@@ -35,6 +53,15 @@
       action: Function,
       noSpan: Boolean
     },
+    data() {
+      return {
+        imageLoaded: false,
+        iconBlobURL: '',
+        timeoutDelay: 5000,
+        maxTimeouts: 5,
+        currentTimeouts: 0
+      };
+    },
     methods: {
       handleClick() {
         this.action(this);
@@ -43,6 +70,41 @@
         return `project${this.disabled ? ' disabled' : ''} ${this.classes.join(
           ' '
         )}`;
+      },
+      loadIcon() {
+        fetch(this.icon).then(
+          res => {
+            if (res.ok) {
+              res.blob().then(blob => {
+                this.iconBlobURL = URL.createObjectURL(blob);
+                this.imageLoaded = true;
+              });
+            } else {
+              if (this.currentTimeouts++ < this.maxTimeouts) {
+                setTimeout(this.loadIcon, this.timeoutDelay);
+                this.timeoutDelay += this.timeoutDelay / 3;
+              } else {
+                this.iconBlobURL = '/img/warning.png';
+                this.imageLoaded = true;
+              }
+            }
+          },
+          error => {
+            console.error(error);
+            if (this.currentTimeouts++ < this.maxTimeouts) {
+              setTimeout(this.loadIcon, this.timeoutDelay);
+              this.timeoutDelay += this.timeoutDelay / 3;
+            } else {
+              this.iconBlobURL = '/img/warning.png';
+              this.imageLoaded = true;
+            }
+          }
+        );
+      }
+    },
+    mounted() {
+      if (this.icon) {
+        this.loadIcon();
       }
     }
   };
