@@ -138,7 +138,8 @@ self.addEventListener('fetch', function(event) {
                   } from cache is outdated, updating cache!`
                 );
                 cache.delete(event.request.url);
-                manageTimeout();
+                if (!new URL(res.url).origin.startsWith('previews'))
+                  manageTimeout();
                 cache.put(event.request, res);
               }
             }
