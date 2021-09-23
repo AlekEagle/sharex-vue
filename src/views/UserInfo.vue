@@ -649,7 +649,7 @@
         }).then(
           res => {
             switch (res.status) {
-              case 200:
+              case 204:
                 this.$parent.$parent.temporaryToast('Done!');
                 this.$router.push('/admin/users/');
                 break;
